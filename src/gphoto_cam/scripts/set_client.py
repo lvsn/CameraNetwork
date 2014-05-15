@@ -19,8 +19,9 @@ def set_client(iso,imageformat,aperture,shutterspeed):
     rospy.wait_for_service('set_camera')
     
     try:
-        set_camera = rospy.ServiceProxy('set_camera', CameraData)
-        set_camera(iso,imageformat,aperture,shutterspeed)
+        set_camera = rospy.ServiceProxy('set_camera', InCameraData)
+        out = set_camera(iso,imageformat,aperture,shutterspeed)
+        print out
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 

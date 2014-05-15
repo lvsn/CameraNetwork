@@ -1,0 +1,7 @@
+<launch>
+
+  <node name="set_serv" pkg="gphoto_cam" type="set_camera_serv.py" />
+  <node name="get_serv" pkg="gphoto_cam" type="get_camera_serv.py" />
+  <node name="capture_serv" pkg="gphoto_cam" type="capture_camera_serv.py" />
+
+</launch>

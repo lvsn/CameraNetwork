@@ -29,4 +29,4 @@ def run(cmd) :
       
         return stdout
   
-    return ''
+    return stdout

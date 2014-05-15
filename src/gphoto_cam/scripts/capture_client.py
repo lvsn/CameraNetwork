@@ -12,15 +12,16 @@ import roslib; roslib.load_manifest('gphoto_cam')
 from gphoto_cam.srv import *
 
 import sys
+import string
 
 
 
 def capture_image_client(keepOnCamera):
-    rospy.wait_for_service('capture_image')
+    rospy.wait_for_service('capture_camera')
     
     try:
-        capture_image = rospy.ServiceProxy('capture_image', Capture)
-        capture_image(keepOnCamera)
+        capture_camera = rospy.ServiceProxy('capture_camera', Capture)
+        capture_camera(keepOnCamera)
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 
@@ -29,7 +30,7 @@ def usage():
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        keepOnCamera = bool(sys.argv[1])
+        keepOnCamera = string.atoi(sys.argv[1])
     else:
         print usage()
         sys.exit(1)

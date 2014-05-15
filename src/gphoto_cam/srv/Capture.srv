@@ -1,1 +1,3 @@
 bool keepOnCamera
+---
+string confirmationMsg
