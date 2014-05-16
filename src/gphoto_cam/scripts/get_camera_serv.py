@@ -21,17 +21,21 @@ def find_current_value(string):
 
 def get_camera_cb(req):
     print "getting Configuration"
-
-    iso = gphoto.run(" --get-config /main/imgsettings/iso")
+    
+    isoConfig = rospy.get_param("/isoConfig"," ")
+    iso = gphoto.run(" --get-config " + isoConfig)
     iso = find_current_value(iso)
     
-    imageformat = gphoto.run(" --get-config /main/imgsettings/imageformat")
+    imageformatConfig = rospy.get_param("/imageformatConfig"," ")
+    imageformat = gphoto.run(" --get-config " + imageformatConfig)
     imageformat = find_current_value(imageformat)
     
-    aperture = gphoto.run(" --get-config /main/capturesettings/aperture")
+    apertureConfig = rospy.get_param("/apertureConfig"," ")
+    aperture = gphoto.run(" --get-config "+ apertureConfig)
     aperture = find_current_value(aperture)
     
-    shutterspeed = gphoto.run(" --get-config /main/capturesettings/shutterspeed")
+    shutterspeedConfig = rospy.get_param("/shutterspeedConfig"," ")
+    shutterspeed = gphoto.run(" --get-config " + shutterspeedConfig)
     shutterspeed = find_current_value(shutterspeed)
             
     return {'iso': iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
