@@ -9,8 +9,6 @@ Created on Wed May 14 14:00:06 2014
 import rospy
 from gphoto_cam.srv import *
 
-import os.path
-from datetime import datetime, timedelta
 import gphoto2_cli_wrapper as gphoto
 
 
@@ -19,7 +17,8 @@ def capture_image_cb(req):
     if(req.keepOnCamera):
         gphoto.run(" --capture-image")
     else:
-        gphoto.run(" --capture-image-and-download")
+        filename = " --filename ~/CameraPicture/%B/%d%B%y_%Hh%Mm%Ss.%C"
+        gphoto.run(filename + " --capture-image-and-download")
     return 'OK'
 
 

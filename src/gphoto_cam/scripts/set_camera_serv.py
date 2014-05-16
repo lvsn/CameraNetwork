@@ -12,28 +12,27 @@ import gphoto2_cli_wrapper as gphoto
 
 
 def set_camera_cb(req):
-    print " --set-config " + imageformatConfig + "=" + req.imageformat
     backMessage = ''
     if(req.iso != ""):
-        isoConfig = rospy.get_param("/isoConfig")
+        isoConfig = rospy.get_param("/isoConfig"," ")
         out = gphoto.run(" --set-config " + isoConfig + "=" + req.iso)
         if out != '':
             backMessage += 'iso Value is not supported\n'
             
     if(req.imageformat != ""):
-        imageformatConfig = rospy.get_param("/imageformatConfig")
+        imageformatConfig = rospy.get_param("/imageformatConfig"," ")
         out = gphoto.run(" --set-config " + imageformatConfig + "=" + req.imageformat)
         if out != '':
             backMessage += 'imageformat Value is not supported\n'
             
     if(req.aperture != ""):
-        apertureConfig = rospy.get_param("/apertureConfig")
+        apertureConfig = rospy.get_param("/apertureConfig"," ")
         out = gphoto.run(" --set-config " + apertureConfig + "=" + req.aperture)
         if out != '':
             backMessage += 'aperture Value is not supported\n'
             
     if(req.shutterspeed != ""):
-        shutterspeedConfig = rospy.get_param("/shutterspeedConfig")
+        shutterspeedConfig = rospy.get_param("/shutterspeedConfig"," ")
         out = gphoto.run(" --set-config " + shutterspeedConfig + "=" + req.shutterspeed)
         if out != '':
             backMessage += 'shutterspeed Value is not supported\n'
