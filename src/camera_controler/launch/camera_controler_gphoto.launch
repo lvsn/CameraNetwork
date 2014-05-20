@@ -1,7 +1,6 @@
 <launch>
   <group ns="pi0">
     <include file="$(find gphoto_cam)/launch/gphoto_cam.launch" />
-    <node name="ip_sender" pkg="camera_controler" type="ip_sender.py" />
   </group>
 
 </launch>
