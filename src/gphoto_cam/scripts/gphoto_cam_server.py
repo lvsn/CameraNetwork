@@ -22,7 +22,7 @@ def find_current_value(string):
     
 
 def capture_image_cb(req):
-    print "Taking Shot"
+    rospy.loginfo("Taking Picture")
     if(req.keepOnCamera):
         gphoto.run(" --capture-image")
     else:
@@ -32,6 +32,7 @@ def capture_image_cb(req):
     
     
 def set_camera_cb(req):
+    rospy.loginfo("Setting camera's Configuration")
     backMessage = ''
     if(req.iso != ""):
         isoConfig = rospy.get_param("/isoConfig"," ")
@@ -61,7 +62,7 @@ def set_camera_cb(req):
     
     
 def get_camera_cb(req):
-    print "getting Configuration"
+    rospy.loginfo("Getting camera's Configuration")
     
     isoConfig = rospy.get_param("/isoConfig"," ")
     iso = gphoto.run(" --get-config " + isoConfig)
@@ -84,6 +85,8 @@ def get_camera_cb(req):
 
 def gphoto_cam_server():
     rospy.init_node('gphoto_cam')
+    #log
+    rospy.loginfo("gphoto_cam's URI : "+rospy.get_node_uri());
     #init gphoto cam
     camParam = CameraParameterHandler()
     camParam.set_camera_parameters()
@@ -92,7 +95,7 @@ def gphoto_cam_server():
     rospy.Service('get_camera', OutCameraData, get_camera_cb)
     rospy.Service('set_camera', InCameraData, set_camera_cb)
     
-    print "Camera Ready."
+    rospy.loginfo("Camera Ready at " + str(rospy.get_rostime().secs))
     rospy.spin()
 
 if __name__ == "__main__":

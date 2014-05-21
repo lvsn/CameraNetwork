@@ -16,13 +16,13 @@ class CameraParameterHandler:
         self.configLoaded = False
         self.cameraModel = ''        
         
-        print "...Looking for camera..."
+        rospy.loginfo("...Looking for camera...")
         cameralist = gphoto.run(" --auto-detect")
         self.cameraModel = self._find_camera_type(cameralist)
         if self.cameraModel == '':
-            print "No Camera Found"
+            rospy.logwarn("No Camera Found")
         else:
-            print "Found : " + self.cameraModel
+            rospy.loginfo("Found : " + self.cameraModel)
         rospy.set_param("camera_model", self.cameraModel)
         
     def __del__(self):
@@ -34,7 +34,7 @@ class CameraParameterHandler:
                 rospy.delete_param("~apertureConfig")
                 rospy.delete_param("~shutterspeedConfig")
             except KeyError:
-                print "Unable to delete parameter (not set)"
+                rospy.logerr("Unable to delete parameter (not set)")
         
     def set_camera_parameters(self):
         if self.cameraModel == 'Nikon DSC D3100 (PTP mode)':
@@ -42,7 +42,8 @@ class CameraParameterHandler:
             rospy.set_param("~imageformatConfig","/main/capturesettings/imagequality")
             rospy.set_param("~apertureConfig","/main/capturesettings/f-number")
             rospy.set_param("~shutterspeedConfig","/main/capturesettings/shutterspeed")
-            self.configLoaded = True            
+            self.configLoaded = True
+            rospy.loginfo("Camera's Configuration loaded")
         
     
     def _find_camera_type(self,string):

@@ -21,9 +21,9 @@ def get_client(getAllInformation):
     try:
         get_camera = rospy.ServiceProxy('get_camera', OutCameraData)
         ans = get_camera(getAllInformation)
-        print ans
+        rospy.loginfo(ans)
     except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+       rospy.logwarn("Service call failed: %s",e)
 
 def usage():
     return "%s [bool] (get_all_information?)"%sys.argv[0]
@@ -34,5 +34,5 @@ if __name__ == "__main__":
     else:
         print usage()
         sys.exit(1)
-    print "get Camera's information"
+    rospy.loginfo("Get Camera's information")
     get_client(True)

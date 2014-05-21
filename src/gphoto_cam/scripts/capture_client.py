@@ -23,7 +23,7 @@ def capture_image_client(keepOnCamera):
         capture_camera = rospy.ServiceProxy('capture_camera', Capture)
         capture_camera(keepOnCamera)
     except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+        rospy.logwarn("Service call failed: %s",e)
 
 def usage():
     return "%s [bool] (keep Image On Camera Device)"%sys.argv[0]
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         print usage()
         sys.exit(1)
     if(keepOnCamera):
-        print "Picture will be saved in Camera"
+        rospy.loginfo("Picture will be saved in Camera")
     else:
-        print "Waiting to receive Picture"
+        rospy.loginfo("Waiting to receive Picture")
     capture_image_client(keepOnCamera)

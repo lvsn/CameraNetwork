@@ -21,9 +21,9 @@ def set_client(iso,imageformat,aperture,shutterspeed):
     try:
         set_camera = rospy.ServiceProxy('set_camera', InCameraData)
         out = set_camera(iso,imageformat,aperture,shutterspeed)
-        print out
+        rospy.loginfo(out)
     except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+        rospy.logwarn("Service call failed: %s",e)
 
 def usage():
     return "%s [string string string string] (iso imageformat aperture shutterspeed)"%sys.argv[0]
@@ -37,5 +37,5 @@ if __name__ == "__main__":
     else:
         print usage()
         sys.exit(1)
-    print "set parameter to camera"
+    rospy.loginfo("set parameter to camera")
     set_client(iso,imageformat,aperture,shutterspeed)
