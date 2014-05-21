@@ -77,7 +77,7 @@ fi
 # Punch it.
 export ROS_HOME=$(echo ~{user})/.ros
 export ROS_LOG_DIR=/tmp
-setuidgid {user} roslaunch $LAUNCH_FILENAME &
+roslaunch $LAUNCH_FILENAME &
 PID=$!
 
 log info "{job}: Started roslaunch as background process, PID $PID"
