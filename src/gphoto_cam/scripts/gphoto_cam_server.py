@@ -5,7 +5,7 @@ Created on Wed May 14 14:00:06 2014
 
 @author: mathieugaron
 """
-
+import roslib; roslib.load_manifest('gphoto_cam')
 import rospy
 from gphoto_cam.srv import *
 from CameraParameterHandler import *
@@ -35,25 +35,25 @@ def set_camera_cb(req):
     rospy.loginfo("Setting camera's Configuration")
     backMessage = ''
     if(req.iso != ""):
-        isoConfig = rospy.get_param("/isoConfig"," ")
+        isoConfig = rospy.get_param("~isoConfig"," ")
         out = gphoto.run(" --set-config " + isoConfig + "=" + req.iso)
         if out != '':
             backMessage += 'iso Value is not supported\n'
             
     if(req.imageformat != ""):
-        imageformatConfig = rospy.get_param("/imageformatConfig"," ")
+        imageformatConfig = rospy.get_param("~imageformatConfig"," ")
         out = gphoto.run(" --set-config " + imageformatConfig + "=" + req.imageformat)
         if out != '':
             backMessage += 'imageformat Value is not supported\n'
             
     if(req.aperture != ""):
-        apertureConfig = rospy.get_param("/apertureConfig"," ")
+        apertureConfig = rospy.get_param("~apertureConfig"," ")
         out = gphoto.run(" --set-config " + apertureConfig + "=" + req.aperture)
         if out != '':
             backMessage += 'aperture Value is not supported\n'
             
     if(req.shutterspeed != ""):
-        shutterspeedConfig = rospy.get_param("/shutterspeedConfig"," ")
+        shutterspeedConfig = rospy.get_param("~shutterspeedConfig"," ")
         out = gphoto.run(" --set-config " + shutterspeedConfig + "=" + req.shutterspeed)
         if out != '':
             backMessage += 'shutterspeed Value is not supported\n'
@@ -64,19 +64,19 @@ def set_camera_cb(req):
 def get_camera_cb(req):
     rospy.loginfo("Getting camera's Configuration")
     
-    isoConfig = rospy.get_param("/isoConfig"," ")
+    isoConfig = rospy.get_param("~isoConfig"," ")
     iso = gphoto.run(" --get-config " + isoConfig)
     iso = find_current_value(iso)
     
-    imageformatConfig = rospy.get_param("/imageformatConfig"," ")
+    imageformatConfig = rospy.get_param("~imageformatConfig"," ")
     imageformat = gphoto.run(" --get-config " + imageformatConfig)
     imageformat = find_current_value(imageformat)
     
-    apertureConfig = rospy.get_param("/apertureConfig"," ")
+    apertureConfig = rospy.get_param("~apertureConfig"," ")
     aperture = gphoto.run(" --get-config "+ apertureConfig)
     aperture = find_current_value(aperture)
     
-    shutterspeedConfig = rospy.get_param("/shutterspeedConfig"," ")
+    shutterspeedConfig = rospy.get_param("~shutterspeedConfig"," ")
     shutterspeed = gphoto.run(" --get-config " + shutterspeedConfig)
     shutterspeed = find_current_value(shutterspeed)
             
