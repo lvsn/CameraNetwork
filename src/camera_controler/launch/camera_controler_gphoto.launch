@@ -1,6 +1,8 @@
 <launch>
   <group ns="pi0">
+    <rosparam command="load" file="$(find camera_controler)/param/timelaps.yaml" />
     <include file="$(find gphoto_cam)/launch/gphoto_cam.launch" />
+    <node name="timelaps_server" pkg="camera_controler" type="timelaps_server.py" />
   </group>
 
 </launch>

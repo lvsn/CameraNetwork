@@ -40,7 +40,7 @@ class CameraParameterHandler:
         if self.cameraModel == 'Nikon DSC D3100 (PTP mode)':
             rospy.set_param("~isoConfig","/main/imgsettings/iso")
             rospy.set_param("~imageformatConfig","/main/capturesettings/imagequality")
-            rospy.set_param("~apertureConfig","/main/capturesettings/f-number")
+            rospy.set_param("~apertureConfig","/main/other/5007")
             rospy.set_param("~shutterspeedConfig","/main/capturesettings/shutterspeed")
             self.configLoaded = True
             rospy.loginfo("Camera's Configuration loaded")

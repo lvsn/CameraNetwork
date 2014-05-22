@@ -1,0 +1,9 @@
+#goal
+uint32 picture_qty
+float32 inter_picture_delay_s
+---
+#result
+uint32 total_picture
+---
+#feedback
+string picture_taken
