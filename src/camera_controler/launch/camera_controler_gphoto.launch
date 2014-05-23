@@ -1,4 +1,5 @@
 <launch>
+  <param name="IP/pi0" value="$(env ROS_IP)" />
   <group ns="pi0">
     <rosparam command="load" file="$(find camera_controler)/param/timelaps.yaml" />
     <include file="$(find gphoto_cam)/launch/gphoto_cam.launch" />
