@@ -17,12 +17,16 @@ class CameraParameterHandler:
         self.cameraModel = ''        
         
         rospy.loginfo("...Looking for camera...")
-        cameralist = gphoto.run(" --auto-detect")
-        self.cameraModel = self._find_camera_type(cameralist)
-        if self.cameraModel == '':
-            rospy.logwarn("No Camera Found")
-        else:
-            rospy.loginfo("Found : " + self.cameraModel)
+        
+        r = rospy.Rate(0.25) #retry connection every 4 seconds
+        while self.cameraModel == '':
+            cameralist = gphoto.run(" --auto-detect")
+            self.cameraModel = self._find_camera_type(cameralist)
+            if self.cameraModel == '':
+                rospy.logwarn("No Camera Found")
+            r.sleep()
+        
+        rospy.loginfo("Found : " + self.cameraModel)
         rospy.set_param("camera_model", self.cameraModel)
         
     def __del__(self):

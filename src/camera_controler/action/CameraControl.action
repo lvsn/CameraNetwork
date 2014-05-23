@@ -1,5 +1,5 @@
 #goal
-uint32 picture_qty
+float32 picture_qty
 float32 inter_picture_delay_s
 ---
 #result

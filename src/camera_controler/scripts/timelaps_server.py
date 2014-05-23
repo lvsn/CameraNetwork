@@ -16,31 +16,28 @@ class TimelapsServer:
     def __init__(self):
         rospy.loginfo("Setting up server")
         
-        self.picture_qty = 0
-        self.inter_picture_delay_s = 0
+        self.picture_count = 0
         self.server = actionlib.SimpleActionServer('timelaps',CameraControlAction,
-                                                   self.execute,False)
+                                                   self.execute,False)                                               
         self.server.start()
         self.cam_handler = ch.CameraHandler()
     
     
                         
-    
+        
     def execute(self,goal):
 
-        self.picture_qty = goal.picture_qty
-        self.inter_picture_delay_s = goal.inter_picture_delay_s
-
-
         feedback_msg = CameraControlActionFeedback
-        count = 1
-        while self.picture_qty > 0:
-            self.cam_handler.takeSinglePicture()
-            feedback_msg.picture_taken = 'Picture taken:' + str(count)
+        r = rospy.Rate(1/goal.inter_picture_delay_s) # hz
+        self.picture_count = 0
+        while self.picture_count < goal.picture_qty:
+            self.picture_count += 1
+            self.cam_handler.takeHDRPicture()
+            feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count)
             self.server.publish_feedback(feedback_msg)
-            rospy.sleep(self.inter_picture_delay_s)
-            count += 1
-            self.picture_qty -= 1
+            if self.server.is_preempt_requested():
+                break
+            r.sleep()
         
 
         

@@ -51,6 +51,9 @@ class CameraHandler:
         self.capture_camera_service(True)
         
     def takeHDRPicture(self):
-        settings = rospy.get_param('camera_capture_settings')
+        settingList = rospy.get_param('camera_capture_settings')
+        for setting in settingList:
+            self.updateCameraSetting(setting)
+            self.capture_camera_service(True)
         
         

@@ -1,7 +1,7 @@
 ---
 camera_actual_settings: {iso: "100", imageformat: "3",
                          shutterspeed: "1", aperture: "630"}
-camera_capture_settings: [{shutterspeed: "1"},
+camera_capture_settings: [{shutterspeed: "1",aperture: "450"},
                           {shutterspeed: "15"},
-                          {shutterspeed: "25"}
+                          {shutterspeed: "30", aperture: "630"}
 ]

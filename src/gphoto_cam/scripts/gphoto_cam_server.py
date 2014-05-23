@@ -34,29 +34,24 @@ def capture_image_cb(req):
 def set_camera_cb(req):
     rospy.loginfo("Setting camera's Configuration")
     backMessage = ''
+    commandCall = ''
     if(req.iso != ""):
         isoConfig = rospy.get_param("~isoConfig"," ")
-        out = gphoto.run(" --set-config " + isoConfig + "=" + req.iso)
-        if out != '':
-            backMessage += 'iso Value is not supported\n'
+        commandCall += " --set-config " + isoConfig + "=" + req.iso
             
     if(req.imageformat != ""):
         imageformatConfig = rospy.get_param("~imageformatConfig"," ")
-        out = gphoto.run(" --set-config " + imageformatConfig + "=" + req.imageformat)
-        if out != '':
-            backMessage += 'imageformat Value is not supported\n'
+        commandCall += " --set-config " + imageformatConfig + "=" + req.imageformat
             
     if(req.aperture != ""):
         apertureConfig = rospy.get_param("~apertureConfig"," ")
-        out = gphoto.run(" --set-config " + apertureConfig + "=" + req.aperture)
-        if out != '':
-            backMessage += 'aperture Value is not supported\n'
+        commandCall += " --set-config " + apertureConfig + "=" + req.aperture
             
     if(req.shutterspeed != ""):
         shutterspeedConfig = rospy.get_param("~shutterspeedConfig"," ")
-        out = gphoto.run(" --set-config " + shutterspeedConfig + "=" + req.shutterspeed)
-        if out != '':
-            backMessage += 'shutterspeed Value is not supported\n'
+        commandCall += " --set-config " + shutterspeedConfig + "=" + req.shutterspeed
+        
+    backMessage = gphoto.run(commandCall)
             
     return backMessage
     
