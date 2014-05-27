@@ -44,16 +44,18 @@ class CameraHandler:
         self.set_camera_service(setting['iso'],setting['imageformat'],
                         setting['aperture'],setting['shutterspeed'])
         
-    def takeSinglePicture(self):
+    def takeSinglePicture(self,pictureId):
         settingList = rospy.get_param('camera_capture_settings')
+        picturePath = '~/CameraPicture/%B/' + pictureId + '_%d%B%y_%Hh%Mm%Ss.%C'
         pictureSetting = settingList[0]
         self.updateCameraSetting(pictureSetting)
-        self.capture_camera_service(True)
+        self.capture_camera_service(False,picturePath)
         
-    def takeHDRPicture(self):
+    def takeHDRPicture(self,pictureId):
         settingList = rospy.get_param('camera_capture_settings')
+        picturePath = '~/CameraPicture/%B/' + pictureId + '_%d%B%y_%Hh%Mm%Ss.%C'
         for setting in settingList:
             self.updateCameraSetting(setting)
-            self.capture_camera_service(True)
+            self.capture_camera_service(False,picturePath)
         
         

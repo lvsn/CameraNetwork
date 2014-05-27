@@ -26,7 +26,7 @@ def capture_image_cb(req):
     if(req.keepOnCamera):
         gphoto.run(" --capture-image")
     else:
-        filename = " --filename ~/CameraPicture/%B/%d%B%y_%Hh%Mm%Ss.%C"
+        filename = " --filename " + req.filePath
         gphoto.run(filename + " --capture-image-and-download")
     return 'OK'
     
@@ -79,6 +79,7 @@ def get_camera_cb(req):
 
 
 def gphoto_cam_server():
+    print 'heh?'
     rospy.init_node('gphoto_cam')
     #log
     rospy.loginfo("gphoto_cam's URI : "+rospy.get_node_uri());
@@ -93,5 +94,4 @@ def gphoto_cam_server():
     rospy.loginfo("Camera Ready at " + str(rospy.get_rostime().secs))
     rospy.spin()
 
-if __name__ == "__main__":
-    gphoto_cam_server()
+
