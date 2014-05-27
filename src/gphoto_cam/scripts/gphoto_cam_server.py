@@ -78,8 +78,7 @@ def get_camera_cb(req):
     return {'iso': iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
 
 
-def gphoto_cam_server():
-    print 'heh?'
+if __name__ == "__main__":
     rospy.init_node('gphoto_cam')
     #log
     rospy.loginfo("gphoto_cam's URI : "+rospy.get_node_uri());
