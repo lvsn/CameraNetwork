@@ -9,7 +9,7 @@ import roslib; roslib.load_manifest('camera_controler')
 import rospy
 import actionlib
 import camera_handler as ch
-from camera_controler.msg import *
+from camera_network_msgs.msg import *
 
 class TimelapsServer:
     
@@ -35,7 +35,7 @@ class TimelapsServer:
         except ZeroDivisionError:
             rospy.logwarn("Can't set a 0 delay for Capture")
             
-        r = rospy.Rate(hz) # hz
+        r = rospy.Rate(hz) # hz 
         self.picture_count = 0
         while self.picture_count < goal.picture_qty:
             self.picture_count += 1

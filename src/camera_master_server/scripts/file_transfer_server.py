@@ -67,7 +67,7 @@ class sftp_server:
         
 
     def refresh_ip(self):
-        self.ipDict = rospy.get_param('IP')
+        self.ipDict = rospy.get_param('IP',{})
         rospy.loginfo("refreshing ip dic" + str(self.ipDict))
         
     def refresh_date(self):

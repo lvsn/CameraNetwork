@@ -30,7 +30,7 @@ class network_capture_listener:
         ns = rospy.get_namespace()
         rospy.loginfo(ns+ " is listening on network_capture_chatter")
         
-        rospy.Subscriber('/network_capture_chatter', Capture, self.callback)
+        rospy.Subscriber('/network_capture_chatter', Capture, self.callback,queue_size=1)
 
 
 if __name__ == '__main__':

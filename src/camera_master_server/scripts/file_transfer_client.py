@@ -16,7 +16,7 @@ def print_feedback(feedback):
 
 if __name__ == '__main__':
     rospy.init_node('sftp_client')
-    client = actionlib.SimpleActionClient('sftp', CameraDownloadAction)
+    client = actionlib.SimpleActionClient('master/sftp', CameraDownloadAction)
     client.wait_for_server()
 
     goal = CameraDownloadGoal()
