@@ -28,16 +28,16 @@ class CameraHandler:
         '''
         #TODO Look for race condition!
         
-        if configDict.has_key('iso'):
+        if 'iso' in configDict:
             rospy.set_param('camera_actual_settings/iso',configDict['iso'])
             
-        if configDict.has_key('imageformat'):
+        if 'imageformat' in configDict:
             rospy.set_param('camera_actual_settings/imageformat',configDict['imageformat'])
             
-        if configDict.has_key('shutterspeed'):
+        if 'shutterspeed' in configDict:
             rospy.set_param('camera_actual_settings/shutterspeed',configDict['shutterspeed'])
             
-        if configDict.has_key('aperture'):
+        if 'aperture' in configDict:
             rospy.set_param('camera_actual_settings/aperture',configDict['aperture'])
             
         setting = rospy.get_param('camera_actual_settings') 
