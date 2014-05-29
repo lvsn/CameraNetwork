@@ -14,9 +14,11 @@ class CameraHandler:
         rospy.loginfo("Setting up camera Handler")        
         rospy.wait_for_service('set_camera')
         rospy.wait_for_service('capture_camera')
+        rospy.wait_for_service('load_camera')
         
         self.capture_camera_service = rospy.ServiceProxy('capture_camera', Capture)
         self.set_camera_service = rospy.ServiceProxy('set_camera', InCameraData)
+        self.load_camera_service = rospy.ServiceProxy('load_camera', Load)
         self.updateCameraSetting()
         
                         
@@ -28,16 +30,16 @@ class CameraHandler:
         '''
         #TODO Look for race condition!
         
-        if configDict.has_key('iso'):
+        if 'iso' in configDict:
             rospy.set_param('camera_actual_settings/iso',configDict['iso'])
             
-        if configDict.has_key('imageformat'):
+        if 'imageformat' in configDict:
             rospy.set_param('camera_actual_settings/imageformat',configDict['imageformat'])
             
-        if configDict.has_key('shutterspeed'):
+        if 'shutterspeed' in configDict:
             rospy.set_param('camera_actual_settings/shutterspeed',configDict['shutterspeed'])
             
-        if configDict.has_key('aperture'):
+        if 'aperture' in configDict:
             rospy.set_param('camera_actual_settings/aperture',configDict['aperture'])
             
         setting = rospy.get_param('camera_actual_settings') 
@@ -47,17 +49,21 @@ class CameraHandler:
     def takeSinglePicture(self,pictureId):
         settingList = rospy.get_param('camera_capture_settings')
         pictureName = str(pictureId)
-        picturePath = '~/CameraPicture/%B/' + pictureName + '_%d%B%y_%Hh%Mm%Ss.%C'
+        #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
+        picturePath = '~/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
         pictureSetting = settingList[0]
         self.updateCameraSetting(pictureSetting)
-        self.capture_camera_service(False,picturePath)
+        self.capture_camera_service('dummy')
+        self.load_camera_service(picturePath)
         
     def takeHDRPicture(self,pictureId):
         settingList = rospy.get_param('camera_capture_settings')
         pictureName = str(pictureId)
-        picturePath = '~/CameraPicture/%B/' + pictureName + '_%d%B%y_%Hh%Mm%Ss.%C'
+        #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
+        picturePath = '~/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C'
         for setting in settingList:
             self.updateCameraSetting(setting)
-            self.capture_camera_service(False,picturePath)
+            self.capture_camera_service('dummy')
+        self.load_camera_service(picturePath)
         
         
