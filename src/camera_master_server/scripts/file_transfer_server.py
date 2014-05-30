@@ -44,6 +44,7 @@ class sftp_server:
     def execute(self,goal):
         feedback_msg = CameraDownloadActionFeedback
         hz = 0
+        totalCount = 0
         try:
             hz = 1/goal.dowload_frequency_s
             rospy.loginfo("Downloading at a rate of "+str(hz)+" hz")
@@ -59,15 +60,17 @@ class sftp_server:
             feedback_msg.picture_downloaded =\
             'Downloaded ' + str(pictureQty) + ' pictures from ' + str(deviceQty) + ' devices.'
             self.server.publish_feedback(feedback_msg)
+            totalCount += pictureQty
             if self.server.is_preempt_requested() or goal.dowload_frequency_s == 0:
                 break
             r.sleep()
-            
+        succes_msg = CameraDownloadActionResult
+        succes_msg.total_downloaded = totalCount
         self.server.set_succeeded()
         
 
     def refresh_ip(self):
-        self.ipDict = rospy.get_param('IP',{})
+        self.ipDict = rospy.get_param('/IP',{})
         rospy.loginfo("refreshing ip dic" + str(self.ipDict))
         
     def refresh_date(self):
@@ -116,7 +119,7 @@ class sftp_server:
         else:
             for f in filelist:
                 rospy.loginfo('Downloading ' + f)
-                remoteFile = '.' + self.imagePath + self.dateFolder + f
+                remoteFile = '/tmp' + self.imagePath + self.dateFolder + f
                 localFile = self.localImagePath + deviceName + '/' + f
                 sftp.get(remoteFile,localFile)
                 sftp.remove(remoteFile)
