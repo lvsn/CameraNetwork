@@ -90,9 +90,9 @@ echo "Downloading libusb 1.0.11"
 echo "-------------------------"
 echo
 
-wget http://downloads.sourceforge.net/project/gphoto/libgphoto/2.5.4/libgphoto2-2.5.4.tar.bz2
-tar xjf libgphoto2-2.5.4.tar.bz2
-cd libgphoto2-2.5.4
+wget http://downloads.sourceforge.net/project/gphoto/libgphoto/2.5.3.1/libgphoto2-2.5.3.1.tar.bz2
+tar xjf libgphoto2-2.5.3.1.tar.bz2
+cd libgphoto2-2.5.3.1
 
 echo 
 echo "-----------------------------------"
@@ -111,9 +111,9 @@ echo "Downloading gphoto2 2.5.1"
 echo "-------------------------"
 echo
 
-wget http://downloads.sourceforge.net/project/gphoto/gphoto/2.5.4/gphoto2-2.5.4.tar.gz
-tar xzvf gphoto2-2.5.4.tar.gz
-cd gphoto2-2.5.4
+wget http://downloads.sourceforge.net/project/gphoto/gphoto/2.5.3/gphoto2-2.5.3.tar.gz
+tar xzvf gphoto2-2.5.3.tar.gz
+cd gphoto2-2.5.3
 
 echo 
 echo "--------------------------------"
