@@ -27,8 +27,8 @@ def capture_image_cb(req):
     return 'OK'
     
 def load_camera_cb(req):
-    rospy.loginfo("Loading picture to folder")
     filename = " --filename " + req.path
+    rospy.loginfo("Loading picture to folder" + req.path)
     gphoto.run(filename + " -P -D --recurse")
     return 'OK'    
     
