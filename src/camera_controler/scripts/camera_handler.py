@@ -50,7 +50,7 @@ class CameraHandler:
         settingList = rospy.get_param('camera_capture_settings')
         pictureName = str(pictureId)
         #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
-        picturePath = '/tmp/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
+        picturePath = '~/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
         pictureSetting = settingList[0]
         self.updateCameraSetting(pictureSetting)
         self.capture_camera_service('dummy')
@@ -60,7 +60,7 @@ class CameraHandler:
         settingList = rospy.get_param('camera_capture_settings')
         pictureName = str(pictureId)
         #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
-        picturePath = '/tmp/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C'
+        picturePath = '~/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C'
         for setting in settingList:
             self.updateCameraSetting(setting)
             self.capture_camera_service('dummy')
