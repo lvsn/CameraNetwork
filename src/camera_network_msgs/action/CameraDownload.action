@@ -2,7 +2,7 @@
 float32 dowload_frequency_s
 ---
 #result
-uint32 total_downloaded
+string total_downloaded
 ---
 #feedback
 string picture_downloaded

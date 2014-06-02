@@ -13,7 +13,7 @@ import actionlib
 
 import roslib; roslib.load_manifest('camera_controler')
 import rospy
-from camera_controler.msg import *
+from camera_network_msgs.msg import *
 
 import paramiko
 
@@ -27,6 +27,7 @@ class sftp_server:
         self.refresh_date()
         self.localImagePath = self.homePath + self.imagePath + self.dateFolder
         self.localLogPath = self.homePath + self.imagePath + 'log/'
+        self.fileQty = 0
         
         rospy.loginfo('Writing files to ' + self.localImagePath)
         rospy.loginfo('Wrinting log to ' + self.localLogPath)
@@ -42,7 +43,6 @@ class sftp_server:
         paramiko.util.log_to_file(self.localLogPath + time.strftime('%d%B%Hh') + '.log')
 
     def execute(self,goal):
-        feedback_msg = CameraDownloadActionFeedback
         hz = 0
         totalCount = 0
         try:
@@ -56,17 +56,16 @@ class sftp_server:
         while True:
             self.refresh_ip()
             self.refresh_date()
-            deviceQty,pictureQty = self.download_all_images()
-            feedback_msg.picture_downloaded =\
-            'Downloaded ' + str(pictureQty) + ' pictures from ' + str(deviceQty) + ' devices.'
-            self.server.publish_feedback(feedback_msg)
+            
+            pictureQty = self.download_all_images_from_network()
             totalCount += pictureQty
             if self.server.is_preempt_requested() or goal.dowload_frequency_s == 0:
                 break
             r.sleep()
         succes_msg = CameraDownloadActionResult
-        succes_msg.total_downloaded = totalCount
-        self.server.set_succeeded()
+        succes_msg.total_downloaded = 'Downloaded ' + str(totalCount) + ' pictures from ' + str(len(self.ipDict)) + ' devices.'
+
+        self.server.set_succeeded(succes_msg)
         
 
     def refresh_ip(self):
@@ -76,7 +75,7 @@ class sftp_server:
     def refresh_date(self):
         self.dateFolder = time.strftime("%B") + '/'
         
-    def download_all_images(self):
+    def download_all_images_from_network(self):
         """
         Open sftp session to download images of each session
         return a tuple of number of device and total transfered images
@@ -98,7 +97,7 @@ class sftp_server:
                     t.close()
                 except:
                     pass
-        return (len(self.ipDict),imageQty)
+        return imageQty
     
     def _createSession(self,ip,port=22):
          t = paramiko.Transport((ip, port))
@@ -107,22 +106,26 @@ class sftp_server:
          return (sftp,t)
                
     def _downloadImageFolder(self,sftp,deviceName=''):
+        feedback_msg = CameraDownloadActionFeedback
         filelist = sftp.listdir('.' + self.imagePath + self.dateFolder)
         rospy.loginfo('found ' + str(len(filelist)) + ' files')
                 
                 
         if not os.path.exists(self.localImagePath + deviceName):
             os.makedirs(self.localImagePath + deviceName)
-                    
+        count = 1.0;                     
         if len(filelist) == 0:
             rospy.loginfo("No file to download")
         else:
             for f in filelist:
                 rospy.loginfo('Downloading ' + f)
-                remoteFile = '/tmp' + self.imagePath + self.dateFolder + f
+                remoteFile = '.' + self.imagePath + self.dateFolder + f
                 localFile = self.localImagePath + deviceName + '/' + f
                 sftp.get(remoteFile,localFile)
                 sftp.remove(remoteFile)
+                feedback_msg.picture_downloaded = str(float(count/len(filelist)*100)) + '% of Device ' + deviceName
+                self.server.publish_feedback(feedback_msg)
+                count += 1;
         return len(filelist)
         
     

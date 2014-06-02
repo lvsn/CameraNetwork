@@ -33,11 +33,17 @@ class TimelapsServer:
             hz = 1/goal.inter_picture_delay_s
             rospy.loginfo("Capturing at a rate of "+str(hz)+" hz")
         except ZeroDivisionError:
+            hz = 1
             rospy.logwarn("Can't set a 0 delay for Capture")
             
         r = rospy.Rate(hz) # hz 
+        if goal.picture_qty < 0:
+            picture_goal = float('inf')
+        else:
+            picture_goal = goal.picture_qty
+            
         self.picture_count = 0
-        while self.picture_count < goal.picture_qty:
+        while self.picture_count < picture_goal:
             self.picture_count += 1
             self.cam_handler.takeHDRPicture(self.picture_count)
             feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count)
@@ -47,8 +53,9 @@ class TimelapsServer:
             r.sleep()
         
 
-        
-        self.server.set_succeeded()
+        succes_msg = CameraControlActionResult
+        succes_msg.total_downloaded = self.picture_count
+        self.server.set_succeeded(succes_msg)
 
 
 

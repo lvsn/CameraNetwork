@@ -7,7 +7,6 @@ Created on Wed May 14 14:58:49 2014
 """
 
 import subprocess
-import time
 
 # if the executable is installed properly it will work
 gphoto2Executable = 'gphoto2'
@@ -20,10 +19,6 @@ def run(cmd) :
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE,
                        )
-    while p.poll() == None:
-    # We can do other things here while we wait
-        time.sleep(.5)
-        p.poll()
       
     (stdout, stderr) = p.communicate()
     ret = p.returncode

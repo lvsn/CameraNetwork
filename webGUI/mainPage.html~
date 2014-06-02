@@ -76,12 +76,40 @@
     cmdShot.publish(capture);
   }
   
+  
+  var timelapsClient = new ROSLIB.ActionClient({
+    ros : ros,
+    serverName : 'pi0/timelaps',
+    actionName : 'camera_network_msgs/CameraControlAction'  
+  });
+  
+  function timelapsAction(form){
+    var goal = new ROSLIB.Goal({
+    actionClient : timelapsClient,
+    goalMessage : {
+      picture_qty : parseFloat(form.timelaps_qty.value),
+      inter_picture_delay_s : parseFloat(form.timelaps_frequency.value)
+    }
+  });
+    goal.on('feedback', function(feedback) {
+      document.getElementById("dd_timelaps_feedback").textContent = feedback.picture_taken
+    });
+    goal.on('result', function(result) {
+      document.getElementById("dd_timelaps_status").textContent = "Idle";
+      document.getElementById("dd_timelaps_termination").textContent = "Total Pictures taken:" + result.total_picture;
+    });
+    goal.send();
+    document.getElementById("dd_timelaps_status").textContent = "Taking " + form.timelaps_qty.value + " Pictures at a frequency of " + form.timelaps_frequency.value;
+    document.getElementById("dd_timelaps_feedback").textContent = "Waiting for feedback"
+  }  
+  
+  
+  
   var downloadClient = new ROSLIB.ActionClient({
     ros : ros,
     serverName : 'master/sftp',
     actionName : 'camera_network_msgs/CameraDownloadAction'
-  });
-  
+  });  
   
   function downloadAction(form){
     var goal = new ROSLIB.Goal({
@@ -95,10 +123,11 @@
     });
     goal.on('result', function(result) {
       document.getElementById("dd_download_status").textContent = "Idle";
-      document.getElementById("dd_download_termination").textContent = "Total Files transfered:" + result.total_downloaded;
+      document.getElementById("dd_download_termination").textContent = result.total_downloaded;
     });
     goal.send();
     document.getElementById("dd_download_status").textContent = "Downloading every " + form.frequency.value + " s";
+    document.getElementById("dd_download_feedback").textContent = "Waiting for feedback"
   }  
 
   
@@ -125,20 +154,41 @@
     </dl> 
   </nav> 
   
-  <button type="button" class="styleButton" onclick = "publishShot()">Network Shot!</button> 
+  
+  <!-- Timelaps interface -->
   <div class="download">
-  <form name="input" action="javascript:void(0)" method="get">
-  Download frequency (s) : <input id="input_frequency" type="number" value=0 name="frequency" >
-  <input type="submit" class="styleButton" onclick="downloadAction(this.form)" value="Download">
-  </form> 
-    <dl>
-    <dt>Status:</dt>
-      <dd id ="dd_download_status">Idle</dd>
-    <dt>Feedback:</dt>
-      <dd id="dd_download_feedback"></dd>
-    <dt>Termination:</dt>
-      <dd id="dd_download_termination"></dd>
-  </dl>
+    <form name="timelaps" action="javascript:void(0)" method="get">
+        Frequency (s) : <input id="timelaps_frequency" type="number" value=0 name="timelaps_frequency" >
+        Quantity (<0 = infinite) : <input id="timelaps_quantity" type="number" value=0 name="timelaps_qty" >
+      <dl>
+        <dt>Status:</dt>
+          <dd id ="dd_timelaps_status">Idle</dd>
+        <dt>Feedback:</dt>
+          <dd id="dd_timelaps_feedback"></dd>
+        <dt>Termination:</dt>
+          <dd id="dd_timelaps_termination"></dd>
+      </dl>
+      <input type="submit" class="styleButton" onclick="timelapsAction(this.form)" value="Set">
+    </form> 
+  </div>  
+  
+  <!-- Network shot Button -->
+  <button type="button" class="styleButton" onclick = "publishShot()">Network Shot!</button> 
+
+  <!-- Download interface -->
+  <div class="download">
+    <form name="download" action="javascript:void(0)" method="get">
+      Download frequency (s) (0 = one time) : <input id="input_frequency" type="number" value=0 name="frequency" >
+      <dl>
+        <dt>Status:</dt>
+          <dd id ="dd_download_status">Idle</dd>
+        <dt>Feedback:</dt>
+          <dd id="dd_download_feedback"></dd>
+        <dt>Termination:</dt>
+          <dd id="dd_download_termination"></dd>
+      </dl>
+      <input type="submit" class="styleButton" onclick="downloadAction(this.form)" value="Download">
+    </form> 
   </div>
   
 </body>
