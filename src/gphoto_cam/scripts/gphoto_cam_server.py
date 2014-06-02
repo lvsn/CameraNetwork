@@ -23,14 +23,14 @@ def find_current_value(string):
 
 def capture_image_cb(req):
     rospy.loginfo("Taking Picture")
-    gphoto.run(" --capture-image")
-    return 'OK'
+    msg = gphoto.run(" --capture-image")
+    return msg
     
 def load_camera_cb(req):
     filename = " --filename " + req.path
     rospy.loginfo("Loading picture to folder" + req.path)
-    gphoto.run(filename + " -P -D --recurse")
-    return 'OK'    
+    msg = gphoto.run(filename + " -P -D --recurse")
+    return msg    
     
 def set_camera_cb(req):
     rospy.loginfo("Setting camera's Configuration")
