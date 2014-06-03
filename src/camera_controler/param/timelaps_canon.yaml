@@ -1,0 +1,8 @@
+---
+camera_actual_settings: {iso: "100", imageformat: "0",
+                         shutterspeed: "1/2000", aperture: "4.0"}
+camera_capture_settings: [{shutterspeed: "1/2000",aperture: "4.0"},
+                          {shutterspeed: "1/100"},
+                          {shutterspeed: "1/8", aperture: "9"}
+]
+
