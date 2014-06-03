@@ -41,20 +41,30 @@ class CameraParameterHandler:
                 rospy.logerr("Unable to delete parameter (not set)")
         
     def set_camera_parameters(self):
+        rospy.set_param("~isoConfig","iso")
+        rospy.set_param("~apertureConfig","aperture")
+        rospy.set_param("~shutterspeedConfig","shutterspeed")
+        
+        #Load spécific parameter
         if self.cameraModel == 'Nikon DSC D3100 (PTP mode)':
-            rospy.set_param("~isoConfig","/main/imgsettings/iso")
             rospy.set_param("~imageformatConfig","/main/capturesettings/imagequality")
             rospy.set_param("~apertureConfig","/main/other/5007")
-            rospy.set_param("~shutterspeedConfig","/main/capturesettings/shutterspeed")
-            self.configLoaded = True
-            rospy.loginfo("Camera's Configuration loaded")
+        elif self.cameraModel == 'Canon Digital Rebel XT (normal mode)':
+            rospy.set_param("~imageformatConfig","/main/settings/imageformat")
+        else:
+            self.configLoaded = False
+            rospy.loginfo("Camera's Configuration Not Loaded")
+            return
+            
+        self.configLoaded = True
+        rospy.loginfo("Camera's Configuration loaded")
         
     
     def _find_camera_type(self,string):
     
         splitedString = string.split('\n')
         if len(splitedString) > 3:
-            return splitedString[2].split('  ')[0]  #the name and port are separated with at least two spaces
+            return splitedString[2].split(' usb')[0].rstrip()  #the name and port are separated with at least two spaces
         else:
             return ''
         

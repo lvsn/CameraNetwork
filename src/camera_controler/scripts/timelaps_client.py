@@ -9,7 +9,7 @@ Created on Thu May 22 10:18:13 2014
 import roslib; roslib.load_manifest('camera_controler')
 import rospy
 import actionlib
-from camera_controler.msg import *
+from camera_network_msgs.msg import *
 
 def print_feedback(feedback):
     rospy.loginfo(str(feedback))
