@@ -21,10 +21,10 @@ class network_capture_listener:
         # Simply print out values in our custom message.
         if data.isHdr:
             rospy.loginfo("Taking hdr picture")
-            self.cam_handler.takeHDRPicture(0)
+            self.cam_handler.takeHDRPicture(0,setCamera=False)
         else:
             rospy.loginfo("Taking single picture")
-            self.cam_handler.takeSinglePicture(0)
+            self.cam_handler.takeSinglePicture(0,setCamera=False)
 
     def listen(self):
         ns = rospy.get_namespace()
