@@ -2,3 +2,4 @@ build
 devel
 /src/*/scripts/*.pyc
 /src/CMakeLists.txt
+webGUI/*~

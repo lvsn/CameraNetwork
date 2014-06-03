@@ -3,13 +3,20 @@ h1 {
 	text-align: center;
 }
 
-.download
+.mainStyle
 {
 margin:auto;
 width:70%;
 background-color:rgb(240,240,240);
 border-style:dotted;
 border-color:rgb(200,200,200);
+}
+
+.timelapsStyle
+{
+background-color:rgb(230,230,230);
+border-style:dotted;
+border-color:rgb(150,150,150);	
 }
 
 .styleButton {

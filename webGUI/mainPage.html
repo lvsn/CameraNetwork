@@ -34,32 +34,75 @@
 		});
   });
   
+  function camera(deviceName,ip,deviceParam,timelapsObj){
+      this.deviceName = deviceName;
+      this.ip = ip;
+      this.deviceParam = deviceParam;
+      this.timelapsObj = timelapsObj;
+  };
+  function timelapsContainer(client,goal){
+    this.client = client;
+    this.goal = goal;  
+  };
+  
+  var cameraArray = [];
+  
+  function printTimelaps(camera){
+    if(camera === null){
+      document.getElementById("dd_Device").textContent = '';
+      document.getElementById("dd_IP").textContent = '';
+      document.getElementById("dd_Camera").textContent = '';  
+    }
+    else{
+      document.getElementById("dd_Device").textContent = camera.deviceName;
+      document.getElementById("dd_IP").textContent = camera.ip;
+      camera.deviceParam.get(function(value){
+        if(value != null && value["camera_model"] != null){
+          document.getElementById("dd_Camera").textContent = value["camera_model"];
+        }
+        else{
+          document.getElementById("dd_Camera").textContent = 'Camera Not Connected';
+        }
+      });
+    }
+  }
   
   
   function selectEvent(select){
     if(select.selectedIndex == 0){
-      document.getElementById("dd_Device").textContent = '';
-      document.getElementById("dd_IP").textContent = '';
-      document.getElementById("dd_Camera").textContent = '';
+      printTimelaps(null);
     }
     else{
-      var device = select.options[select.selectedIndex].text;
+      var deviceName = select.options[select.selectedIndex].text;
       var deviceParam =  new ROSLIB.Param({
         ros : ros,
-        name : '/'+device
+        name : '/'+deviceName
       }); 
-    
-    
-      document.getElementById("dd_Device").textContent = device
-      document.getElementById("dd_IP").textContent = select.value
-      deviceParam.get(function(value){
-        var output = 'No Camera Connected';
-        if(value != null && value["camera_model"] != null){
-          output = value["camera_model"]
-        }
-        document.getElementById("dd_Camera").textContent = output;
-      });
+      var timelapsClient = new ROSLIB.ActionClient({
+        ros : ros,
+        serverName : deviceName + '/timelaps',
+        actionName : 'camera_network_msgs/CameraControlAction'  
+      });  
+  
+      var device;
+      var found = false;
+      device = getDevice(deviceName)
+      if(device == null){
+        device = new camera(deviceName,select.value,deviceParam,new timelapsContainer(timelapsClient,''));
+        cameraArray.push(device);            
+      }
+      printTimelaps(device);
+      
     }
+  }
+  
+  function getDevice(deviceName){
+    for(var i = 0; i < cameraArray.length;i++){
+      if(cameraArray[i].deviceName == deviceName){
+        return cameraArray[i];      
+      }      
+    }
+    return null;
   }
   
   
@@ -77,15 +120,11 @@
   }
   
   
-  var timelapsClient = new ROSLIB.ActionClient({
-    ros : ros,
-    serverName : 'pi0/timelaps',
-    actionName : 'camera_network_msgs/CameraControlAction'  
-  });
-  
+
   function timelapsAction(form){
+    
     var goal = new ROSLIB.Goal({
-    actionClient : timelapsClient,
+    actionClient : cameraArray[0].timelapsObj.client,
     goalMessage : {
       picture_qty : parseFloat(form.timelaps_qty.value),
       inter_picture_delay_s : parseFloat(form.timelaps_frequency.value)
@@ -138,25 +177,24 @@
 <body>
   <header>
     <h1>Camera Network</h1>
-    <select onchange="selectEvent(this);" id ="deviceList">
-      <option value="index0">Online Devices</option>
-    </select> 
-  
   </header>
- <nav>
-    <dl>
-      <dt>Device:</dt>
-        <dd id="dd_Device"></dd>
-      <dt>IP:</dt>
-        <dd id="dd_IP"></dd>
-      <dt>Camera Type:</dt>
-        <dd id="dd_Camera"></dd>
-    </dl> 
-  </nav> 
   
-  
+<nav class="mainStyle">
+  <select onchange="selectEvent(this);" id ="deviceList">
+    <option value="index0">Online Devices</option>
+  </select> 
+  <dl>
+    <dt>Device:</dt>
+      <dd id="dd_Device"></dd>
+    <dt>IP:</dt>
+      <dd id="dd_IP"></dd>
+    <dt>Camera Type:</dt>
+      <dd id="dd_Camera"></dd>
+  </dl> 
+
+    
   <!-- Timelaps interface -->
-  <div class="download">
+  <div class="timelapsStyle">
     <form name="timelaps" action="javascript:void(0)" method="get">
         Frequency (s) : <input id="timelaps_frequency" type="number" value=0 name="timelaps_frequency" >
         Quantity (<0 = infinite) : <input id="timelaps_quantity" type="number" value=0 name="timelaps_qty" >
@@ -170,13 +208,14 @@
       </dl>
       <input type="submit" class="styleButton" onclick="timelapsAction(this.form)" value="Set">
     </form> 
-  </div>  
+  </div>
+</nav> 
   
   <!-- Network shot Button -->
   <button type="button" class="styleButton" onclick = "publishShot()">Network Shot!</button> 
 
   <!-- Download interface -->
-  <div class="download">
+  <div class="mainStyle">
     <form name="download" action="javascript:void(0)" method="get">
       Download frequency (s) (0 = one time) : <input id="input_frequency" type="number" value=0 name="frequency" >
       <dl>
