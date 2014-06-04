@@ -15,17 +15,10 @@
     url : 'ws://localhost:9090'
   });
 
-
-
-  // Getting and setting a param value
-  // ---------------------------------
-
-
   var IpList = new ROSLIB.Param({
     ros : ros,
     name : '/IP'
   });
-
   
   	IpList.get(function(value) {
   		var select = document.getElementById("deviceList");
@@ -40,18 +33,24 @@
       this.deviceParam = deviceParam;
       this.timelapsObj = timelapsObj;
   };
-  function timelapsContainer(client,goal){
+  function timelapsContainer(client){
     this.client = client;
-    this.goal = goal;  
+    this.statusMessage = 'Idle'
+    this.feedbackMessage = ''
+    this.terminationMessage = '' 
   };
   
   var cameraArray = [];
+  var currentDevice;
   
   function printTimelaps(camera){
     if(camera === null){
       document.getElementById("dd_Device").textContent = '';
       document.getElementById("dd_IP").textContent = '';
-      document.getElementById("dd_Camera").textContent = '';  
+      document.getElementById("dd_Camera").textContent = ''; 
+      document.getElementById("dd_timelaps_termination").textContent =  '';
+      document.getElementById("dd_timelaps_status").textContent = '';
+      document.getElementById("dd_timelaps_feedback").textContent = '';
     }
     else{
       document.getElementById("dd_Device").textContent = camera.deviceName;
@@ -63,7 +62,10 @@
         else{
           document.getElementById("dd_Camera").textContent = 'Camera Not Connected';
         }
-      });
+                      });
+      document.getElementById("dd_timelaps_termination").textContent =  camera.timelapsObj.terminationMessage;
+      document.getElementById("dd_timelaps_status").textContent = camera.timelapsObj.statusMessage;
+      document.getElementById("dd_timelaps_feedback").textContent = camera.timelapsObj.feedbackMessage;
     }
   }
   
@@ -73,22 +75,22 @@
       printTimelaps(null);
     }
     else{
-      var deviceName = select.options[select.selectedIndex].text;
+      currentDevice = select.options[select.selectedIndex].text;
       var deviceParam =  new ROSLIB.Param({
         ros : ros,
-        name : '/'+deviceName
+        name : '/'+currentDevice
       }); 
       var timelapsClient = new ROSLIB.ActionClient({
         ros : ros,
-        serverName : deviceName + '/timelaps',
+        serverName : currentDevice + '/timelaps',
         actionName : 'camera_network_msgs/CameraControlAction'  
       });  
   
       var device;
       var found = false;
-      device = getDevice(deviceName)
+      device = getDevice(currentDevice)
       if(device == null){
-        device = new camera(deviceName,select.value,deviceParam,new timelapsContainer(timelapsClient,''));
+        device = new camera(currentDevice,select.value,deviceParam,new timelapsContainer(timelapsClient,''));
         cameraArray.push(device);            
       }
       printTimelaps(device);
@@ -100,7 +102,7 @@
     for(var i = 0; i < cameraArray.length;i++){
       if(cameraArray[i].deviceName == deviceName){
         return cameraArray[i];      
-      }      
+      }  
     }
     return null;
   }
@@ -122,24 +124,29 @@
   
 
   function timelapsAction(form){
-    
+    camera = getDevice(currentDevice);
     var goal = new ROSLIB.Goal({
-    actionClient : cameraArray[0].timelapsObj.client,
+    actionClient : camera.timelapsObj.client,
     goalMessage : {
       picture_qty : parseFloat(form.timelaps_qty.value),
       inter_picture_delay_s : parseFloat(form.timelaps_frequency.value)
     }
   });
+  
     goal.on('feedback', function(feedback) {
-      document.getElementById("dd_timelaps_feedback").textContent = feedback.picture_taken
+      camera.timelapsObj.feedbackMessage = feedback.picture_taken
+      printTimelaps(getDevice(currentDevice))
     });
     goal.on('result', function(result) {
-      document.getElementById("dd_timelaps_status").textContent = "Idle";
-      document.getElementById("dd_timelaps_termination").textContent =  result.total_picture;
+      camera.timelapsObj.statusMessage = "Idle";
+      camera.timelapsObj.terminationMessage =  result.total_picture;
+      printTimelaps(getDevice(currentDevice))
     });
     goal.send();
-    document.getElementById("dd_timelaps_status").textContent = "Taking " + form.timelaps_qty.value + " Pictures at a frequency of " + form.timelaps_frequency.value;
-    document.getElementById("dd_timelaps_feedback").textContent = "Waiting for feedback"
+    camera.timelapsObj['goal'] = goal;
+    camera.timelapsObj.statusMessage = "Taking " + form.timelaps_qty.value + " Pictures at a frequency of " + form.timelaps_frequency.value;
+    camera.timelapsObj.feedbackMessage = "Waiting for feedback"
+    printTimelaps(getDevice(currentDevice))
   }  
   
   
@@ -180,7 +187,7 @@
   </header>
   
 <nav class="mainStyle">
-  <select onchange="selectEvent(this);" id ="deviceList">
+  <select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
     <option value="index0">Online Devices</option>
   </select> 
   <dl>

@@ -54,7 +54,7 @@ class TimelapsServer:
         
 
         succes_msg = CameraControlActionResult
-        succes_msg.total_downloaded = self.picture_count
+        succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.server.set_succeeded(succes_msg)
 
 
