@@ -6,7 +6,7 @@ Created on Thu May 22 16:21:09 2014
 @author: mathieugaron
 """
 import rospy
-from gphoto_cam.srv import *  #TODO make it generic (another package)
+from camera_network_msgs.srv import * 
 
 class CameraHandler:
     
@@ -16,7 +16,7 @@ class CameraHandler:
         rospy.wait_for_service('capture_camera')
         rospy.wait_for_service('load_camera')
         
-        self.capture_camera_service = rospy.ServiceProxy('capture_camera', Capture)
+        self.capture_camera_service = rospy.ServiceProxy('capture_camera', CaptureService)
         self.set_camera_service = rospy.ServiceProxy('set_camera', InCameraData)
         self.load_camera_service = rospy.ServiceProxy('load_camera', Load)
         self.updateCameraSetting()
@@ -28,7 +28,6 @@ class CameraHandler:
         configDict must contain the supported key to update parameter server:
             ex: if only 'iso' is present, only the iso parameter will be updated
         '''
-        #TODO Look for race condition!
         
         if 'iso' in configDict:
             rospy.set_param('camera_actual_settings/iso',configDict['iso'])
@@ -42,9 +41,12 @@ class CameraHandler:
         if 'aperture' in configDict:
             rospy.set_param('camera_actual_settings/aperture',configDict['aperture'])
             
-        setting = rospy.get_param('camera_actual_settings') 
-        self.set_camera_service(setting['iso'],setting['imageformat'],
+        setting = rospy.get_param('camera_actual_settings')
+        try:
+            self.set_camera_service(setting['iso'],setting['imageformat'],
                         setting['aperture'],setting['shutterspeed'])
+        except rospy.ServiceException, e:
+            rospy.logwarn("Service call failed: %s",e)
         
     def takeSinglePicture(self,pictureId,setCamera = True, loadCamera = True):
         settingList = rospy.get_param('camera_capture_settings')

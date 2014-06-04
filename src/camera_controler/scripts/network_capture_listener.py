@@ -15,6 +15,7 @@ class network_capture_listener:
     
     def __init__(self):
         self.cam_handler = ch.CameraHandler()
+        self.topic = '/network_capture_chatter'
         pass
     
     def callback(self,data):
@@ -28,9 +29,9 @@ class network_capture_listener:
 
     def listen(self):
         ns = rospy.get_namespace()
-        rospy.loginfo(ns+ " is listening on network_capture_chatter")
+        rospy.loginfo(ns+ " is listening on " + self.topic)
         
-        rospy.Subscriber('/network_capture_chatter', Capture, self.callback,queue_size=1)
+        rospy.Subscriber(self.topic, Capture, self.callback,queue_size=1)
 
 
 if __name__ == '__main__':

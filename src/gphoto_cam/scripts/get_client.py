@@ -12,7 +12,7 @@ import sys
 
 import rospy
 
-from gphoto_cam.srv import *
+from camera_network_msgs.srv import *
 
 
 def get_client(getAllInformation):

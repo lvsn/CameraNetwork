@@ -10,7 +10,6 @@ import roslib; roslib.load_manifest('camera_controler')
 import rospy
 import timelaps_server as ts
 import network_capture_listener as ncl
-from camera_controler.msg import *
 
 if __name__ == "__main__":
     rospy.init_node('timelaps_server')

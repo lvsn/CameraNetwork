@@ -8,7 +8,7 @@ Created on Wed May 14 14:58:49 2014
 
 import subprocess
 
-# if the executable is installed properly it will work
+# if the executable is installed properly no direct path needed
 gphoto2Executable = 'gphoto2'
 
 def run(cmd) :

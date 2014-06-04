@@ -9,7 +9,7 @@ Created on Wed May 14 14:00:06 2014
 
 import rospy
 import roslib; roslib.load_manifest('gphoto_cam')
-from gphoto_cam.srv import *
+from camera_network_msgs.srv import *
 
 import sys
 import string
@@ -20,7 +20,7 @@ def capture_image_client(keepOnCamera):
     rospy.wait_for_service('capture_camera')
     
     try:
-        capture_camera = rospy.ServiceProxy('capture_camera', Capture)
+        capture_camera = rospy.ServiceProxy('capture_camera', CaptureService)
         capture_camera(keepOnCamera)
     except rospy.ServiceException, e:
         rospy.logwarn("Service call failed: %s",e)
