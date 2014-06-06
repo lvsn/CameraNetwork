@@ -17,8 +17,11 @@ import picamParameterHandler as pph
 
 class picam_server:
     def __init__(self):
-        self.picam = picamera.PiCamera()
-        
+        try:
+            self.picam = picamera.PiCamera()
+        except:
+            rospy.logfatal("Check if the Picam is free or installed")
+
         self.picam.awb_mode = 'off'
 
         self.camParam = pph.PicameraParameterHandler()
@@ -45,20 +48,24 @@ class picam_server:
         rospy.loginfo("Taking Picture")
         if not os.path.exists( self.tmpPath):
             os.makedirs( self.tmpPath)
-        self.picam.capture( self.tmpPath + '/unloaded_' + self.id_gen.next() + '.' + self.camParam.get_format())
-    
+        pictureFileName =  self.tmpPath + '/unloaded_' + self.id_gen.next() + '.' + self.camParam.get_format() 
+        self.picam.capture( pictureFileName, format=self.camParam.get_format())
+        return 'image saved as ' + pictureFileName
+
     def load_camera_cb(self,req):
         #reset generator
         self.id_gen = self._id_generator()
-        rospy.loginfo("Loading Picture to folder" + req.path)
-        directory = os.path.dirname(req.path)
+        loadPath = self._gphoto_filename_format(req.path,0,'dummy')  #to make sure it create the right path
+        directory = os.path.dirname(loadPath)
+        rospy.loginfo("Loading Picture to folder" + directory)
         if not os.path.exists(directory):
             os.makedirs( directory)
         count = 0
-        for pictureFile in listdir(self.tmpPath):
-            fileFormat = pictureFile.split('.')[-1]
-            os.rename( pictureFile, self._gphoto_filename_format(req.path,count,fileFormat))
+        for pictureFile in os.listdir(self.tmpPath):
+            fileFormat =pictureFile.split('.')[-1]
+            os.rename( self.tmpPath + "/" + pictureFile, self._gphoto_filename_format(req.path,count,fileFormat))
             count += 1
+        return "Transfered " + str(count) + " files."
 
     def set_camera_cb(self,req):
         rospy.loginfo("Setting camera's Configuration")
@@ -75,14 +82,15 @@ class picam_server:
 
     def get_camera_cb(self,req):
         rospy.loginfo("Getting camera's Configuration")
-        iso = self.picam.ISO
-        imageformat = self.camParam.get_format()
+        iso = str(self.picam.ISO)
+        imageformat = str(self.camParam.get_format())
         aperture = "not supported"
-        shutterspeed = self.picam.shutter_speed()
+        shutterspeed = str(self.picam.shutter_speed)
         
         return {'iso':iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
     def _gphoto_filename_format(self,string,pictureId,pictureFormat):
+        string = string.replace('~',self.homePath)
         string = string.replace('%C',pictureFormat)
         string = string.replace('%n', str(pictureId))
         return time.strftime(string)
