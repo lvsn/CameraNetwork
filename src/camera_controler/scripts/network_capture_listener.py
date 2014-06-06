@@ -13,8 +13,8 @@ from camera_network_msgs.msg import *
 
 class network_capture_listener:
     
-    def __init__(self):
-        self.cam_handler = ch.CameraHandler()
+    def __init__(self,cam_handler):
+        self.cam_handler = cam_handler
         self.topic = '/network_capture_chatter'
         pass
     

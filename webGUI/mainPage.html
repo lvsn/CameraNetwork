@@ -10,10 +10,9 @@
 <script type="text/javascript" type="text/javascript">
   // Connecting to ROS
   // -----------------
-
   var ros = new ROSLIB.Ros({
     url : 'ws://localhost:9090'
-  });
+          });
 
   var IpList = new ROSLIB.Param({
     ros : ros,
@@ -26,20 +25,19 @@
   		   select.options[select.options.length] = new Option(key, value);
 		});
   });
-  
   function camera(deviceName,ip,deviceParam,timelapsObj){
       this.deviceName = deviceName;
       this.ip = ip;
       this.deviceParam = deviceParam;
       this.timelapsObj = timelapsObj;
-  };
+        };
+  
   function timelapsContainer(client){
     this.client = client;
     this.statusMessage = 'Idle'
     this.feedbackMessage = ''
     this.terminationMessage = '' 
   };
-  
   var cameraArray = [];
   var currentDevice;
   
@@ -51,6 +49,11 @@
       document.getElementById("dd_timelaps_termination").textContent =  '';
       document.getElementById("dd_timelaps_status").textContent = '';
       document.getElementById("dd_timelaps_feedback").textContent = '';
+      document.getElementById("dd_iso").textContent = '';
+      document.getElementById("dd_aperture").textContent = '';
+      document.getElementById("dd_shutterspeed").textContent = '';
+      document.getElementById("dd_imageformat").textContent = '';
+      document.getElementById("p_parameters").innerHTML ='';
     }
     else{
       document.getElementById("dd_Device").textContent = camera.deviceName;
@@ -58,6 +61,23 @@
       camera.deviceParam.get(function(value){
         if(value != null && value["camera_model"] != null){
           document.getElementById("dd_Camera").textContent = value["camera_model"];
+          document.getElementById("dd_iso").textContent = value["camera_actual_settings"]["iso"];
+          document.getElementById("dd_aperture").textContent = value["camera_actual_settings"]["aperture"];
+          document.getElementById("dd_shutterspeed").textContent = value["camera_actual_settings"]["shutterspeed"];
+          document.getElementById("dd_imageformat").textContent = value["camera_actual_settings"]["imageformat"];
+          
+          var sequenceSize = value["camera_capture_settings"].length;
+          var sequence = value["camera_capture_settings"];
+			 var parameterString = '';
+			 for(var i = 0; i < sequenceSize; i++){
+			   parameterString += "Picture " + i + " :</br>";
+			   for (var prop in sequence[i]){
+			     parameterString += prop + ": " + sequence[i][prop] + "</br>";
+			   }
+			   parameterString += "</br>"
+			 }
+			 document.getElementById("p_parameters").innerHTML =parameterString;
+			 
         }
         else{
           document.getElementById("dd_Camera").textContent = 'Camera Not Connected';
@@ -68,7 +88,6 @@
       document.getElementById("dd_timelaps_feedback").textContent = camera.timelapsObj.feedbackMessage;
     }
   }
-  
   
   function selectEvent(select){
     if(select.selectedIndex == 0){
@@ -107,7 +126,6 @@
     return null;
   }
   
-  
   function publishShot(){
     var cmdShot = new ROSLIB.Topic({
       ros : ros,
@@ -121,8 +139,45 @@
     cmdShot.publish(capture);
   }
   
+  function removeSequence() {
+    var setting = new ROSLIB.Param({
+    ros : ros,
+    name : currentDevice + '/camera_capture_settings'
+    });
+    var devicename = getDevice(currentDevice);
+    if(devicename != undefined){
+      setting.set([{}]);
+      printTimelaps(getDevice(currentDevice))
+    }
+  } 
   
-
+  function addSequence(form){
+    var setting = new ROSLIB.Param({
+      ros : ros,
+      name : currentDevice + '/camera_capture_settings'
+    });
+    var devicename = getDevice(currentDevice);
+    if(devicename != undefined){
+      var config = {};
+      if(form.sequence_shutterspeed.value != ''){
+        config['shutterspeed']= form.sequence_shutterspeed.value
+      }  
+      if(form.sequence_aperture.value != ''){
+        config['aperture']= form.sequence_aperture.value
+      }     
+      setting.get(function(value){
+        if(JSON.stringify(value) === JSON.stringify([{}]) ){
+          setting.set([config]); 
+        }
+        else{
+          value.push(config)
+          setting.set(value);    
+        }
+        printTimelaps(getDevice(currentDevice));
+      });
+    }
+  }
+  
   function timelapsAction(form){
     camera = getDevice(currentDevice);
     var goal = new ROSLIB.Goal({
@@ -147,9 +202,7 @@
     camera.timelapsObj.statusMessage = "Taking " + form.timelaps_qty.value + " Pictures at a frequency of " + form.timelaps_frequency.value;
     camera.timelapsObj.feedbackMessage = "Waiting for feedback"
     printTimelaps(getDevice(currentDevice))
-  }  
-  
-  
+  }
   
   var downloadClient = new ROSLIB.ActionClient({
     ros : ros,
@@ -186,7 +239,7 @@
     <h1>Camera Network</h1>
   </header>
   
-<nav class="mainStyle">
+<div class="mainStyle">
   <select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
     <option value="index0">Online Devices</option>
   </select> 
@@ -198,6 +251,36 @@
     <dt>Camera Type:</dt>
       <dd id="dd_Camera"></dd>
   </dl> 
+  
+  <dl>
+    <dt>ISO:</dt>
+      <dd id="dd_iso"></dd>
+    <dt>Aperture:</dt>
+      <dd id="dd_aperture"></dd>
+    <dt>Shutter speed:</dt>
+      <dd id="dd_shutterspeed"></dd>
+    <dt>Image format :</dt>
+      <dd id ="dd_imageformat"></dd>
+  </dl> 
+  
+
+  <!-- Parameter interface -->
+  <div class="parameterStyle" id="capture_mode">
+    <div class="left">
+      <p>Capture Parameters:</p>
+      <p id="p_parameters"></p>
+    </div>
+    <div class="right">
+      <button type="button" style="width:100px" class="styleButton" onclick = "removeSequence()">Reset</button>
+      <form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
+        Aperture : <input id="sequence_aperture"  value='' name="sequence_aperture" >
+        </br>
+        Shutter Speed : <input id="sequence_shutterspeed" value='' name="sequence_shutterspeed" >
+        </br>
+        <input type="submit" class="styleButton" onclick="addSequence(this.form)" value="Add">
+        </form>
+    </div>
+  </div>
 
     
   <!-- Timelaps interface -->
@@ -213,10 +296,11 @@
         <dt>Termination:</dt>
           <dd id="dd_timelaps_termination"></dd>
       </dl>
+      
       <input type="submit" class="styleButton" onclick="timelapsAction(this.form)" value="Set">
-    </form> 
-  </div>
-</nav> 
+    </form>
+  </div> 
+</div>
   
   <!-- Network shot Button -->
   <button type="button" class="styleButton" onclick = "publishShot()">Network Shot!</button> 

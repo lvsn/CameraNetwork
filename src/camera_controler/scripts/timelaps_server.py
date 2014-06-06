@@ -13,14 +13,14 @@ from camera_network_msgs.msg import *
 
 class TimelapsServer:
     
-    def __init__(self):
+    def __init__(self,cam_handler):
         rospy.loginfo("Setting up server")
         
         self.picture_count = 0
         self.server = actionlib.SimpleActionServer('timelaps',CameraControlAction,
                                                    self.execute,False)                                               
         self.server.start()
-        self.cam_handler = ch.CameraHandler()
+        self.cam_handler = cam_handler
     
     
                         
