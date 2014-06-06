@@ -11,9 +11,13 @@ import gphoto2_cli_caller as gphoto
 
     
 class CameraParameterHandler:
+    isoConfig = "iso"
+    apertureConfig = "aperture"
+    shutterspeedConfig = "shutterspeed"
+    imageformatConfig = "imageformat"
     def __init__(self):
         self.configLoadedtoRos = False
-        self.cameraModel = ''        
+        self.cameraModel = ''
         
         rospy.loginfo("...Looking for camera...")
         
@@ -32,28 +36,18 @@ class CameraParameterHandler:
         if self.configLoadedtoRos:
             try:
                 rospy.delete_param("camera_model") #local parameter
-                rospy.delete_param("~isoConfig")
-                rospy.delete_param("~imageformatConfig")
-                rospy.delete_param("~apertureConfig")
-                rospy.delete_param("~shutterspeedConfig")
             except KeyError:
                 rospy.logerr("Unable to delete parameter (not set)")
         
     def set_camera_parameters(self):
         rospy.set_param("camera_model", self.cameraModel)
-        rospy.set_param("~isoConfig","iso")
-        rospy.set_param("~apertureConfig","aperture")
-        rospy.set_param("~shutterspeedConfig","shutterspeed")
         
         #Load spécific parameter
         if self.cameraModel == 'Nikon DSC D3100 (PTP mode)':
-            rospy.set_param("~imageformatConfig","/main/capturesettings/imagequality")
-            rospy.set_param("~apertureConfig","/main/other/5007")
+            self.imageformatConfig = "/main/capturesettings/imagequality"
+            self.apertureConfig = "/main/other/5007"
             
-        elif self.cameraModel == 'Canon Digital Rebel XT (normal mode)':
-            rospy.set_param("~imageformatConfig","/main/settings/imageformat")
-            
-            
+
         self.configLoadedtoRos = True
         rospy.loginfo("Camera's Configuration loaded")
         
