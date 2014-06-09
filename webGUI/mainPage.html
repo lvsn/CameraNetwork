@@ -61,13 +61,13 @@
       camera.deviceParam.get(function(value){
         if(value != null && value["camera_model"] != null){
           document.getElementById("dd_Camera").textContent = value["camera_model"];
-          document.getElementById("dd_iso").textContent = value["camera_actual_settings"]["iso"];
-          document.getElementById("dd_aperture").textContent = value["camera_actual_settings"]["aperture"];
-          document.getElementById("dd_shutterspeed").textContent = value["camera_actual_settings"]["shutterspeed"];
-          document.getElementById("dd_imageformat").textContent = value["camera_actual_settings"]["imageformat"];
+          document.getElementById("dd_iso").textContent = value["camera_setting"]["iso"];
+          document.getElementById("dd_aperture").textContent = value["camera_setting"]["aperture"];
+          document.getElementById("dd_shutterspeed").textContent = value["camera_setting"]["shutterspeed"];
+          document.getElementById("dd_imageformat").textContent = value["camera_setting"]["imageformat"];
           
-          var sequenceSize = value["camera_capture_settings"].length;
-          var sequence = value["camera_capture_settings"];
+          var sequenceSize = value["camera_setting"]["captureSequence"].length;
+          var sequence = value["camera_setting"]["captureSequence"];
 			 var parameterString = '';
 			 for(var i = 0; i < sequenceSize; i++){
 			   parameterString += "Picture " + i + " :</br>";
@@ -142,7 +142,7 @@
   function removeSequence() {
     var setting = new ROSLIB.Param({
     ros : ros,
-    name : currentDevice + '/camera_capture_settings'
+    name : currentDevice + '/camera_setting/captureSequence'
     });
     var devicename = getDevice(currentDevice);
     if(devicename != undefined){
@@ -151,10 +151,20 @@
     }
   } 
   
+  function saveSequence(){
+    var save = new ROSLIB.Service({
+      ros : ros,
+      name : '/' + currentDevice +'/save_config',
+      serviceType : 'std_srvs/Empty'
+  });
+  var request = new ROSLIB.ServiceRequest({});
+  save.callService(request, function(result) {});
+  }
+  
   function addSequence(form){
     var setting = new ROSLIB.Param({
       ros : ros,
-      name : currentDevice + '/camera_capture_settings'
+      name : currentDevice + '/camera_setting/captureSequence'
     });
     var devicename = getDevice(currentDevice);
     if(devicename != undefined){
@@ -279,6 +289,7 @@
         </br>
         <input type="submit" class="styleButton" onclick="addSequence(this.form)" value="Add">
         </form>
+        <button type="button" style="width:100px" class="styleButton" onclick = "saveSequence()">Save</button>
     </div>
   </div>
 

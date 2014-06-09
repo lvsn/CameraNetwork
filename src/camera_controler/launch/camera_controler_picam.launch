@@ -1,7 +1,8 @@
 <launch>
   <param name="IP/$(env CAMERA_NAME)" value="$(env ROS_IP)" />
   <group ns="$(env CAMERA_NAME)">
-    <rosparam command="load" file="$(find camera_controler)/param/timelaps_picam.yaml" />
+    <rosparam param="file">"timelaps_picam.yaml"</rosparam>
+    <rosparam command="load" file="$(find camera_controler)/param/timelaps_picam.yaml" ns="camera_setting" />
     <include file="$(find picam)/launch/picam.launch" />
     <node name="camera_controler_server" pkg="camera_controler" type="camera_controler_server.py" />
   </group>

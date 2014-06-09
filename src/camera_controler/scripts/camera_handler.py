@@ -21,6 +21,10 @@ class CameraHandler:
         self.load_camera_service = rospy.ServiceProxy('load_camera', Load)
         self.updateCameraSetting()
         
+    #def __del__(self):
+        #rospy.delete_param('camera_setting')
+        #rospy.delete_param('file')
+        
                         
     def updateCameraSetting(self,configDict = {}):
         '''
@@ -30,18 +34,18 @@ class CameraHandler:
         '''
         
         if 'iso' in configDict:
-            rospy.set_param('camera_actual_settings/iso',configDict['iso'])
+            rospy.set_param('camera_setting/iso',configDict['iso'])
             
         if 'imageformat' in configDict:
-            rospy.set_param('camera_actual_settings/imageformat',configDict['imageformat'])
+            rospy.set_param('camera_setting/imageformat',configDict['imageformat'])
             
         if 'shutterspeed' in configDict:
-            rospy.set_param('camera_actual_settings/shutterspeed',configDict['shutterspeed'])
+            rospy.set_param('camera_setting/shutterspeed',configDict['shutterspeed'])
             
         if 'aperture' in configDict:
-            rospy.set_param('camera_actual_settings/aperture',configDict['aperture'])
+            rospy.set_param('camera_setting/aperture',configDict['aperture'])
             
-        setting = rospy.get_param('camera_actual_settings')
+        setting = rospy.get_param('camera_setting')
         try:
             self.set_camera_service(setting['iso'],setting['imageformat'],
                         setting['aperture'],setting['shutterspeed'])
@@ -49,7 +53,7 @@ class CameraHandler:
             rospy.logwarn("Service call failed: %s",e)
         
     def takeSinglePicture(self,pictureId,setCamera = True, loadCamera = True):
-        settingList = rospy.get_param('camera_capture_settings')
+        settingList = rospy.get_param('camera_setting/captureSequence')
         pictureName = str(pictureId)
         #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
         picturePath = '~/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
@@ -61,7 +65,7 @@ class CameraHandler:
             self.load_camera_service(picturePath)
         
     def takeHDRPicture(self,pictureId,setCamera = True, loadCamera = True):
-        settingList = rospy.get_param('camera_capture_settings')
+        settingList = rospy.get_param('camera_setting/captureSequence')
         pictureName = str(pictureId)
         #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
         picturePath = '~/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C'

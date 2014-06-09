@@ -11,11 +11,27 @@ import rospy
 import timelaps_server as ts
 import network_capture_listener as ncl
 import camera_handler as ch
+import parameter_save as ps
+
+class server:
+    
+    def __init__(self):
+        rospy.init_node('timelaps_server')
+        self.cam_handler = ch.CameraHandler()
+        self.timelapsServer = ts.TimelapsServer(self.cam_handler)
+        self.listener = ncl.network_capture_listener(self.cam_handler)
+        self.listener.listen()
+        self.paramSaver = ps.save_server()
+        rospy.on_shutdown(self.shutdown)
+        rospy.spin()
+
+    def shutdown(self):
+        del self.cam_handler
+        del self.listener
+        del self.timelapsServer
+        rospy.delete_param('camera_setting')
+        rospy.delete_param('file')
 
 if __name__ == "__main__":
-    rospy.init_node('timelaps_server')
-    cam_handler = ch.CameraHandler()
-    server = ts.TimelapsServer(cam_handler)
-    listener = ncl.network_capture_listener(cam_handler)
-    listener.listen()
-    rospy.spin()
+    
+    serverInstance = server()

@@ -1,7 +1,8 @@
----
-camera_actual_settings: {iso: "100", imageformat: "jpeg",
-                         shutterspeed: "30", aperture: ""}
-camera_capture_settings: [{shutterspeed: "100"},
-                          {shutterspeed: "400"},
-                          {shutterspeed: "600"}
-]
+aperture: ''
+captureSequence:
+- {shutterspeed: '100'}
+- {shutterspeed: '400'}
+- {shutterspeed: '600'}
+imageformat: 'jpeg'
+iso: '100'
+shutterspeed: '30'

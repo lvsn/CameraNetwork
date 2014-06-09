@@ -6,10 +6,13 @@ Created on Wed May 21 14:59:35 2014
 @author: mathieugaron
 """
 import roslib; roslib.load_manifest('camera_controler')
+roslib.load_manifest("rosparam")
 import rospy
 import actionlib
 import camera_handler as ch
 from camera_network_msgs.msg import *
+import rosparam
+import rospkg
 
 class TimelapsServer:
     
@@ -23,8 +26,6 @@ class TimelapsServer:
         self.cam_handler = cam_handler
     
     
-                        
-        
     def execute(self,goal):
 
         feedback_msg = CameraControlActionFeedback
@@ -61,5 +62,6 @@ class TimelapsServer:
 
 if __name__ == "__main__":
     rospy.init_node('timelaps_server')
-    server = TimelapsServer()
+    camH = ch.CameraHandler()
+    server = TimelapsServer(camH)
     rospy.spin()
