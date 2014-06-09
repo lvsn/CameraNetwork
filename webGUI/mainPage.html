@@ -88,6 +88,7 @@
       document.getElementById("dd_timelaps_feedback").textContent = camera.timelapsObj.feedbackMessage;
     }
   }
+
   
   function selectEvent(select){
     if(select.selectedIndex == 0){
@@ -214,6 +215,34 @@
     printTimelaps(getDevice(currentDevice))
   }
   
+  function networkAction(form){
+    var downloadClient = new ROSLIB.ActionClient({
+      ros : ros,
+      serverName : 'master/network_timelaps',
+      actionName : 'camera_network_msgs/CameraDownloadAction'
+    }); 
+  
+    var goal = new ROSLIB.Goal({
+    actionClient : camera.timelapsObj.client,
+    goalMessage : {
+      picture_qty : parseFloat(form.network_qty.value),
+      inter_picture_delay_s : parseFloat(form.network_frequency.value)
+    }
+  });
+  
+    goal.on('feedback', function(feedback) {
+      document.getElementById("dd_network_feedback").textContent = feedback.picture_taken
+    });
+    goal.on('result', function(result) {
+      document.getElementById("dd_network_status").textContent = "Idle";
+      document.getElementById("dd_network_termination").textContent =  result.total_picture;
+
+    });
+    goal.send();
+    document.getElementById("dd_network_status").textContent = "Taking " + form.timelaps_qty.value + " Pictures at a frequency of " + form.timelaps_frequency.value;
+    document.getElementById("dd_network_feedback").textContent = "Waiting for feedback"
+  }
+  
   var downloadClient = new ROSLIB.ActionClient({
     ros : ros,
     serverName : 'master/sftp',
@@ -312,9 +341,26 @@
     </form>
   </div> 
 </div>
-  
-  <!-- Network shot Button -->
-  <button type="button" class="styleButton" onclick = "publishShot()">Network Shot!</button> 
+
+  <!-- Network interface -->
+  <p class="title">Network Interface</p>
+  <div class="mainStyle">
+    <form name="network" action="javascript:void(0)" method="get">
+        Frequency (s 0 = single Shot) : <input id="network_frequency" type="number" value=0 name="network_frequency" >
+        Quantity (<0 = infinite) : <input id="network_quantity" type="number" value=0 name="network_qty" >
+      <dl>
+        <dt>Status:</dt>
+          <dd id ="dd_network_status">Idle</dd>
+        <dt>Feedback:</dt>
+          <dd id="dd_network_feedback"></dd>
+        <dt>Termination:</dt>
+          <dd id="dd_network_termination"></dd>
+      </dl>
+      
+      <input type="submit" class="styleButton" onclick="networkAction(this.form)" value="Set">
+    </form>
+  </div> 
+ 
 
   <!-- Download interface -->
   <div class="mainStyle">
