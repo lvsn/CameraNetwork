@@ -75,5 +75,10 @@ class CameraHandler:
             self.capture_camera_service('dummy')
         if loadCamera:
             self.load_camera_service(picturePath)
+            
+    def takePreview(self):
+        picturePath = '~/CameraPicture/preview/send.%C'
+        self.capture_camera_service('dummy')
+        self.load_camera_service(picturePath)
         
         

@@ -4,6 +4,7 @@
   </include>
   <group ns="master">
     <node name="master_server" pkg="camera_master_server" type="master_server.py" />
+    <node name="mjpeg_server" pkg="mjpeg_server" type="mjpeg_server" args="_port:=8181"/>
   </group>
 
 </launch>

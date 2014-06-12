@@ -8,13 +8,14 @@ Created on Wed May 28 13:05:43 2014
 
 import roslib; roslib.load_manifest('camera_master_server')
 import rospy
+from camera_network_msgs.srv import *
 from camera_network_msgs.msg import *
 import actionlib
 
 class network_capture_server:
     
     def __init__(self):
-        rospy.loginfo("Publish Capture message")
+        rospy.loginfo("Initialising Network timlaps server")
         self.publisher = rospy.Publisher("/network_capture_chatter", Capture)
         rospy.sleep(0.5) #let time for connections
         self.server = actionlib.SimpleActionServer('network_timelaps',CameraControlAction,

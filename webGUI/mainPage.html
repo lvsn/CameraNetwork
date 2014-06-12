@@ -5,6 +5,7 @@
 
 <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
 <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
 <script type="text/javascript" type="text/javascript">
@@ -215,15 +216,16 @@
     printTimelaps(getDevice(currentDevice))
   }
   
-  function networkAction(form){
-    var downloadClient = new ROSLIB.ActionClient({
+  var networkTimelapsClient = new ROSLIB.ActionClient({
       ros : ros,
       serverName : 'master/network_timelaps',
-      actionName : 'camera_network_msgs/CameraDownloadAction'
+      actionName : 'camera_network_msgs/CameraControlAction'
     }); 
+    
+  function networkAction(form){
   
     var goal = new ROSLIB.Goal({
-    actionClient : camera.timelapsObj.client,
+    actionClient : networkTimelapsClient,
     goalMessage : {
       picture_qty : parseFloat(form.network_qty.value),
       inter_picture_delay_s : parseFloat(form.network_frequency.value)
@@ -239,7 +241,7 @@
 
     });
     goal.send();
-    document.getElementById("dd_network_status").textContent = "Taking " + form.timelaps_qty.value + " Pictures at a frequency of " + form.timelaps_frequency.value;
+    document.getElementById("dd_network_status").textContent = "Taking " + form.network_qty.value + " Pictures at a frequency of " + form.network_frequency.value;
     document.getElementById("dd_network_feedback").textContent = "Waiting for feedback"
   }
   
@@ -267,6 +269,45 @@
     document.getElementById("dd_download_status").textContent = "Downloading every " + form.frequency.value + " s";
     document.getElementById("dd_download_feedback").textContent = "Waiting for feedback"
   }  
+  
+  /*function init() {
+    // Create the main viewer.
+    var viewer1 = new MJPEGCANVAS.Viewer({
+      divID : 'mjpeg',
+      host : 'localhost',
+      width : 640,
+      height : 480,
+      topic : '/pi100/preview',
+      port : 8181
+    });
+    var viewer1 = new MJPEGCANVAS.Viewer({
+      divID : 'mjpeg',
+      host : 'localhost',
+      width : 0,
+      height : 0,
+      topic : '/pi100/preview',
+      port : 8181
+    });
+    }*/
+    
+    
+    
+    function drawPreview(){
+      var ctx = document.getElementById('previewCanvas').getContext('2d');
+      var img = new Image;
+      img.src = "http://localhost:8181/snapshot?topic=/pi100/preview";
+      
+      var preview = new ROSLIB.Service({
+      ros : ros,
+      name : '/pi100/preview_camera',
+      serviceType : 'std_srvs/Empty'
+      });
+      var request = new ROSLIB.ServiceRequest({});
+      preview.callService(request, function(result) {ctx.drawImage(img,0,0);});
+      
+    }
+    
+
 
   
 </script>
@@ -278,6 +319,45 @@
     <h1>Camera Network</h1>
   </header>
   
+  <!-- Network interface -->
+  <p class="title">Network Interface</p>
+  <div class="mainStyle">
+    <form name="network" action="javascript:void(0)" method="get">
+        Frequency (s 0 = single Shot) : <input id="network_frequency" type="number" value=0 name="network_frequency" >
+        Quantity (<0 = infinite) : <input id="network_quantity" type="number" value=0 name="network_qty" >
+      <dl>
+        <dt>Status:</dt>
+          <dd id ="dd_network_status">Idle</dd>
+        <dt>Feedback:</dt>
+          <dd id="dd_network_feedback"></dd>
+        <dt>Termination:</dt>
+          <dd id="dd_network_termination"></dd>
+      </dl>
+      
+      <input type="submit" class="styleButton" onclick="networkAction(this.form)" value="Set">
+    </form>
+  </div> 
+ 
+
+  <!-- Download interface -->
+  <div class="mainStyle">
+    <form name="download" action="javascript:void(0)" method="get">
+      Download frequency (s) (0 = one time) : <input id="input_frequency" type="number" value=0 name="frequency" >
+      <dl>
+        <dt>Status:</dt>
+          <dd id ="dd_download_status">Idle</dd>
+        <dt>Feedback:</dt>
+          <dd id="dd_download_feedback"></dd>
+        <dt>Termination:</dt>
+          <dd id="dd_download_termination"></dd>
+      </dl>
+      <input type="submit" class="styleButton" onclick="downloadAction(this.form)" value="Download">
+    </form> 
+  </div>  
+  
+  
+  <!-- Device interface -->
+  <p class="title">Device Interface</p>
 <div class="mainStyle">
   <select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
     <option value="index0">Online Devices</option>
@@ -300,8 +380,7 @@
       <dd id="dd_shutterspeed"></dd>
     <dt>Image format :</dt>
       <dd id ="dd_imageformat"></dd>
-  </dl> 
-  
+  </dl>   
 
   <!-- Parameter interface -->
   <div class="parameterStyle" id="capture_mode">
@@ -340,43 +419,13 @@
       <input type="submit" class="styleButton" onclick="timelapsAction(this.form)" value="Set">
     </form>
   </div> 
-</div>
+  
+  <!--<div id="mjpeg" class="timelapsStyle"></div>-->
+  
+  <input type="submit" class="styleButton" onclick="drawPreview()" value="Preview">
+  <canvas id="previewCanvas" width="640" height="480"></canvas> 
+</div> 
 
-  <!-- Network interface -->
-  <p class="title">Network Interface</p>
-  <div class="mainStyle">
-    <form name="network" action="javascript:void(0)" method="get">
-        Frequency (s 0 = single Shot) : <input id="network_frequency" type="number" value=0 name="network_frequency" >
-        Quantity (<0 = infinite) : <input id="network_quantity" type="number" value=0 name="network_qty" >
-      <dl>
-        <dt>Status:</dt>
-          <dd id ="dd_network_status">Idle</dd>
-        <dt>Feedback:</dt>
-          <dd id="dd_network_feedback"></dd>
-        <dt>Termination:</dt>
-          <dd id="dd_network_termination"></dd>
-      </dl>
-      
-      <input type="submit" class="styleButton" onclick="networkAction(this.form)" value="Set">
-    </form>
-  </div> 
- 
-
-  <!-- Download interface -->
-  <div class="mainStyle">
-    <form name="download" action="javascript:void(0)" method="get">
-      Download frequency (s) (0 = one time) : <input id="input_frequency" type="number" value=0 name="frequency" >
-      <dl>
-        <dt>Status:</dt>
-          <dd id ="dd_download_status">Idle</dd>
-        <dt>Feedback:</dt>
-          <dd id="dd_download_feedback"></dd>
-        <dt>Termination:</dt>
-          <dd id="dd_download_termination"></dd>
-      </dl>
-      <input type="submit" class="styleButton" onclick="downloadAction(this.form)" value="Download">
-    </form> 
-  </div>
   
 </body>
 </html>

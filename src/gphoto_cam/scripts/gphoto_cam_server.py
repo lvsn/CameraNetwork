@@ -39,7 +39,8 @@ class gphoto_server():
         filename = " --filename " + req.path
         rospy.loginfo("Loading picture to folder" + req.path)
         msg = gphoto.run(filename + " -P -D --recurse")
-        return msg    
+        return msg
+        
     
     def set_camera_cb(self,req):
         rospy.loginfo("Setting camera's Configuration")
