@@ -20,13 +20,11 @@ import paramiko
 
 class sftp_server:
     
-    def __init__(self):
-        self.homePath = os.path.expanduser("~")
-        self.imagePath = '/CameraPicture/'
+    def __init__(self,imagePath):
+        self.imagePath = imagePath
         self.dateFolder = ''
-        self.refresh_date()
-        self.localImagePath = self.homePath + self.imagePath + self.dateFolder
-        self.localLogPath = self.homePath + self.imagePath + 'log/'
+        self.localImagePath = self.imagePath + self.dateFolder
+        self.localLogPath = self.imagePath + 'log/'
         self.fileQty = 0
         
         rospy.loginfo('Writing files to ' + self.localImagePath)
@@ -38,7 +36,10 @@ class sftp_server:
         self.server.start()
         
         self.ipDict = {}
-
+        
+        if not os.path.exists(self.localLogPath):
+            os.makedirs(self.localLogPath)
+ 
         # setup logging
         paramiko.util.log_to_file(self.localLogPath + time.strftime('%d%B%Hh') + '.log')
 
@@ -74,7 +75,9 @@ class sftp_server:
         
     def refresh_date(self):
         self.dateFolder = time.strftime("%B") + '/'
+        self.localImagePath = self.imagePath + self.dateFolder
         
+
     def download_all_images_from_network(self):
         """
         Open sftp session to download images of each session
