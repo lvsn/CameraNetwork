@@ -12,7 +12,7 @@ from camera_network_msgs.srv import *
 from CameraParameterHandler import *
 
 import gphoto2_cli_caller as gphoto
-    
+import os    
     
     
 class gphoto_server():
@@ -36,9 +36,17 @@ class gphoto_server():
         return msg
     
     def load_camera_cb(self,req):
-        filename = " --filename " + req.path
-        rospy.loginfo("Loading picture to folder" + req.path)
+        rootPath = os.path.expanduser("~") + "/CameraPicture/" 
+        filename = " --filename " + rootPath + req.path
+        if filename.find('..') != -1:
+            rospy.logwarn("use of /.. is prohibed")
+            return "error"
+        directory = os.path.dirname(rootPath+req.path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        rospy.loginfo("Loading picture to folder : ~/" + req.path)
         msg = gphoto.run(filename + " -P -D --recurse")
+        rospy.loginfo(msg)
         return msg
         
     

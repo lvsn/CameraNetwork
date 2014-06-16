@@ -4,3 +4,4 @@ devel
 /src/CMakeLists.txt
 webGUI/*~
 .catkin_workspace
+*.swp

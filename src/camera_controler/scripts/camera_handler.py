@@ -15,11 +15,12 @@ class CameraHandler:
         rospy.wait_for_service('set_camera')
         rospy.wait_for_service('capture_camera')
         rospy.wait_for_service('load_camera')
-        
+         
         self.capture_camera_service = rospy.ServiceProxy('capture_camera', CaptureService)
         self.set_camera_service = rospy.ServiceProxy('set_camera', InCameraData)
         self.load_camera_service = rospy.ServiceProxy('load_camera', Load)
         self.updateCameraSetting()
+        
         
     #def __del__(self):
         #rospy.delete_param('camera_setting')
@@ -56,7 +57,7 @@ class CameraHandler:
         settingList = rospy.get_param('camera_setting/captureSequence')
         pictureName = str(pictureId)
         #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
-        picturePath = '~/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
+        picturePath = self._generatePictureName(pictureName)
         pictureSetting = settingList[0]
         if setCamera:
             self.updateCameraSetting(pictureSetting)
@@ -68,7 +69,7 @@ class CameraHandler:
         settingList = rospy.get_param('camera_setting/captureSequence')
         pictureName = str(pictureId)
         #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
-        picturePath = '~/CameraPicture/%B/' + pictureName + '-%n_%d%B%y_%Hh%Mm%Ss.%C'
+        picturePath = self._generatePictureName(pictureName)   
         for setting in settingList:
             if setCamera:
                 self.updateCameraSetting(setting)
@@ -77,8 +78,10 @@ class CameraHandler:
             self.load_camera_service(picturePath)
             
     def takePreview(self):
-        picturePath = '~/CameraPicture/preview/send.%C'
+        picturePath = 'preview/send.%C'
         self.capture_camera_service('dummy')
         self.load_camera_service(picturePath)
-        
+     
+    def _generatePictureName(self,name):
+        return self.picturePath = '%B/' + name + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
         

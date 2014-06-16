@@ -16,7 +16,7 @@ class network_capture_server:
     
     def __init__(self):
         rospy.loginfo("Initialising Network timlaps server")
-        self.publisher = rospy.Publisher("/network_capture_chatter", Capture)
+        self.publisher = rospy.Publisher("/network_capture_chatter", Capture, queue_size=1)
         rospy.sleep(0.5) #let time for connections
         self.server = actionlib.SimpleActionServer('network_timelaps',CameraControlAction,
                                                    self.execute,False)                                               

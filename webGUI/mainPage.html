@@ -295,11 +295,11 @@
     function drawPreview(){
       var ctx = document.getElementById('previewCanvas').getContext('2d');
       var img = new Image;
-      img.src = "http://localhost:8181/snapshot?topic=/pi100/preview";
+      img.src = "http://localhost:8181/snapshot?topic=/preview";
       
       var preview = new ROSLIB.Service({
       ros : ros,
-      name : '/pi100/preview_camera',
+      name : currentDevice + '/preview_camera',
       serviceType : 'std_srvs/Empty'
       });
       var request = new ROSLIB.ServiceRequest({});
