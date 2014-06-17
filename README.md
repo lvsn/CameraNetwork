@@ -106,18 +106,21 @@ here, set the interface of your choice, and the master's URL/IP
 $ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.launch --interface wlan0 --master http://<MASTER'S URL>:11311 --setup /home/pi/ros_catkin_ws/install_isolated/setup.bash 
 ```
 add these lines at the beginning of /etc/init/camera.conf:
+```
  setuid pi  
  setgid plugdev   //for Gphoto
  setgid video      //for Picam
+```
 
 ** you can't add the two setgid! **
 
 
 add this line in /usr/sbin/camera-start:
-export CAMERA_NAME=<Unique name>
 
-Configur camera_control.launch as you need:
+```
+export CAMERA_NAME=<Unique name>
+```
+
+Configure camera_control.launch as you need:
 (the param file can be changed)
 (the camera control launch file can be changed to picam or gphoto)
-
-
