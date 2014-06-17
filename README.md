@@ -74,3 +74,50 @@ $ ./src/catkin/bin/catkin_make_isolated --install
 $ sudo apt-get install python-picamera daemontools
 $ echo ‘source /opt/ros/hydro/setup.bash ’ >> ~/.bashrc
 ```
+
+
+# Install Camera Network #
+
+will generate camera-network folder:
+
+### setup ROS workspace ###
+```
+#!bash
+$ git clone https://MathieuGaron@bitbucket.org/MathieuGaron/camera-network.git
+$ cd camera-network/src
+$ catkin_init_workspace
+$ cd ..
+$ catkin_make
+```
+
+### Install gphoto and upstart ###
+```
+#!bash
+$ sudo ./gphoto2-updater.sh 
+$ sudo apt-get install upstart  
+```
+
+### Setup Upstart Job ###
+This section create an upstart job when the desired interface start or stop:
+
+here, set the interface of your choice, and the master's URL/IP
+```
+#!bash
+$ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.launch --interface wlan0 --master http://<MASTER'S URL>:11311 --setup /home/pi/ros_catkin_ws/install_isolated/setup.bash 
+```
+add these lines at the beginning of /etc/init/camera.conf:
+ setuid pi  
+ setgid plugdev   //for Gphoto
+ setgid video      //for Picam
+
+** you can't add the two setgid! **
+
+
+add this line in /usr/sbin/camera-start:
+export CAMERA_NAME=<Unique name>
+
+Configur camera_control.launch as you need:
+(the param file can be changed)
+(the camera control launch file can be changed to picam or gphoto)
+
+
