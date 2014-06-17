@@ -36,17 +36,18 @@ class gphoto_server():
         return msg
     
     def load_camera_cb(self,req):
+        rospy.sleep(3)
         rootPath = os.path.expanduser("~") + "/CameraPicture/" 
         filename = " --filename " + rootPath + req.path
         if filename.find('..') != -1:
             rospy.logwarn("use of /.. is prohibed")
             return "error"
-        directory = os.path.dirname(rootPath+req.path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        rospy.loginfo("Loading picture to folder : ~/" + req.path)
-        msg = gphoto.run(filename + " -P -D --recurse")
-        rospy.loginfo(msg)
+        rospy.loginfo("Loading picture to : " + filename)
+
+        msg = gphoto.run(filename + " -P")
+        
+        rospy.loginfo("Deleting camera's pictures")
+        gphoto.run(" -D --recurse")
         return msg
         
     

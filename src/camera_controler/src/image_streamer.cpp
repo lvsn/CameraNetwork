@@ -24,7 +24,7 @@ int main(int argc, char** argv)
   ROS_INFO_STREAM("Setting jpeg Streaming path to " << streamImagePath);
 
   image_transport::ImageTransport it(nh);
-  image_transport::Publisher pub = it.advertise("preview", 1);
+  image_transport::Publisher pub = it.advertise("/preview", 1);
 
   ros::Time time = ros::Time::now();
   sensor_msgs::Image im;

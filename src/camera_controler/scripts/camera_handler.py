@@ -83,5 +83,5 @@ class CameraHandler:
         self.load_camera_service(picturePath)
      
     def _generatePictureName(self,name):
-        return self.picturePath = '%B/' + name + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
+        return '%B/' + name + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
         

@@ -16,11 +16,11 @@ def print_feedback(feedback):
 
 if __name__ == '__main__':
     rospy.init_node('timelaps_client')
-    client = actionlib.SimpleActionClient('/pi0/timelaps', CameraControlAction)
+    client = actionlib.SimpleActionClient('/test/timelaps', CameraControlAction)
     client.wait_for_server()
 
     goal = CameraControlGoal()
-    goal.picture_qty = 5
+    goal.picture_qty = 1
     goal.inter_picture_delay_s = 20
     rospy.loginfo("Goal Sent!")
     client.send_goal(goal,feedback_cb = print_feedback)

@@ -290,20 +290,25 @@
     });
     }*/
     
-    
-    
+    //var ctx = document.getElementById('previewCanvas').getContext('2d');
+    var img = new Image;
+    img.src = "http://localhost:8181/stream?topic=/preview?width=640?height=480";
+
+
+    function refreshCanvas(){
+        document.getElementById('imagePreview').src = "http://localhost:8181/stream?topic=/preview?width=640?height=480";
+    };
+
+    setInterval(refreshCanvas(), 10);
+   
     function drawPreview(){
-      var ctx = document.getElementById('previewCanvas').getContext('2d');
-      var img = new Image;
-      img.src = "http://localhost:8181/snapshot?topic=/preview";
-      
       var preview = new ROSLIB.Service({
       ros : ros,
-      name : currentDevice + '/preview_camera',
+      name : '/' + currentDevice + '/preview_camera',
       serviceType : 'std_srvs/Empty'
       });
       var request = new ROSLIB.ServiceRequest({});
-      preview.callService(request, function(result) {ctx.drawImage(img,0,0);});
+      preview.callService(request, refreshCanvas);
       
     }
     
@@ -423,9 +428,8 @@
   <!--<div id="mjpeg" class="timelapsStyle"></div>-->
   
   <input type="submit" class="styleButton" onclick="drawPreview()" value="Preview">
-  <canvas id="previewCanvas" width="640" height="480"></canvas> 
+    <img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480">
 </div> 
-
   
 </body>
 </html>
