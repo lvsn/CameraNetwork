@@ -53,7 +53,7 @@ class picam_server:
     def load_camera_cb(self,req):
         #reset generator
         self.id_gen = self._id_generator()
-        loadPath = self.homePath + "/" + self._gphoto_filename_format(req.path,0,'dummy')  #to make sure it create the right path
+        loadPath = self.homePath + "/" + self._filename_format(req.path,0,'dummy')  #to make sure it create the right path
         if loadPath.find('..') != -1:
             rospy.logwarn("use of .. is prohibed")
             return "error"
@@ -64,7 +64,7 @@ class picam_server:
         count = 0
         for pictureFile in os.listdir(self.tmpPath):
             fileFormat =pictureFile.split('.')[-1]
-            os.rename( self.tmpPath + "/" + pictureFile, self._gphoto_filename_format(req.path,count,fileFormat))
+            os.rename( self.tmpPath + "/" + pictureFile, self.homePath + "/" + self._filename_format(req.path,count,fileFormat))
             count += 1
         return "Transfered " + str(count) + " files."
 
@@ -90,8 +90,7 @@ class picam_server:
         
         return {'iso':iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
-    def _gphoto_filename_format(self,string,pictureId,pictureFormat):
-        string = string.replace('~',self.homePath)
+    def _filename_format(self,string,pictureId,pictureFormat):
         string = string.replace('%C',pictureFormat)
         string = string.replace('%n', str(pictureId))
         return time.strftime(string)
