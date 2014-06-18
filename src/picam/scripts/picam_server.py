@@ -53,12 +53,12 @@ class picam_server:
     def load_camera_cb(self,req):
         #reset generator
         self.id_gen = self._id_generator()
-        loadPath = self._gphoto_filename_format(req.path,0,'dummy')  #to make sure it create the right path
+        loadPath = self.homePath + "/" + self._gphoto_filename_format(req.path,0,'dummy')  #to make sure it create the right path
         if loadPath.find('..') != -1:
             rospy.logwarn("use of .. is prohibed")
             return "error"
         directory = os.path.dirname(loadPath)
-        rospy.loginfo("Loading Picture to folder" + directory)
+        rospy.loginfo("Loading Picture to folder " + directory)
         if not os.path.exists(directory):
             os.makedirs( directory)
         count = 0
@@ -69,7 +69,7 @@ class picam_server:
         return "Transfered " + str(count) + " files."
 
     def set_camera_cb(self,req):
-        rospy.loginfo("Setting camera's Configuration")
+        rospy.loginfo("Setting camera's Configuration to " + str(req))
         if(req.iso != ""):
             self.picam.ISO = int(float(req.iso))
         if(req.imageformat != ""):
