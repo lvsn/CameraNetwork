@@ -88,6 +88,7 @@ $ cd camera-network/src
 $ catkin_init_workspace
 $ cd ..
 $ catkin_make
+$ sudo ./install.sh
 ```
 
 ### Install gphoto and upstart ###
