@@ -110,7 +110,7 @@ class sftp_server:
                
     def _downloadImageFolder(self,sftp,deviceName=''):
         feedback_msg = CameraDownloadActionFeedback
-        filelist = sftp.listdir('.' + self.imagePath + self.dateFolder)
+        filelist = sftp.listdir(self.imagePath + self.dateFolder)
         rospy.loginfo('found ' + str(len(filelist)) + ' files')
                 
                 
@@ -122,7 +122,7 @@ class sftp_server:
         else:
             for f in filelist:
                 rospy.loginfo('Downloading ' + f)
-                remoteFile = '.' + self.imagePath + self.dateFolder + f
+                remoteFile = self.imagePath + self.dateFolder + f
                 localFile = self.localImagePath + deviceName + '/' + f
                 sftp.get(remoteFile,localFile)
                 sftp.remove(remoteFile)

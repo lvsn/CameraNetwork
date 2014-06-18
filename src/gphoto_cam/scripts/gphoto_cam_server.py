@@ -32,7 +32,7 @@ class gphoto_server():
 
     def capture_image_cb(self,req):
         rospy.loginfo("Taking Picture")
-        msg = gphoto.run(" --capture-image")
+        msg = gphoto.run(" --capture-image --wait-event=1s")
         return msg
     
     def load_camera_cb(self,req):
@@ -52,7 +52,7 @@ class gphoto_server():
         
     
     def set_camera_cb(self,req):
-        rospy.loginfo("Setting camera's Configuration")
+        rospy.loginfo("Setting camera's Configuration : " + str(req))
         backMessage = ''
         commandCall = ''
         if(req.iso != ""):
