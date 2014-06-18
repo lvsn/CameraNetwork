@@ -301,13 +301,18 @@
 
     setInterval(refreshCanvas(), 10);
    
-    function drawPreview(){
-      var preview = new ROSLIB.Service({
-      ros : ros,
-      name : '/' + currentDevice + '/preview_camera',
-      serviceType : 'std_srvs/Empty'
-      });
-      var request = new ROSLIB.ServiceRequest({});
+	function drawPreview(form){
+		var preview = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + currentDevice + '/preview_camera',
+			serviceType : 'camera_network_msgs/InCameraData'
+		});
+		var request = new ROSLIB.ServiceRequest({
+    		iso: form.preview_iso.value,
+    		aperture : form.preview_aperture.value,
+    		imageformat: form.preview_format.value,
+    		shutterspeed: form.preview_shutterspeed.value
+  		});
       preview.callService(request, refreshCanvas);
       
     }
@@ -362,74 +367,89 @@
   
   
   <!-- Device interface -->
-  <p class="title">Device Interface</p>
-<div class="mainStyle">
-  <select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
-    <option value="index0">Online Devices</option>
-  </select> 
-  <dl>
-    <dt>Device:</dt>
-      <dd id="dd_Device"></dd>
-    <dt>IP:</dt>
-      <dd id="dd_IP"></dd>
-    <dt>Camera Type:</dt>
-      <dd id="dd_Camera"></dd>
-  </dl> 
-  
-  <dl>
-    <dt>ISO:</dt>
-      <dd id="dd_iso"></dd>
-    <dt>Aperture:</dt>
-      <dd id="dd_aperture"></dd>
-    <dt>Shutter speed:</dt>
-      <dd id="dd_shutterspeed"></dd>
-    <dt>Image format :</dt>
-      <dd id ="dd_imageformat"></dd>
-  </dl>   
-
-  <!-- Parameter interface -->
-  <div class="parameterStyle" id="capture_mode">
-    <div class="left">
-      <p>Capture Parameters:</p>
-      <p id="p_parameters"></p>
-    </div>
-    <div class="right">
-      <button type="button" style="width:100px" class="styleButton" onclick = "removeSequence()">Reset</button>
-      <form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
-        Aperture : <input id="sequence_aperture"  value='' name="sequence_aperture" >
-        </br>
-        Shutter Speed : <input id="sequence_shutterspeed" value='' name="sequence_shutterspeed" >
-        </br>
-        <input type="submit" class="styleButton" onclick="addSequence(this.form)" value="Add">
-        </form>
-        <button type="button" style="width:100px" class="styleButton" onclick = "saveSequence()">Save</button>
-    </div>
-  </div>
-
-    
-  <!-- Timelaps interface -->
-  <div class="timelapsStyle">
-    <form name="timelaps" action="javascript:void(0)" method="get">
-        Frequency (s) : <input id="timelaps_frequency" type="number" value=0 name="timelaps_frequency" >
-        Quantity (<0 = infinite) : <input id="timelaps_quantity" type="number" value=0 name="timelaps_qty" >
-      <dl>
-        <dt>Status:</dt>
-          <dd id ="dd_timelaps_status">Idle</dd>
-        <dt>Feedback:</dt>
-          <dd id="dd_timelaps_feedback"></dd>
-        <dt>Termination:</dt>
-          <dd id="dd_timelaps_termination"></dd>
-      </dl>
-      
-      <input type="submit" class="styleButton" onclick="timelapsAction(this.form)" value="Set">
-    </form>
+	<p class="title">Device Interface</p>
+	<div class="mainStyle">
+		<select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
+	    	<option value="index0">Online Devices</option>
+	  	</select> 
+	  	<dl>
+	    	<dt>Device:</dt>
+	      	<dd id="dd_Device"></dd>
+	    	<dt>IP:</dt>
+	      	<dd id="dd_IP"></dd>
+	    	<dt>Camera Type:</dt>
+	      	<dd id="dd_Camera"></dd>
+	  	</dl> 
+	  
+	  	<dl>
+	    	<dt>ISO:</dt>
+	      	<dd id="dd_iso"></dd>
+	    	<dt>Aperture:</dt>
+	      	<dd id="dd_aperture"></dd>
+	    	<dt>Shutter speed:</dt>
+	      	<dd id="dd_shutterspeed"></dd>
+	    	<dt>Image format :</dt>
+	      	<dd id ="dd_imageformat"></dd>
+	  	</dl>   
+	
+	  	<!-- Parameter interface -->
+	  	<div class="parameterStyle" id="capture_mode">
+	    	<div class="left">
+	      		<p>Capture Parameters:</p>
+	      		<p id="p_parameters"></p>
+	    	</div>
+		    <div class="right">
+		    	<button type="button" style="width:100px" class="styleButton" onclick = "removeSequence()">Reset</button>
+		    	<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
+		    		Aperture : <input id="sequence_aperture"  value='' name="sequence_aperture" >
+		        	</br>
+		        	Shutter Speed : <input id="sequence_shutterspeed" value='' name="sequence_shutterspeed" >
+		        	</br>
+		        	<input type="submit" class="styleButton" onclick="addSequence(this.form)" value="Add">
+		    	</form>
+		    	<button type="button" style="width:100px" class="styleButton" onclick = "saveSequence()">Save</button>
+		    </div>
+		</div>
+	
+	    
+	  <!-- Timelaps interface -->
+	  <div class="timelapsStyle">
+	    <form name="timelaps" action="javascript:void(0)" method="get">
+	        Frequency (s) : <input id="timelaps_frequency" type="number" value=0 name="timelaps_frequency" >
+	        Quantity (<0 = infinite) : <input id="timelaps_quantity" type="number" value=0 name="timelaps_qty" >
+	      <dl>
+	        <dt>Status:</dt>
+	          <dd id ="dd_timelaps_status">Idle</dd>
+	        <dt>Feedback:</dt>
+	          <dd id="dd_timelaps_feedback"></dd>
+	        <dt>Termination:</dt>
+	          <dd id="dd_timelaps_termination"></dd>
+	      </dl>
+	      
+	      <input type="submit" class="styleButton" onclick="timelapsAction(this.form)" value="Set">
+	    </form>
+	  </div> 
+	  
+	  <!--<div id="mjpeg" class="timelapsStyle"></div>-->
+		<div class="timelapsStyle">
+			<img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480">
+			<form class="right" name="timelaps" action="javascript:void(0)" method="get">
+		    		<label>Aperture :</label>
+		    		<input id="preview_aperture"  value='' name="preview_aperture" align="right" >
+		        	</br>
+		        	<label>Shutter Speed :</label>
+		        	<input id="preview_shutterspeed" value='' name="preview_shutterspeed" >
+		        	</br>
+		        	<label>Format : </label>
+		        	<input id="preview_format"  value='' name="preview_format" >
+		        	</br>
+		        	<label>iso : </label>
+		        	<input id="preview_iso" value='' name="preview_iso" >
+		        	</br>
+		        	<input type="submit" class="styleButton" onclick="drawPreview(this.form)" value="Preview">
+		    </form>
+		</div>
   </div> 
-  
-  <!--<div id="mjpeg" class="timelapsStyle"></div>-->
-  
-  <input type="submit" class="styleButton" onclick="drawPreview()" value="Preview">
-    <img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480">
-</div> 
   
 </body>
 </html>

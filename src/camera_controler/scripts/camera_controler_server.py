@@ -12,8 +12,8 @@ import timelaps_server as ts
 import network_capture_listener as ncl
 import camera_handler as ch
 import parameter_save as ps
-import std_srvs.srv
 import os
+from camera_network_msgs.srv import *
 
 class server:
     
@@ -24,7 +24,7 @@ class server:
         self.listener = ncl.network_capture_listener(self.cam_handler)
         self.listener.listen()
         self.paramSaver = ps.save_server()
-        rospy.Service('preview_camera', std_srvs.srv.Empty(), self.preview_image_cb)
+        rospy.Service('preview_camera', InCameraData, self.preview_image_cb)
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
 
@@ -36,7 +36,12 @@ class server:
         rospy.delete_param('file')
         
     def preview_image_cb(self,req):
-        self.cam_handler.takePreview()
+        dictSetting = {}
+        dictSetting['iso'] = req.iso
+        dictSetting['imageformat'] = req.imageformat
+        dictSetting['aperture'] = req.aperture
+        dictSetting['shutterspeed'] = req.shutterspeed
+        self.cam_handler.takePreview(dictSetting)
         directory = "/home/CameraNetwork/preview/"
         filelist = os.listdir(directory)
         for filename in filelist:
