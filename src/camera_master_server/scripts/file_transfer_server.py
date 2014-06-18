@@ -21,7 +21,7 @@ import paramiko
 class sftp_server:
     
     def __init__(self,imagePath):
-        self.imagePath = imagePath
+        self.imagePath = imagePath + '/'
         self.dateFolder = ''
         self.localImagePath = self.imagePath + self.dateFolder
         self.localLogPath = self.imagePath + 'log/'

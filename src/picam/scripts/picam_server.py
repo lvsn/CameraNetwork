@@ -26,10 +26,8 @@ class picam_server:
 
         self.camParam = pph.PicameraParameterHandler()
         self.camParam.set_camera_parameters()
-
-        self.homePath = '/home/pi'
-        self.tmpPath = self.homePath + '/CameraPicture/tmp'
-        self.picturePath = self.homePath + '/CameraPicture'
+        self.homePath = "/home/CameraNetwork"
+        self.tmpPath = self.homePath + '/tmp'
 
         #creating a large id generator so pictures are not overwrited
         self.id_gen = self._id_generator()
@@ -56,6 +54,9 @@ class picam_server:
         #reset generator
         self.id_gen = self._id_generator()
         loadPath = self._gphoto_filename_format(req.path,0,'dummy')  #to make sure it create the right path
+        if loadPath.find('..') != -1:
+            rospy.logwarn("use of .. is prohibed")
+            return "error"
         directory = os.path.dirname(loadPath)
         rospy.loginfo("Loading Picture to folder" + directory)
         if not os.path.exists(directory):

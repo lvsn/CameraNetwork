@@ -19,8 +19,8 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "image_publisher");
   ros::NodeHandle nh;
 
-  std::string homePath = getenv ("HOME");
-  const std::string streamImagePath = homePath + "/CameraPicture/preview/send.jpeg";
+  std::string homePath = "/home/CameraNetwork";
+  const std::string streamImagePath = homePath + "/preview/send.jpeg";
   ROS_INFO_STREAM("Setting jpeg Streaming path to " << streamImagePath);
 
   image_transport::ImageTransport it(nh);

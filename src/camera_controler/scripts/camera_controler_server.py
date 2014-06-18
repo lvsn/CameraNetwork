@@ -37,7 +37,7 @@ class server:
         
     def preview_image_cb(self,req):
         self.cam_handler.takePreview()
-        directory = os.environ['HOME'] + "/CameraPicture/preview/"
+        directory = "/home/CameraNetwork/preview/"
         filelist = os.listdir(directory)
         for filename in filelist:
             f, e = os.path.splitext(filename)

@@ -15,10 +15,9 @@ import os
 class server:
     
     def __init__(self):
-        self.homePath = os.path.expanduser("~")
-        self.imagePath = self.homePath + '/CameraPicture/'
+        self.imagePath = "/home/CameraNetwork"
         if not os.path.exists(self.imagePath):
-            os.makedirs(self.imagePath)
+            rospy.logfatal("Install file not executed! : CameraNetwork path not set")
         rospy.init_node('master_server')
         self.sftp = fts.sftp_server(self.imagePath)
         self.network_capture = ncs.network_capture_server()
