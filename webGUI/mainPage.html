@@ -12,7 +12,7 @@
   // Connecting to ROS
   // -----------------
   var ros = new ROSLIB.Ros({
-    url : 'ws://localhost:9090'
+    url : 'ws://pimaster.jflalonde.org:9090'
           });
 
   var IpList = new ROSLIB.Param({
@@ -292,11 +292,11 @@
     
     //var ctx = document.getElementById('previewCanvas').getContext('2d');
     var img = new Image;
-    img.src = "http://localhost:8181/stream?topic=/preview?width=640?height=480";
+    img.src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
 
 
     function refreshCanvas(){
-        document.getElementById('imagePreview').src = "http://localhost:8181/stream?topic=/preview?width=640?height=480";
+        document.getElementById('imagePreview').src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
     };
 
     setInterval(refreshCanvas(), 10);
@@ -432,7 +432,8 @@
 	  
 	  <!--<div id="mjpeg" class="timelapsStyle"></div>-->
 		<div class="timelapsStyle">
-			<img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480">
+			<img id="imagePreview" src="http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480" alt="Image Not Showing" />
+
 			<form class="right" name="timelaps" action="javascript:void(0)" method="get">
 		    		<label>Aperture :</label>
 		    		<input id="preview_aperture"  value='' name="preview_aperture" align="right" >
@@ -451,5 +452,4 @@
 		</div>
   </div> 
   
-</body>
-</html>
+  
