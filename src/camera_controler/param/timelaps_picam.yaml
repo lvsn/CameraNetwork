@@ -1,0 +1,8 @@
+aperture: ''
+captureSequence:
+- {shutterspeed: '100'}
+- {shutterspeed: '400'}
+- {shutterspeed: '600'}
+imageformat: 'jpeg'
+iso: '100'
+shutterspeed: '30'

@@ -12,87 +12,96 @@ from camera_network_msgs.srv import *
 from CameraParameterHandler import *
 
 import gphoto2_cli_caller as gphoto
+import os    
     
-
-def capture_image_cb(req):
-    rospy.loginfo("Taking Picture")
-    msg = gphoto.run(" --capture-image")
-    return msg
     
-def load_camera_cb(req):
-    filename = " --filename " + req.path
-    rospy.loginfo("Loading picture to folder" + req.path)
-    msg = gphoto.run(filename + " -P -D --recurse")
-    return msg    
+class gphoto_server():
     
-def set_camera_cb(req):
-    rospy.loginfo("Setting camera's Configuration")
-    backMessage = ''
-    commandCall = ''
-    if(req.iso != ""):
-        isoConfig = rospy.get_param("~isoConfig"," ")
-        commandCall += " --set-config " + isoConfig + "=" + req.iso
-            
-    if(req.imageformat != ""):
-        imageformatConfig = rospy.get_param("~imageformatConfig"," ")
-        commandCall += " --set-config " + imageformatConfig + "=" + req.imageformat
-            
-    if(req.aperture != ""):
-        apertureConfig = rospy.get_param("~apertureConfig"," ")
-        commandCall += " --set-config " + apertureConfig + "=" + req.aperture
-            
-    if(req.shutterspeed != ""):
-        shutterspeedConfig = rospy.get_param("~shutterspeedConfig"," ")
-        commandCall += " --set-config " + shutterspeedConfig + "=" + req.shutterspeed
+    def __init__(self):
+        #init gphoto cam
+        self.camParam = CameraParameterHandler()
+        self.camParam.set_camera_parameters()
+        #Start services
+        rospy.Service('capture_camera', CaptureService, self.capture_image_cb)
+        rospy.Service('get_camera', OutCameraData, self.get_camera_cb)
+        rospy.Service('set_camera', InCameraData, self.set_camera_cb)
+        rospy.Service('load_camera',Load,self.load_camera_cb)
         
-    backMessage = gphoto.run(commandCall)
+        rospy.loginfo("Camera Ready")
+        rospy.spin()
+
+    def capture_image_cb(self,req):
+        rospy.loginfo("Taking Picture")
+        msg = gphoto.run(" --capture-image --wait-event=1s")
+        return msg
+    
+    def load_camera_cb(self,req):
+        rospy.sleep(3)
+        rootPath = '/home/CameraNetwork/'
+        filename = " --filename " + rootPath + req.path
+        if filename.find('..') != -1:
+            rospy.logwarn("use of .. is prohibed")
+            return "error"
+        rospy.loginfo("Loading picture to : " + filename)
+
+        msg = gphoto.run(filename + " -P")
+        
+        rospy.loginfo("Deleting camera's pictures")
+        gphoto.run(" -D --recurse")
+        return msg
+        
+    
+    def set_camera_cb(self,req):
+        rospy.loginfo("Setting camera's Configuration : " + str(req))
+        backMessage = ''
+        commandCall = ''
+        if(req.iso != ""):
+            commandCall += " --set-config " + self.camParam.isoConfig + "=" + req.iso
+                
+        if(req.imageformat != ""):
+            commandCall += " --set-config " + self.camParam.imageformatConfig + "=" + req.imageformat
+                
+        if(req.aperture != ""):
+            commandCall += " --set-config " + self.camParam.apertureConfig + "=" + req.aperture
+                
+        if(req.shutterspeed != ""):
+            commandCall += " --set-config " + self.camParam.shutterspeedConfig + "=" + req.shutterspeed
             
-    return backMessage
+        backMessage = gphoto.run(commandCall)
+                
+        return backMessage
     
     
-def get_camera_cb(req):
-    rospy.loginfo("Getting camera's Configuration")
-    
-    isoConfig = rospy.get_param("~isoConfig"," ")
-    iso = gphoto.run(" --get-config " + isoConfig)
-    iso = parse_current_value(iso)
-    
-    imageformatConfig = rospy.get_param("~imageformatConfig"," ")
-    imageformat = gphoto.run(" --get-config " + imageformatConfig)
-    imageformat = parse_current_value(imageformat)
-    
-    apertureConfig = rospy.get_param("~apertureConfig"," ")
-    aperture = gphoto.run(" --get-config "+ apertureConfig)
-    aperture = parse_current_value(aperture)
-    
-    shutterspeedConfig = rospy.get_param("~shutterspeedConfig"," ")
-    shutterspeed = gphoto.run(" --get-config " + shutterspeedConfig)
-    shutterspeed = parse_current_value(shutterspeed)
-            
-    return {'iso': iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
+    def get_camera_cb(self,req):
+        rospy.loginfo("Getting camera's Configuration")
+        
+        iso = gphoto.run(" --get-config " + self.camParam.isoConfig)
+        iso = self._parse_current_value(iso)
+        
+        imageformat = gphoto.run(" --get-config " + self.camParam.imageformatConfig)
+        imageformat = self._parse_current_value(imageformat)
+        
+        aperture = gphoto.run(" --get-config "+ self.camParam.apertureConfig)
+        aperture = self._parse_current_value(aperture)
+        
+        shutterspeed = gphoto.run(" --get-config " + self.camParam.shutterspeedConfig)
+        shutterspeed = self._parse_current_value(shutterspeed)
+                
+        return {'iso': iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
     
-def parse_current_value(string):
-    
-    lineList = string.split('\n')
-    for n in lineList:
-        if n.find('Current') == 0:
-            return n[8:]    #remove Current: from the string
-    return ''
+    def _parse_current_value(self,string):
+        
+        lineList = string.split('\n')
+        for n in lineList:
+            if n.find('Current') == 0:
+                return n[8:]    #remove Current: from the string
+        return ''
 
 
 if __name__ == "__main__":
     rospy.init_node('gphoto_cam')
     #init gphoto cam
-    camParam = CameraParameterHandler()
-    camParam.set_camera_parameters()
-    #Start services
-    rospy.Service('capture_camera', CaptureService, capture_image_cb)
-    rospy.Service('get_camera', OutCameraData, get_camera_cb)
-    rospy.Service('set_camera', InCameraData, set_camera_cb)
-    rospy.Service('load_camera',Load,load_camera_cb)
-    
-    rospy.loginfo("Camera Ready")
-    rospy.spin()
+    server = gphoto_server()
 
 

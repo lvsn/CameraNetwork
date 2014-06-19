@@ -3,3 +3,5 @@ devel
 /src/*/scripts/*.pyc
 /src/CMakeLists.txt
 webGUI/*~
+.catkin_workspace
+*.swp

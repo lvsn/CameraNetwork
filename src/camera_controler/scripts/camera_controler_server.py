@@ -10,10 +10,58 @@ import roslib; roslib.load_manifest('camera_controler')
 import rospy
 import timelaps_server as ts
 import network_capture_listener as ncl
+import camera_handler as ch
+import parameter_save as ps
+import os
+from camera_network_msgs.srv import *
+
+class server:
+    
+    def __init__(self):
+        rospy.init_node('timelaps_server')
+        self.cam_handler = ch.CameraHandler()
+        self.timelapsServer = ts.TimelapsServer(self.cam_handler)
+        self.listener = ncl.network_capture_listener(self.cam_handler)
+        self.listener.listen()
+        self.paramSaver = ps.save_server()
+        rospy.Service('preview_camera', InCameraData, self.preview_image_cb)
+        rospy.on_shutdown(self.shutdown)
+        rospy.spin()
+
+    def shutdown(self):
+        del self.cam_handler
+        del self.listener
+        del self.timelapsServer
+        rospy.delete_param('camera_setting')
+        rospy.delete_param('file')
+        
+    def preview_image_cb(self,req):
+        dictSetting = {}
+        dictSetting['iso'] = req.iso
+        dictSetting['imageformat'] = req.imageformat
+        dictSetting['aperture'] = req.aperture
+        dictSetting['shutterspeed'] = req.shutterspeed
+        self.cam_handler.takePreview(dictSetting)
+        directory = "/home/CameraNetwork/preview/"
+        filelist = os.listdir(directory)
+        for filename in filelist:
+            f, e = os.path.splitext(filename)
+            if e not in [".jpg",".jpeg",".JPG",".JPEG"]:
+                rospy.logwarn("Camera is not set to JPG: current format = " + e)
+                try:
+                    os.remove(directory + filename)
+                except:
+                    rospy.logerr("Problem while deleting " + directory+filename)
+
+            else:
+                rospy.loginfo("file " + f + ".jpeg is ready")
+                try:
+                    os.rename(directory + filename, directory+f+".jpeg")
+                except:
+                    rospy.logerr("Problem while renaming" + directory+filename)
+        return []
+        
 
 if __name__ == "__main__":
-    rospy.init_node('timelaps_server')
-    server = ts.TimelapsServer()
-    listener = ncl.network_capture_listener()
-    listener.listen()
-    rospy.spin()
+    
+    serverInstance = server()
