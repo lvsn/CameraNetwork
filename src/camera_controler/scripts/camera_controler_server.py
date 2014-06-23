@@ -34,6 +34,7 @@ class server:
         del self.timelapsServer
         rospy.delete_param('camera_setting')
         rospy.delete_param('file')
+        rospy.delete_param('/IP/' + os.environ['CAMERA_NAME'])
         
     def preview_image_cb(self,req):
         dictSetting = {}
