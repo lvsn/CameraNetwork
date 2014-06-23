@@ -23,6 +23,8 @@ class picam_server:
             rospy.logfatal("Check if the Picam is free or installed")
 
         self.picam.awb_mode = 'off'
+        self.picam.awb_gains = 1.5
+
 
         self.camParam = pph.PicameraParameterHandler()
         self.camParam.set_camera_parameters()
