@@ -7,449 +7,156 @@
 <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
 <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="rosclient.js"></script>
 
-<script type="text/javascript" type="text/javascript">
-  // Connecting to ROS
-  // -----------------
-  var ros = new ROSLIB.Ros({
-    url : 'ws://localhost:9090'
-          });
-
-  var IpList = new ROSLIB.Param({
-    ros : ros,
-    name : '/IP'
-  });
-  
-  	IpList.get(function(value) {
-  		var select = document.getElementById("deviceList");
-  		$.each( value, function( key, value ) {
-  		   select.options[select.options.length] = new Option(key, value);
-		});
-  });
-  function camera(deviceName,ip,deviceParam,timelapsObj){
-      this.deviceName = deviceName;
-      this.ip = ip;
-      this.deviceParam = deviceParam;
-      this.timelapsObj = timelapsObj;
-        };
-  
-  function timelapsContainer(client){
-    this.client = client;
-    this.statusMessage = 'Idle'
-    this.feedbackMessage = ''
-    this.terminationMessage = '' 
-  };
-  var cameraArray = [];
-  var currentDevice;
-  
-  function printTimelaps(camera){
-    if(camera === null){
-      document.getElementById("dd_Device").textContent = '';
-      document.getElementById("dd_IP").textContent = '';
-      document.getElementById("dd_Camera").textContent = ''; 
-      document.getElementById("dd_timelaps_termination").textContent =  '';
-      document.getElementById("dd_timelaps_status").textContent = '';
-      document.getElementById("dd_timelaps_feedback").textContent = '';
-      document.getElementById("dd_iso").textContent = '';
-      document.getElementById("dd_aperture").textContent = '';
-      document.getElementById("dd_shutterspeed").textContent = '';
-      document.getElementById("dd_imageformat").textContent = '';
-      document.getElementById("p_parameters").innerHTML ='';
-    }
-    else{
-      document.getElementById("dd_Device").textContent = camera.deviceName;
-      document.getElementById("dd_IP").textContent = camera.ip;
-      camera.deviceParam.get(function(value){
-        if(value != null && value["camera_model"] != null){
-          document.getElementById("dd_Camera").textContent = value["camera_model"];
-          document.getElementById("dd_iso").textContent = value["camera_setting"]["iso"];
-          document.getElementById("dd_aperture").textContent = value["camera_setting"]["aperture"];
-          document.getElementById("dd_shutterspeed").textContent = value["camera_setting"]["shutterspeed"];
-          document.getElementById("dd_imageformat").textContent = value["camera_setting"]["imageformat"];
-          
-          var sequenceSize = value["camera_setting"]["captureSequence"].length;
-          var sequence = value["camera_setting"]["captureSequence"];
-			 var parameterString = '';
-			 for(var i = 0; i < sequenceSize; i++){
-			   parameterString += "Picture " + i + " :</br>";
-			   for (var prop in sequence[i]){
-			     parameterString += prop + ": " + sequence[i][prop] + "</br>";
-			   }
-			   parameterString += "</br>"
-			 }
-			 document.getElementById("p_parameters").innerHTML =parameterString;
-			 
-        }
-        else{
-          document.getElementById("dd_Camera").textContent = 'Camera Not Connected';
-        }
-                      });
-      document.getElementById("dd_timelaps_termination").textContent =  camera.timelapsObj.terminationMessage;
-      document.getElementById("dd_timelaps_status").textContent = camera.timelapsObj.statusMessage;
-      document.getElementById("dd_timelaps_feedback").textContent = camera.timelapsObj.feedbackMessage;
-    }
-  }
-
-  
-  function selectEvent(select){
-    if(select.selectedIndex == 0){
-      printTimelaps(null);
-    }
-    else{
-      currentDevice = select.options[select.selectedIndex].text;
-      var deviceParam =  new ROSLIB.Param({
-        ros : ros,
-        name : '/'+currentDevice
-      }); 
-      var timelapsClient = new ROSLIB.ActionClient({
-        ros : ros,
-        serverName : currentDevice + '/timelaps',
-        actionName : 'camera_network_msgs/CameraControlAction'  
-      });  
-  
-      var device;
-      var found = false;
-      device = getDevice(currentDevice)
-      if(device == null){
-        device = new camera(currentDevice,select.value,deviceParam,new timelapsContainer(timelapsClient,''));
-        cameraArray.push(device);            
-      }
-      printTimelaps(device);
-      
-    }
-  }
-  
-  function getDevice(deviceName){
-    for(var i = 0; i < cameraArray.length;i++){
-      if(cameraArray[i].deviceName == deviceName){
-        return cameraArray[i];      
-      }  
-    }
-    return null;
-  }
-  
-  function publishShot(){
-    var cmdShot = new ROSLIB.Topic({
-      ros : ros,
-      name : '/network_capture_chatter',
-      messageType : 'camera_network_msgs/Capture'
-    });
-    var capture = new ROSLIB.Message({
-      isHdr : false
-    });
-    
-    cmdShot.publish(capture);
-  }
-  
-  function removeSequence() {
-    var setting = new ROSLIB.Param({
-    ros : ros,
-    name : currentDevice + '/camera_setting/captureSequence'
-    });
-    var devicename = getDevice(currentDevice);
-    if(devicename != undefined){
-      setting.set([{}]);
-      printTimelaps(getDevice(currentDevice))
-    }
-  } 
-  
-  function saveSequence(){
-    var save = new ROSLIB.Service({
-      ros : ros,
-      name : '/' + currentDevice +'/save_config',
-      serviceType : 'std_srvs/Empty'
-  });
-  var request = new ROSLIB.ServiceRequest({});
-  save.callService(request, function(result) {});
-  }
-  
-  function addSequence(form){
-    var setting = new ROSLIB.Param({
-      ros : ros,
-      name : currentDevice + '/camera_setting/captureSequence'
-    });
-    var devicename = getDevice(currentDevice);
-    if(devicename != undefined){
-      var config = {};
-      if(form.sequence_shutterspeed.value != ''){
-        config['shutterspeed']= form.sequence_shutterspeed.value
-      }  
-      if(form.sequence_aperture.value != ''){
-        config['aperture']= form.sequence_aperture.value
-      }     
-      setting.get(function(value){
-        if(JSON.stringify(value) === JSON.stringify([{}]) ){
-          setting.set([config]); 
-        }
-        else{
-          value.push(config)
-          setting.set(value);    
-        }
-        printTimelaps(getDevice(currentDevice));
-      });
-    }
-  }
-  
-  function timelapsAction(form){
-    camera = getDevice(currentDevice);
-    var goal = new ROSLIB.Goal({
-    actionClient : camera.timelapsObj.client,
-    goalMessage : {
-      picture_qty : parseFloat(form.timelaps_qty.value),
-      inter_picture_delay_s : parseFloat(form.timelaps_frequency.value)
-    }
-  });
-  
-    goal.on('feedback', function(feedback) {
-      camera.timelapsObj.feedbackMessage = feedback.picture_taken
-      printTimelaps(getDevice(currentDevice))
-    });
-    goal.on('result', function(result) {
-      camera.timelapsObj.statusMessage = "Idle";
-      camera.timelapsObj.terminationMessage =  result.total_picture;
-      printTimelaps(getDevice(currentDevice))
-    });
-    goal.send();
-    camera.timelapsObj['goal'] = goal;
-    camera.timelapsObj.statusMessage = "Taking " + form.timelaps_qty.value + " Pictures at a frequency of " + form.timelaps_frequency.value;
-    camera.timelapsObj.feedbackMessage = "Waiting for feedback"
-    printTimelaps(getDevice(currentDevice))
-  }
-  
-  var networkTimelapsClient = new ROSLIB.ActionClient({
-      ros : ros,
-      serverName : 'master/network_timelaps',
-      actionName : 'camera_network_msgs/CameraControlAction'
-    }); 
-    
-  function networkAction(form){
-  
-    var goal = new ROSLIB.Goal({
-    actionClient : networkTimelapsClient,
-    goalMessage : {
-      picture_qty : parseFloat(form.network_qty.value),
-      inter_picture_delay_s : parseFloat(form.network_frequency.value)
-    }
-  });
-  
-    goal.on('feedback', function(feedback) {
-      document.getElementById("dd_network_feedback").textContent = feedback.picture_taken
-    });
-    goal.on('result', function(result) {
-      document.getElementById("dd_network_status").textContent = "Idle";
-      document.getElementById("dd_network_termination").textContent =  result.total_picture;
-
-    });
-    goal.send();
-    document.getElementById("dd_network_status").textContent = "Taking " + form.network_qty.value + " Pictures at a frequency of " + form.network_frequency.value;
-    document.getElementById("dd_network_feedback").textContent = "Waiting for feedback"
-  }
-  
-  var downloadClient = new ROSLIB.ActionClient({
-    ros : ros,
-    serverName : 'master/sftp',
-    actionName : 'camera_network_msgs/CameraDownloadAction'
-  });  
-  
-  function downloadAction(form){
-    var goal = new ROSLIB.Goal({
-    actionClient : downloadClient,
-    goalMessage : {
-      dowload_frequency_s : parseFloat(form.frequency.value)
-    }
-  });
-    goal.on('feedback', function(feedback) {
-      document.getElementById("dd_download_feedback").textContent = feedback.picture_downloaded
-    });
-    goal.on('result', function(result) {
-      document.getElementById("dd_download_status").textContent = "Idle";
-      document.getElementById("dd_download_termination").textContent = result.total_downloaded;
-    });
-    goal.send();
-    document.getElementById("dd_download_status").textContent = "Downloading every " + form.frequency.value + " s";
-    document.getElementById("dd_download_feedback").textContent = "Waiting for feedback"
-  }  
-  
-  /*function init() {
-    // Create the main viewer.
-    var viewer1 = new MJPEGCANVAS.Viewer({
-      divID : 'mjpeg',
-      host : 'localhost',
-      width : 640,
-      height : 480,
-      topic : '/pi100/preview',
-      port : 8181
-    });
-    var viewer1 = new MJPEGCANVAS.Viewer({
-      divID : 'mjpeg',
-      host : 'localhost',
-      width : 0,
-      height : 0,
-      topic : '/pi100/preview',
-      port : 8181
-    });
-    }*/
-    
-    //var ctx = document.getElementById('previewCanvas').getContext('2d');
-    var img = new Image;
-    img.src = "http://localhost:8181/stream?topic=/preview?width=640?height=480";
-
-
-    function refreshCanvas(){
-        document.getElementById('imagePreview').src = "http://localhost:8181/stream?topic=/preview?width=640?height=480";
-    };
-
-    setInterval(refreshCanvas(), 10);
-   
-	function drawPreview(form){
-		var preview = new ROSLIB.Service({
-			ros : ros,
-			name : '/' + currentDevice + '/preview_camera',
-			serviceType : 'camera_network_msgs/InCameraData'
-		});
-		var request = new ROSLIB.ServiceRequest({
-    		iso: form.preview_iso.value,
-    		aperture : form.preview_aperture.value,
-    		imageformat: form.preview_format.value,
-    		shutterspeed: form.preview_shutterspeed.value
-  		});
-      preview.callService(request, refreshCanvas);
-      
-    }
-    
-
-
-  
-</script>
 <link rel="stylesheet" href="style.css" type="text/css" media="screen, projection" />
 </head>
 
 <body>
-  <header>
-    <h1>Camera Network</h1>
-  </header>
+	<header>
+		<h1>Camera Network</h1>
+	</header>
   
-  <!-- Network interface -->
-  <p class="title">Network Interface</p>
-  <div class="mainStyle">
-    <form name="network" action="javascript:void(0)" method="get">
-        Frequency (s 0 = single Shot) : <input id="network_frequency" type="number" value=0 name="network_frequency" >
-        Quantity (<0 = infinite) : <input id="network_quantity" type="number" value=0 name="network_qty" >
-      <dl>
-        <dt>Status:</dt>
-          <dd id ="dd_network_status">Idle</dd>
-        <dt>Feedback:</dt>
-          <dd id="dd_network_feedback"></dd>
-        <dt>Termination:</dt>
-          <dd id="dd_network_termination"></dd>
-      </dl>
+	<!-- Network interface -->
+	<p class="title">Network Interface</p>
+	<div class="mainStyle">
+		<form name="network" action="javascript:void(0)" method="get">
+    		<label>Frequency (s 0 = single Shot) :</label>
+			<input id="network_frequency" type="number" value=0 name="network_timelaps_frequency" >
+        	<label>Quantity (<0 = infinite) : </label>
+        	<input id="network_quantity" type="number" value=0 name="network_timelaps_qty" >
+      		<dl>
+        		<dt>Status:</dt>
+          			<dd id ="network_timelaps_status"></dd>
+        		<dt>Feedback:</dt>
+          			<dd id="network_timelaps_feedback"></dd>
+        		<dt>Result:</dt>
+          			<dd id="network_timelaps_result"></dd>
+      		</dl>
       
-      <input type="submit" class="styleButton" onclick="networkAction(this.form)" value="Set">
-    </form>
-  </div> 
+			<input type="submit" class="styleButton" onclick="_network_timelaps.setAction(this.form)" value="Set">
+    	</form>
+		<button type="button" class="styleButton" onclick = "_network_timelaps.stopAction()">Stop</button>
+
+    	
+	</div> 
  
 
   <!-- Download interface -->
-  <div class="mainStyle">
-    <form name="download" action="javascript:void(0)" method="get">
-      Download frequency (s) (0 = one time) : <input id="input_frequency" type="number" value=0 name="frequency" >
-      <dl>
-        <dt>Status:</dt>
-          <dd id ="dd_download_status">Idle</dd>
-        <dt>Feedback:</dt>
-          <dd id="dd_download_feedback"></dd>
-        <dt>Termination:</dt>
-          <dd id="dd_download_termination"></dd>
-      </dl>
-      <input type="submit" class="styleButton" onclick="downloadAction(this.form)" value="Download">
-    </form> 
-  </div>  
+	<div class="mainStyle">
+		<form name="download" action="javascript:void(0)" method="get">
+			<label> Download frequency (s) (0 = one time) : </label>
+	 		<input id="input_frequency" type="number" value=0 name="network_download_frequency" >
+			<dl>
+				<dt>Status:</dt>
+					<dd id ="network_download_status"></dd>
+				<dt>Feedback:</dt>
+					<dd id="network_download_feedback"></dd>
+				<dt>Result:</dt>
+					<dd id="network_download_termination"></dd>
+			</dl>
+			<input type="submit" class="styleButton" onclick="_network_download.setAction(this.form)" value="Download">
+		</form> 
+		<button type="button" class="styleButton" onclick = "_network_download.stopAction()">Stop</button>
+
+	</div>  
   
   
   <!-- Device interface -->
 	<p class="title">Device Interface</p>
 	<div class="mainStyle">
-		<select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
-	    	<option value="index0">Online Devices</option>
-	  	</select> 
-	  	<dl>
-	    	<dt>Device:</dt>
-	      	<dd id="dd_Device"></dd>
-	    	<dt>IP:</dt>
-	      	<dd id="dd_IP"></dd>
-	    	<dt>Camera Type:</dt>
-	      	<dd id="dd_Camera"></dd>
-	  	</dl> 
-	  
-	  	<dl>
-	    	<dt>ISO:</dt>
-	      	<dd id="dd_iso"></dd>
-	    	<dt>Aperture:</dt>
-	      	<dd id="dd_aperture"></dd>
-	    	<dt>Shutter speed:</dt>
-	      	<dd id="dd_shutterspeed"></dd>
-	    	<dt>Image format :</dt>
-	      	<dd id ="dd_imageformat"></dd>
-	  	</dl>   
-	
-	  	<!-- Parameter interface -->
-	  	<div class="parameterStyle" id="capture_mode">
-	    	<div class="left">
-	      		<p>Capture Parameters:</p>
-	      		<p id="p_parameters"></p>
-	    	</div>
-		    <div class="right">
-		    	<button type="button" style="width:100px" class="styleButton" onclick = "removeSequence()">Reset</button>
-		    	<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
-		    		Aperture : <input id="sequence_aperture"  value='' name="sequence_aperture" >
-		        	</br>
-		        	Shutter Speed : <input id="sequence_shutterspeed" value='' name="sequence_shutterspeed" >
-		        	</br>
-		        	<input type="submit" class="styleButton" onclick="addSequence(this.form)" value="Add">
-		    	</form>
-		    	<button type="button" style="width:100px" class="styleButton" onclick = "saveSequence()">Save</button>
-		    </div>
+		<div class="parameterStyle">
+			<div class="left">
+				<select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
+					<option value="index0">Online Devices</option>
+				</select> 
+				<dl>
+					<dt>Device:</dt>
+						<dd id="device_name"></dd>
+					<dt>IP:</dt>
+						<dd id="device_ip"></dd>
+					<dt>Camera Type:</dt>
+						<dd id="device_camera"></dd>
+				</dl> 
+			  
+			  	<dl>
+					<dt>ISO:</dt>
+						<dd id="device_iso"></dd>
+					<dt>Aperture:</dt>
+						<dd id="device_aperture"></dd>
+					<dt>Shutter speed:</dt>
+						<dd id="device_shutterspeed"></dd>
+					<dt>Image format :</dt>
+						<dd id ="device_imageformat"></dd>
+					</dl>
+			</div>
+				
+			<form class="right" name="timelaps" action="javascript:void(0)" method="get">
+				<label>iso : </label>
+				<input id="device_parameter_iso" value='' name="device_parameter_iso" >
+				</br>
+				<label>Aperture :</label>
+				<input id="device_parameter_aperture"  value='' name="device_parameter_aperture" align="right" >
+				</br>
+				<label>Shutter Speed :</label>
+				<input id="device_parameter_shutterspeed" value='' name="device_parameter_shutterspeed">
+				</br>
+				<label>Format : </label>
+				<input id="device_parameter_imageformat"  value='' name="device_parameter_imageformat" >
+				</br>
+				<input type="submit" class="styleButton" onclick="_current_device.setParameters(this.form)" value="Set">
+			</form>
 		</div>
-	
-	    
-	  <!-- Timelaps interface -->
-	  <div class="timelapsStyle">
-	    <form name="timelaps" action="javascript:void(0)" method="get">
-	        Frequency (s) : <input id="timelaps_frequency" type="number" value=0 name="timelaps_frequency" >
-	        Quantity (<0 = infinite) : <input id="timelaps_quantity" type="number" value=0 name="timelaps_qty" >
-	      <dl>
-	        <dt>Status:</dt>
-	          <dd id ="dd_timelaps_status">Idle</dd>
-	        <dt>Feedback:</dt>
-	          <dd id="dd_timelaps_feedback"></dd>
-	        <dt>Termination:</dt>
-	          <dd id="dd_timelaps_termination"></dd>
-	      </dl>
-	      
-	      <input type="submit" class="styleButton" onclick="timelapsAction(this.form)" value="Set">
-	    </form>
-	  </div> 
-	  
-	  <!--<div id="mjpeg" class="timelapsStyle"></div>-->
+
+		<!-- Parameter interface -->
+		<div class="parameterStyle" id="capture_mode">
+			<div class="left">
+				<p>Capture Parameters:</p>
+				<p id="device_parameters"></p>
+			</div>
+			<div class="right">
+				<button type="button" class="styleButton" onclick = "_current_device.removeSequence()">Reset</button>
+				<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
+					<label>Aperture : </label>	
+					<input id="device_sequence_aperture"  value='' name="device_sequence_aperture" >
+					</br>
+					<label>Shutter Speed : </label>
+					<input id="device_sequence_shutterspeed" value='' name="device_sequence_shutterspeed" >
+					</br>
+					<input type="submit" class="styleButton" onclick="_current_device.addSequence(this.form)" value="Add">
+				</form>
+				<button type="button" class="styleButton" onclick = "_current_device.saveSequence()">Save</button>
+			</div>
+		</div>
+
+    
+	<!-- Timelaps interface -->
+		<div class="timelapsStyle">
+			<form name="timelaps" action="javascript:void(0)" method="get">
+				<label>Frequency (s) : </label>
+				<input id="device_timelaps_frequency" type="number" value=0 name="device_timelaps_frequency" >
+				<label>Quantity (<0 = infinite) : </label>
+				<input id="device_timelaps_qty" type="number" value=0 name="device_timelaps_qty" >
+				<dl>
+					<dt>Status:</dt>
+						<dd id ="device_timelaps_status"></dd>
+					<dt>Feedback:</dt>
+						<dd id="device_timelaps_feedback"></dd>
+					<dt>Termination:</dt>
+						<dd id="device_timelaps_result"></dd>
+				</dl>
+  
+				<input type="submit" class="styleButton" onclick="_current_device.setAction(this.form)" value="Set">
+			</form>
+			<button type="button" class="styleButton" onclick = "_current_device.stopAction()">Stop</button>
+
+		</div> 
+  
 		<div class="timelapsStyle">
 			<img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480">
-			<form class="right" name="timelaps" action="javascript:void(0)" method="get">
-		    		<label>Aperture :</label>
-		    		<input id="preview_aperture"  value='' name="preview_aperture" align="right" >
-		        	</br>
-		        	<label>Shutter Speed :</label>
-		        	<input id="preview_shutterspeed" value='' name="preview_shutterspeed" >
-		        	</br>
-		        	<label>Format : </label>
-		        	<input id="preview_format"  value='' name="preview_format" >
-		        	</br>
-		        	<label>iso : </label>
-		        	<input id="preview_iso" value='' name="preview_iso" >
-		        	</br>
-		        	<input type="submit" class="styleButton" onclick="drawPreview(this.form)" value="Preview">
-		    </form>
+			<button type="button" class="styleButton" onclick = "_current_device.drawPreview()">Preview</button>
 		</div>
-  </div> 
+	</div> 
   
 </body>
 </html>
