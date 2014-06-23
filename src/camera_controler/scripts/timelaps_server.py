@@ -47,9 +47,9 @@ class TimelapsServer:
             self.cam_handler.takeHDRPicture(self.picture_count)
             feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count)
             self.server.publish_feedback(feedback_msg)
-            if self.server.is_preempt_requested():
-                break
             r.sleep()
+            if self.server.is_preempt_requested() or not self.server.is_active():
+                break
         
 
         succes_msg = CameraControlActionResult

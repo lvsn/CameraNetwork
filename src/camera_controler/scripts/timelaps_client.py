@@ -20,7 +20,7 @@ if __name__ == '__main__':
     client.wait_for_server()
 
     goal = CameraControlGoal()
-    goal.picture_qty = 1
+    goal.picture_qty = 3
     goal.inter_picture_delay_s = 20
     rospy.loginfo("Goal Sent!")
     client.send_goal(goal,feedback_cb = print_feedback)

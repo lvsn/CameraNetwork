@@ -7,7 +7,9 @@
 <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
 <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="rosclient.js"></script>
 
+<<<<<<< HEAD
 <script type="text/javascript" type="text/javascript">
   // Connecting to ROS
   // -----------------
@@ -321,117 +323,153 @@
 
   
 </script>
+=======
+>>>>>>> master
 <link rel="stylesheet" href="style.css" type="text/css" media="screen, projection" />
 </head>
 
 <body>
-  <header>
-    <h1>Camera Network</h1>
-  </header>
+	<header>
+		<h1>Camera Network</h1>
+	</header>
   
-  <!-- Network interface -->
-  <p class="title">Network Interface</p>
-  <div class="mainStyle">
-    <form name="network" action="javascript:void(0)" method="get">
-        Frequency (s 0 = single Shot) : <input id="network_frequency" type="number" value=0 name="network_frequency" >
-        Quantity (<0 = infinite) : <input id="network_quantity" type="number" value=0 name="network_qty" >
-      <dl>
-        <dt>Status:</dt>
-          <dd id ="dd_network_status">Idle</dd>
-        <dt>Feedback:</dt>
-          <dd id="dd_network_feedback"></dd>
-        <dt>Termination:</dt>
-          <dd id="dd_network_termination"></dd>
-      </dl>
+	<!-- Network interface -->
+	<p class="title">Network Interface</p>
+	<div class="mainStyle">
+		<form name="network" action="javascript:void(0)" method="get">
+    		<label>Frequency (s 0 = single Shot) :</label>
+			<input id="network_frequency" type="number" value=0 name="network_timelaps_frequency" >
+        	<label>Quantity (<0 = infinite) : </label>
+        	<input id="network_quantity" type="number" value=0 name="network_timelaps_qty" >
+      		<dl>
+        		<dt>Status:</dt>
+          			<dd id ="network_timelaps_status"></dd>
+        		<dt>Feedback:</dt>
+          			<dd id="network_timelaps_feedback"></dd>
+        		<dt>Result:</dt>
+          			<dd id="network_timelaps_result"></dd>
+      		</dl>
       
-      <input type="submit" class="styleButton" onclick="networkAction(this.form)" value="Set">
-    </form>
-  </div> 
+			<input type="submit" class="styleButton" onclick="_network_timelaps.setAction(this.form)" value="Set">
+    	</form>
+		<button type="button" class="styleButton" onclick = "_network_timelaps.stopAction()">Stop</button>
+
+    	
+	</div> 
  
 
   <!-- Download interface -->
-  <div class="mainStyle">
-    <form name="download" action="javascript:void(0)" method="get">
-      Download frequency (s) (0 = one time) : <input id="input_frequency" type="number" value=0 name="frequency" >
-      <dl>
-        <dt>Status:</dt>
-          <dd id ="dd_download_status">Idle</dd>
-        <dt>Feedback:</dt>
-          <dd id="dd_download_feedback"></dd>
-        <dt>Termination:</dt>
-          <dd id="dd_download_termination"></dd>
-      </dl>
-      <input type="submit" class="styleButton" onclick="downloadAction(this.form)" value="Download">
-    </form> 
-  </div>  
+	<div class="mainStyle">
+		<form name="download" action="javascript:void(0)" method="get">
+			<label> Download frequency (s) (0 = one time) : </label>
+	 		<input id="input_frequency" type="number" value=0 name="network_download_frequency" >
+			<dl>
+				<dt>Status:</dt>
+					<dd id ="network_download_status"></dd>
+				<dt>Feedback:</dt>
+					<dd id="network_download_feedback"></dd>
+				<dt>Result:</dt>
+					<dd id="network_download_termination"></dd>
+			</dl>
+			<input type="submit" class="styleButton" onclick="_network_download.setAction(this.form)" value="Download">
+		</form> 
+		<button type="button" class="styleButton" onclick = "_network_download.stopAction()">Stop</button>
+
+	</div>  
   
   
   <!-- Device interface -->
 	<p class="title">Device Interface</p>
 	<div class="mainStyle">
-		<select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
-	    	<option value="index0">Online Devices</option>
-	  	</select> 
-	  	<dl>
-	    	<dt>Device:</dt>
-	      	<dd id="dd_Device"></dd>
-	    	<dt>IP:</dt>
-	      	<dd id="dd_IP"></dd>
-	    	<dt>Camera Type:</dt>
-	      	<dd id="dd_Camera"></dd>
-	  	</dl> 
-	  
-	  	<dl>
-	    	<dt>ISO:</dt>
-	      	<dd id="dd_iso"></dd>
-	    	<dt>Aperture:</dt>
-	      	<dd id="dd_aperture"></dd>
-	    	<dt>Shutter speed:</dt>
-	      	<dd id="dd_shutterspeed"></dd>
-	    	<dt>Image format :</dt>
-	      	<dd id ="dd_imageformat"></dd>
-	  	</dl>   
-	
-	  	<!-- Parameter interface -->
-	  	<div class="parameterStyle" id="capture_mode">
-	    	<div class="left">
-	      		<p>Capture Parameters:</p>
-	      		<p id="p_parameters"></p>
-	    	</div>
-		    <div class="right">
-		    	<button type="button" style="width:100px" class="styleButton" onclick = "removeSequence()">Reset</button>
-		    	<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
-		    		Aperture : <input id="sequence_aperture"  value='' name="sequence_aperture" >
-		        	</br>
-		        	Shutter Speed : <input id="sequence_shutterspeed" value='' name="sequence_shutterspeed" >
-		        	</br>
-		        	<input type="submit" class="styleButton" onclick="addSequence(this.form)" value="Add">
-		    	</form>
-		    	<button type="button" style="width:100px" class="styleButton" onclick = "saveSequence()">Save</button>
-		    </div>
+		<div class="parameterStyle">
+			<div class="left">
+				<select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
+					<option value="index0">Online Devices</option>
+				</select> 
+				<dl>
+					<dt>Device:</dt>
+						<dd id="device_name"></dd>
+					<dt>IP:</dt>
+						<dd id="device_ip"></dd>
+					<dt>Camera Type:</dt>
+						<dd id="device_camera"></dd>
+				</dl> 
+			  
+			  	<dl>
+					<dt>ISO:</dt>
+						<dd id="device_iso"></dd>
+					<dt>Aperture:</dt>
+						<dd id="device_aperture"></dd>
+					<dt>Shutter speed:</dt>
+						<dd id="device_shutterspeed"></dd>
+					<dt>Image format :</dt>
+						<dd id ="device_imageformat"></dd>
+					</dl>
+			</div>
+				
+			<form class="right" name="timelaps" action="javascript:void(0)" method="get">
+				<label>iso : </label>
+				<input id="device_parameter_iso" value='' name="device_parameter_iso" >
+				</br>
+				<label>Aperture :</label>
+				<input id="device_parameter_aperture"  value='' name="device_parameter_aperture" align="right" >
+				</br>
+				<label>Shutter Speed :</label>
+				<input id="device_parameter_shutterspeed" value='' name="device_parameter_shutterspeed">
+				</br>
+				<label>Format : </label>
+				<input id="device_parameter_imageformat"  value='' name="device_parameter_imageformat" >
+				</br>
+				<input type="submit" class="styleButton" onclick="_current_device.setParameters(this.form)" value="Set">
+			</form>
 		</div>
-	
-	    
-	  <!-- Timelaps interface -->
-	  <div class="timelapsStyle">
-	    <form name="timelaps" action="javascript:void(0)" method="get">
-	        Frequency (s) : <input id="timelaps_frequency" type="number" value=0 name="timelaps_frequency" >
-	        Quantity (<0 = infinite) : <input id="timelaps_quantity" type="number" value=0 name="timelaps_qty" >
-	      <dl>
-	        <dt>Status:</dt>
-	          <dd id ="dd_timelaps_status">Idle</dd>
-	        <dt>Feedback:</dt>
-	          <dd id="dd_timelaps_feedback"></dd>
-	        <dt>Termination:</dt>
-	          <dd id="dd_timelaps_termination"></dd>
-	      </dl>
-	      
-	      <input type="submit" class="styleButton" onclick="timelapsAction(this.form)" value="Set">
-	    </form>
-	  </div> 
-	  
-	  <!--<div id="mjpeg" class="timelapsStyle"></div>-->
+
+		<!-- Parameter interface -->
+		<div class="parameterStyle" id="capture_mode">
+			<div class="left">
+				<p>Capture Parameters:</p>
+				<p id="device_parameters"></p>
+			</div>
+			<div class="right">
+				<button type="button" class="styleButton" onclick = "_current_device.removeSequence()">Reset</button>
+				<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
+					<label>Aperture : </label>	
+					<input id="device_sequence_aperture"  value='' name="device_sequence_aperture" >
+					</br>
+					<label>Shutter Speed : </label>
+					<input id="device_sequence_shutterspeed" value='' name="device_sequence_shutterspeed" >
+					</br>
+					<input type="submit" class="styleButton" onclick="_current_device.addSequence(this.form)" value="Add">
+				</form>
+				<button type="button" class="styleButton" onclick = "_current_device.saveSequence()">Save</button>
+			</div>
+		</div>
+
+    
+	<!-- Timelaps interface -->
 		<div class="timelapsStyle">
+			<form name="timelaps" action="javascript:void(0)" method="get">
+				<label>Frequency (s) : </label>
+				<input id="device_timelaps_frequency" type="number" value=0 name="device_timelaps_frequency" >
+				<label>Quantity (<0 = infinite) : </label>
+				<input id="device_timelaps_qty" type="number" value=0 name="device_timelaps_qty" >
+				<dl>
+					<dt>Status:</dt>
+						<dd id ="device_timelaps_status"></dd>
+					<dt>Feedback:</dt>
+						<dd id="device_timelaps_feedback"></dd>
+					<dt>Termination:</dt>
+						<dd id="device_timelaps_result"></dd>
+				</dl>
+  
+				<input type="submit" class="styleButton" onclick="_current_device.setAction(this.form)" value="Set">
+			</form>
+			<button type="button" class="styleButton" onclick = "_current_device.stopAction()">Stop</button>
+
+		</div> 
+  
+		<div class="timelapsStyle">
+<<<<<<< HEAD
 			<img id="imagePreview" src="http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480" alt="Image Not Showing" />
 
 			<form class="right" name="timelaps" action="javascript:void(0)" method="get">
@@ -449,7 +487,11 @@
 		        	</br>
 		        	<input type="submit" class="styleButton" onclick="drawPreview(this.form)" value="Preview">
 		    </form>
+=======
+			<img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480">
+			<button type="button" class="styleButton" onclick = "_current_device.drawPreview()">Preview</button>
+>>>>>>> master
 		</div>
-  </div> 
+	</div> 
   
   

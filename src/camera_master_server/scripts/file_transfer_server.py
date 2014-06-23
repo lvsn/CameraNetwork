@@ -60,9 +60,9 @@ class sftp_server:
             
             pictureQty = self.download_all_images_from_network()
             totalCount += pictureQty
-            if self.server.is_preempt_requested() or goal.dowload_frequency_s == 0:
-                break
             r.sleep()
+            if self.server.is_preempt_requested() or not self.server.is_active() or goal.dowload_frequency_s == 0:
+                break
         succes_msg = CameraDownloadActionResult
         succes_msg.total_downloaded = 'Downloaded ' + str(totalCount) + ' pictures from ' + str(len(self.ipDict)) + ' devices.'
 

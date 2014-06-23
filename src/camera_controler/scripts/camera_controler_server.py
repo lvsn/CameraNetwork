@@ -37,10 +37,14 @@ class server:
         
     def preview_image_cb(self,req):
         dictSetting = {}
-        dictSetting['iso'] = req.iso
-        dictSetting['imageformat'] = req.imageformat
-        dictSetting['aperture'] = req.aperture
-        dictSetting['shutterspeed'] = req.shutterspeed
+        if req.iso != "":
+            dictSetting['iso'] = req.iso
+        if req.imageformat != "":
+            dictSetting['imageformat'] = req.imageformat
+        if req.aperture != "":
+            dictSetting['aperture'] = req.aperture
+        if req.shutterspeed != "":
+            dictSetting['shutterspeed'] = req.shutterspeed
         self.cam_handler.takePreview(dictSetting)
         directory = "/home/CameraNetwork/preview/"
         filelist = os.listdir(directory)
