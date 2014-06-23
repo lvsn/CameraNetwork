@@ -90,6 +90,11 @@ class picam_server:
         aperture = "not supported"
         shutterspeed = str(self.picam.shutter_speed)
         
+        if req.getAllInformation:
+            iso = "ISO : " + iso + "\n Choice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800"
+            imageformat = "Image format : " + imageformat + "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra"
+            shutterspeed = "Shutterspeed : " + shutterspeed + "\nChoice : 0(auto)\nChoice : (int)usec"
+        
         return {'iso':iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
     def _filename_format(self,string,pictureId,pictureFormat):

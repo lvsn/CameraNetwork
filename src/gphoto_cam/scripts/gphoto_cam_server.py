@@ -75,17 +75,16 @@ class gphoto_server():
     def get_camera_cb(self,req):
         rospy.loginfo("Getting camera's Configuration")
         
-        iso = gphoto.run(" --get-config " + self.camParam.isoConfig)
-        iso = self._parse_current_value(iso)
-        
-        imageformat = gphoto.run(" --get-config " + self.camParam.imageformatConfig)
-        imageformat = self._parse_current_value(imageformat)
-        
-        aperture = gphoto.run(" --get-config "+ self.camParam.apertureConfig)
-        aperture = self._parse_current_value(aperture)
-        
+        iso = gphoto.run(" --get-config " + self.camParam.isoConfig) 
+        imageformat = gphoto.run(" --get-config " + self.camParam.imageformatConfig)     
+        aperture = gphoto.run(" --get-config "+ self.camParam.apertureConfig)        
         shutterspeed = gphoto.run(" --get-config " + self.camParam.shutterspeedConfig)
-        shutterspeed = self._parse_current_value(shutterspeed)
+        
+        if not req.getAllInformation:
+            iso = self._parse_current_value(iso)
+            imageformat = self._parse_current_value(imageformat)
+            aperture = self._parse_current_value(aperture)
+            shutterspeed = self._parse_current_value(shutterspeed)
                 
         return {'iso': iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     

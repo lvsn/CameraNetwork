@@ -7,18 +7,6 @@
 var ros = new ROSLIB.Ros({
     url : 'ws://pimaster.jflalonde.org:9090'
 });
- 
-var IpList = new ROSLIB.Param({
-	ros : ros,
-	name : '/IP'
-});
-  
-IpList.get(function(value) {
-	var select = document.getElementById("deviceList");
-		$.each( value, function( key, value ) {
-		select.options[select.options.length] = new Option(key, value);
-	});
-});
 
 //   ---- Class ---- 
  
@@ -261,6 +249,23 @@ function device(name,ip){
 
 	}
 
+	this.getInformation = function(form){
+		var save = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name +'/get_camera',
+			serviceType : 'camera_network_msgs/OutCameraData'
+		});
+		var request = new ROSLIB.ServiceRequest({getAllInformation:true});
+		save.callService(request, function(result) {
+			string = '';
+			string += result['iso'] + '\n';
+			string += result['aperture'] + '\n';
+			string += result['shutterspeed'] + '\n';
+			string += result['imageformat'] + '\n';
+			alert(string);
+		});
+	}
+
 	this.refresh = function(){
 		this.param.get(function(value){
 	    	if(value != null && value["camera_model"] != null){
@@ -386,6 +391,22 @@ function refreshCanvas(){
     document.getElementById('imagePreview').src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
 };
 
+function refreshSelect(){
+	var IpList = new ROSLIB.Param({
+		ros : ros,
+		name : '/IP'
+	});
+	IpList.get(function(value) {
+	$("#deviceList").empty(); 
+	var select = document.getElementById("deviceList");
+	select.options[0] = new Option("Online Devices", "index0");
+	$.each( value, function( key, value ) {
+		select.options[select.options.length] = new Option(key, value);
+	});
+	});
+
+}
+
 /*function init(){
 	var viewer = new MJPEGCANVAS.MultiStreamViewer({
 		divID : 'mjpeg',
@@ -402,3 +423,4 @@ function refreshCanvas(){
 
 setInterval(refreshScreen, 1000);
 setInterval(refreshCanvas, 500);
+setInterval(refreshSelect,500);
