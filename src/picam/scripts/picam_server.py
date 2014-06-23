@@ -91,9 +91,10 @@ class picam_server:
         shutterspeed = str(self.picam.shutter_speed)
         
         if req.getAllInformation:
-            iso = "ISO : " + iso + "\n Choice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800"
-            imageformat = "Image format : " + imageformat + "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra"
-            shutterspeed = "Shutterspeed : " + shutterspeed + "\nChoice : 0(auto)\nChoice : (int)usec"
+            iso = "current ISO : " + iso + "\n Choice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800\n"
+            imageformat = "current Image format : " + imageformat + "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra\n"
+            shutterspeed = "current Shutterspeed : " + shutterspeed + "\nChoice : 0(auto)\nChoice : (int)usec\n"
+            aperture = "current aperture : " + aperture + "\n"
         
         return {'iso':iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
