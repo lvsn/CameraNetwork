@@ -60,9 +60,9 @@ class sftp_server:
             
             pictureQty = self.download_all_images_from_network()
             totalCount += pictureQty
-            if self.server.is_preempt_requested() or goal.dowload_frequency_s == 0:
-                break
             r.sleep()
+            if self.server.is_preempt_requested() or not self.server.is_active() or goal.dowload_frequency_s == 0:
+                break
         succes_msg = CameraDownloadActionResult
         succes_msg.total_downloaded = 'Downloaded ' + str(totalCount) + ' pictures from ' + str(len(self.ipDict)) + ' devices.'
 
@@ -110,7 +110,7 @@ class sftp_server:
                
     def _downloadImageFolder(self,sftp,deviceName=''):
         feedback_msg = CameraDownloadActionFeedback
-        filelist = sftp.listdir('.' + self.imagePath + self.dateFolder)
+        filelist = sftp.listdir(self.imagePath + self.dateFolder)
         rospy.loginfo('found ' + str(len(filelist)) + ' files')
                 
                 
@@ -122,7 +122,7 @@ class sftp_server:
         else:
             for f in filelist:
                 rospy.loginfo('Downloading ' + f)
-                remoteFile = '.' + self.imagePath + self.dateFolder + f
+                remoteFile = self.imagePath + self.dateFolder + f
                 localFile = self.localImagePath + deviceName + '/' + f
                 sftp.get(remoteFile,localFile)
                 sftp.remove(remoteFile)

@@ -54,13 +54,11 @@ class CameraHandler:
             rospy.logwarn("Service call failed: %s",e)
         
     def takeSinglePicture(self,pictureId,setCamera = True, loadCamera = True):
-        settingList = rospy.get_param('camera_setting/captureSequence')
         pictureName = str(pictureId)
         #picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on camera's picture qty)
         picturePath = self._generatePictureName(pictureName)
-        pictureSetting = settingList[0]
         if setCamera:
-            self.updateCameraSetting(pictureSetting)
+            self.updateCameraSetting()
         self.capture_camera_service('dummy')
         if loadCamera:
             self.load_camera_service(picturePath)
@@ -77,7 +75,8 @@ class CameraHandler:
         if loadCamera:
             self.load_camera_service(picturePath)
             
-    def takePreview(self):
+    def takePreview(self,configDict={}):
+        self.updateCameraSetting(configDict)
         picturePath = 'preview/send.%C'
         self.capture_camera_service('dummy')
         self.load_camera_service(picturePath)

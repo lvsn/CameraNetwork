@@ -23,6 +23,8 @@ class picam_server:
             rospy.logfatal("Check if the Picam is free or installed")
 
         self.picam.awb_mode = 'off'
+        self.picam.awb_gains = 1.5
+
 
         self.camParam = pph.PicameraParameterHandler()
         self.camParam.set_camera_parameters()
@@ -53,23 +55,23 @@ class picam_server:
     def load_camera_cb(self,req):
         #reset generator
         self.id_gen = self._id_generator()
-        loadPath = self._gphoto_filename_format(req.path,0,'dummy')  #to make sure it create the right path
+        loadPath = self.homePath + "/" + self._filename_format(req.path,0,'dummy')  #to make sure it create the right path
         if loadPath.find('..') != -1:
             rospy.logwarn("use of .. is prohibed")
             return "error"
         directory = os.path.dirname(loadPath)
-        rospy.loginfo("Loading Picture to folder" + directory)
+        rospy.loginfo("Loading Picture to folder " + directory)
         if not os.path.exists(directory):
             os.makedirs( directory)
         count = 0
         for pictureFile in os.listdir(self.tmpPath):
             fileFormat =pictureFile.split('.')[-1]
-            os.rename( self.tmpPath + "/" + pictureFile, self._gphoto_filename_format(req.path,count,fileFormat))
+            os.rename( self.tmpPath + "/" + pictureFile, self.homePath + "/" + self._filename_format(req.path,count,fileFormat))
             count += 1
         return "Transfered " + str(count) + " files."
 
     def set_camera_cb(self,req):
-        rospy.loginfo("Setting camera's Configuration")
+        rospy.loginfo("Setting camera's Configuration to " + str(req))
         if(req.iso != ""):
             self.picam.ISO = int(float(req.iso))
         if(req.imageformat != ""):
@@ -88,10 +90,15 @@ class picam_server:
         aperture = "not supported"
         shutterspeed = str(self.picam.shutter_speed)
         
+        if req.getAllInformation:
+            iso = "current ISO : " + iso + "\n Choice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800\n"
+            imageformat = "current Image format : " + imageformat + "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra\n"
+            shutterspeed = "current Shutterspeed : " + shutterspeed + "\nChoice : 0(auto)\nChoice : (int)usec\n"
+            aperture = "current aperture : " + aperture + "\n"
+        
         return {'iso':iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
-    def _gphoto_filename_format(self,string,pictureId,pictureFormat):
-        string = string.replace('~',self.homePath)
+    def _filename_format(self,string,pictureId,pictureFormat):
         string = string.replace('%C',pictureFormat)
         string = string.replace('%n', str(pictureId))
         return time.strftime(string)

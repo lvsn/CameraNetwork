@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   cv_bridge
   image_transport
+  camera_network_msgs
 )
 
 ## System dependencies are found with CMake's conventions

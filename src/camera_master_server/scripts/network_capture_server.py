@@ -52,9 +52,9 @@ class network_capture_server:
             self.publisher.publish(self.msg)
             feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count)
             self.server.publish_feedback(feedback_msg)
-            if self.server.is_preempt_requested() or singleShotFlag:
-                break
             r.sleep()
+            if self.server.is_preempt_requested() or not self.server.is_active() or singleShotFlag:
+                break
         
 
         succes_msg = CameraControlActionResult
