@@ -16,7 +16,7 @@ def print_feedback(feedback):
 
 if __name__ == '__main__':
     rospy.init_node('timelaps_client')
-    client = actionlib.SimpleActionClient('/test/timelaps', CameraControlAction)
+    client = actionlib.SimpleActionClient('/pi1/timelaps', CameraControlAction)
     client.wait_for_server()
 
     goal = CameraControlGoal()
