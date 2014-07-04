@@ -10,6 +10,7 @@ import rospy
 from camera_network_msgs.srv import *
 
 import picamera
+import wiringpi2 as gpio
 import os
 import time
 import picamParameterHandler as pph
@@ -24,6 +25,12 @@ class picam_server:
 
         self.picam.awb_mode = 'off'
         self.picam.awb_gains = 1.5
+        
+        self.led = 5
+        os.system("gpio export " + str(self.led) + " out")
+        if gpio.wiringPiSetupSys() != 0:
+            rospy.logfatal("Unable to setup gpio")
+        gpio.digitalWrite(self.led,False)
 
 
         self.camParam = pph.PicameraParameterHandler()
@@ -39,10 +46,20 @@ class picam_server:
         rospy.Service('get_camera',OutCameraData,self.get_camera_cb)
         rospy.Service('set_camera',InCameraData,self.set_camera_cb)
         rospy.loginfo("Camera Ready")
+        self.flash_led(nflash=4)
         rospy.spin()
 
     def __del__(self):
+        self.flash_led(nflash=3)
         self.picam.close()
+
+    def flash_led(self,nflash=1,delay=0.25):
+        #nflash is the number of blink the led will make
+        for n in range(nflash):
+            gpio.digitalWrite(self.led,True)
+            rospy.sleep(delay)
+            gpio.digitalWrite(self.led,False)
+            rospy.sleep(delay)
 
     def capture_image_cb(self,req):
         rospy.loginfo("Taking Picture")
@@ -50,6 +67,7 @@ class picam_server:
             os.makedirs( self.tmpPath)
         pictureFileName =  self.tmpPath + '/unloaded_' + self.id_gen.next() + '.' + self.camParam.get_format() 
         self.picam.capture( pictureFileName, format=self.camParam.get_format())
+        self.flash_led(nflash=2)
         return 'image saved as ' + pictureFileName
 
     def load_camera_cb(self,req):

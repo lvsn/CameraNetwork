@@ -21,6 +21,7 @@ class PicameraParameterHandler:
         #todo look if camera is here
         rospy.loginfo("Found PiCam")
 
+
     def __del__(self):
         if self.configLoadedtoRos:
             try:
