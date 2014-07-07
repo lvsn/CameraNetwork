@@ -53,7 +53,7 @@ class picam_server:
         self.flash_led(nflash=3)
         self.picam.close()
 
-    def flash_led(self,nflash=1,delay=0.25):
+    def flash_led(self,nflash=1,delay=0.1):
         #nflash is the number of blink the led will make
         for n in range(nflash):
             gpio.digitalWrite(self.led,True)
