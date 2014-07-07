@@ -9,18 +9,27 @@ gpio_input_handler::gpio_input_handler(ros::NodeHandle nh){
     mTimer[0] = 0;
     mTimer[1] = 0;
     mTimer[2] = 0;
+
+    system("gpio export 4 in");
+    system("gpio edge 4 falling");
+    system("gpio export 22 in");
+    system("gpio edge 22 falling");
+    system("gpio export 23 in");
+    system("gpio edge 23 falling");
+    
+
     int err = wiringPiSetupSys();
     if(err == -1){
         ROS_WARN_STREAM("Unable to setup GPIO");
     }
     else{
-        ROS_INFO_STREAM("piGPIO node ready, wiringpi init pin :" << digitalRead(4));
+        ROS_INFO_STREAM("piGPIO node ready");
     }
     
     //pinMode does nothing in Sys mode but at least it says the pin configuration
-    pinMode(4,INPUT);
-    pinMode(22,INPUT);
-    pinMode(23,INPUT);
+    //pinMode(4,INPUT);
+    //pinMode(22,INPUT);
+    //pinMode(23,INPUT);
     
     //Setup ISRs
     if( wiringPiISR(4,INT_EDGE_SETUP,&setShotInterupt) < 0){
@@ -29,9 +38,30 @@ gpio_input_handler::gpio_input_handler(ros::NodeHandle nh){
     if( wiringPiISR(22,INT_EDGE_SETUP,&setNetworkShotInterupt) < 0){
         ROS_WARN_STREAM("Unable to setup Network Shot Interupt!");
     }
-    if( wiringPiISR(23,INT_EDGE_SETUP,&setTimelapsInterupt) < 0){
+    if( wiringPiISR(22,INT_EDGE_SETUP,&setTimelapsInterupt) < 0){
         ROS_WARN_STREAM("Unable to setup Timelaps Interupt!");
     }
+
+    //Setup publishers 
+    mChatter_pub = mNh.advertise<camera_network_msgs::Capture>("/network_capture_chatter", 1);
+    mCapture_client = mNh.serviceClient<camera_network_msgs::CaptureService>("capture_camera");
+}
+
+void gpio_input_handler::publishNetworkShot(){
+    camera_network_msgs::Capture msg;
+    msg.isHdr = false;
+    mChatter_pub.publish(msg);
+}
+
+void gpio_input_handler::callShotService(){
+    camera_network_msgs::CaptureService::Request req;
+    camera_network_msgs::CaptureService::Response resp;
+    req.time = "heh";
+    bool success = mCapture_client.call(req,resp);
+    if (!success)
+        ROS_WARN_STREAM("error calling capture_image client : check if camera's service are online");
+
+
 }
 
 void setShotInterupt(void){
@@ -39,14 +69,7 @@ void setShotInterupt(void){
         return;
     }
     ROS_INFO_STREAM("Button Shot pressed");
-    ros::ServiceClient captureClient = node->mNh.serviceClient<camera_network_msgs::CaptureService>("capture_camera");
-    camera_network_msgs::CaptureService::Request req;
-    camera_network_msgs::CaptureService::Response resp;
-    req.time = "heh";
-    bool success = captureClient.call(req,resp);
-    if (!success)
-        ROS_WARN_STREAM("error calling capture_image client");
-
+    node->callShotService();
     node->mTimer[0] = millis();
 }
 
@@ -54,8 +77,8 @@ void setNetworkShotInterupt(void){
     if (node->mTimer[1] + DEBOUNCE_TIME > millis()){
         return;
     }
-    ROS_INFO_STREAM("Network Shot!!");
-
+    ROS_INFO_STREAM("Button network Shot pressed");
+    node->publishNetworkShot();
     node->mTimer[1] = millis();
 }
 

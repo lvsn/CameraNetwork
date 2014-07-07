@@ -75,8 +75,8 @@ class CameraHandler:
         if loadCamera:
             self.load_camera_service(picturePath)
             
-    def takePreview(self,configDict={}):
-        self.updateCameraSetting(configDict)
+    def takePreview(self):
+        self.updateCameraSetting()
         picturePath = 'preview/send.%C'
         self.capture_camera_service('dummy')
         self.load_camera_service(picturePath)

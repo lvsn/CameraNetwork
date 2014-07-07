@@ -32,10 +32,7 @@ class PicameraParameterHandler:
     def set_camera_parameters(self):
         rospy.set_param("camera_model",self.cameraModel)
         self.configLoadedtoRos = True
-        #rospy.set_param("~isoConfig","iso")
-        #rospy.set_param("",)
-        #rospy.set_param("",)
-        #rospy.set_param("",)
+
 
     def set_format(self,formatString):
         if formatString in self.supportedFormatList:

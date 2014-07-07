@@ -25,6 +25,7 @@
 			<input id="network_frequency" type="number" value=0 name="network_timelaps_frequency" >
         	<label>Quantity (<0 = infinite) : </label>
         	<input id="network_quantity" type="number" value=0 name="network_timelaps_qty" >
+        	<input type="checkbox" id="network_hdr" value="HDR">HDR<br>
       		<dl>
         		<dt>Status:</dt>
           			<dd id ="network_timelaps_status"></dd>
@@ -33,7 +34,6 @@
         		<dt>Result:</dt>
           			<dd id="network_timelaps_result"></dd>
       		</dl>
-      
 			<input type="submit" class="styleButton" onclick="_network_timelaps.setAction(this.form)" value="Set">
     	</form>
 		<button type="button" class="styleButton" onclick = "_network_timelaps.stopAction()">Stop</button>
@@ -53,7 +53,7 @@
 				<dt>Feedback:</dt>
 					<dd id="network_download_feedback"></dd>
 				<dt>Result:</dt>
-					<dd id="network_download_termination"></dd>
+					<dd id="network_download_result"></dd>
 			</dl>
 			<input type="submit" class="styleButton" onclick="_network_download.setAction(this.form)" value="Download">
 		</form> 
@@ -138,6 +138,7 @@
 				<input id="device_timelaps_frequency" type="number" value=0 name="device_timelaps_frequency" >
 				<label>Quantity (<0 = infinite) : </label>
 				<input id="device_timelaps_qty" type="number" value=0 name="device_timelaps_qty" >
+				<input type="checkbox" id="device_hdr" value="HDR">HDR<br>
 				<dl>
 					<dt>Status:</dt>
 						<dd id ="device_timelaps_status"></dd>

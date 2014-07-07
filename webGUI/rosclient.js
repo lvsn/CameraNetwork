@@ -37,7 +37,8 @@ function network_timelaps(){
 			actionClient : _network_timelaps.action,
 			goalMessage : {
 				picture_qty : parseFloat(form.network_timelaps_qty.value),
-				inter_picture_delay_s : parseFloat(form.network_timelaps_frequency.value)
+				inter_picture_delay_s : parseFloat(form.network_timelaps_frequency.value),
+				is_hdr : $('#network_hdr').is(':checked')
 			}
 		});
 		goal.send();
@@ -99,7 +100,7 @@ function network_download(){
 		goal.send();
 	}  
 
-   this.stopAction = function(){
+    this.stopAction = function(){
 		this.action.cancel();
 	}
    
@@ -126,47 +127,81 @@ function network_download(){
 	}); 
 };
 
-function device(name,ip){
-	this.name = name;
-	this.ip = ip;
-	this.param =  new ROSLIB.Param({
-    	ros : ros,
-		name : '/'+name
-	}); 
-	this.status = new ROSLIB.Topic({
-		ros : ros,
-		name :  name + '/timelaps/status',
-		messageType : 'actionlib_msgs/GoalStatusArray'
-	});
-	this.feedback = new ROSLIB.Topic({
-		ros : ros,
-		name : name + '/timelaps/feedback',
-		messageType : 'camera_network_msgs/CameraControlActionFeedback'
-	});
-	this.result = new ROSLIB.Topic({
-		ros : ros,
-		name : name + '/timelaps/result',
-		messageType : 'camera_network_msgs/CameraControlActionResult'
-	});
-	this.action = new ROSLIB.ActionClient({
-		ros : ros,
-		serverName : name + '/timelaps',
-		actionName : 'camera_network_msgs/CameraControlAction'  
-  	});  
+function device(){
+
+	var param;
+	var status;
+	var feedback;
+	var result;
+	var action;
+	var name;
+	var ip;
+
+	this.createRosAttribute = function(pName,pIP){
+		name = pName;
+		ip = pIP;
+		param = new ROSLIB.Param({
+	    	ros : ros,
+			name : '/' + name
+		}); 
+		status = new ROSLIB.Topic({
+			ros : ros,
+			name :  name + '/timelaps/status',
+			messageType : 'actionlib_msgs/GoalStatusArray'
+		});
+		feedback = new ROSLIB.Topic({
+			ros : ros,
+			name : name + '/timelaps/feedback',
+			messageType : 'camera_network_msgs/CameraControlActionFeedback'
+		});
+		result = new ROSLIB.Topic({
+			ros : ros,
+			name : name + '/timelaps/result',
+			messageType : 'camera_network_msgs/CameraControlActionResult'
+		});
+		action = new ROSLIB.ActionClient({
+			ros : ros,
+			serverName : name + '/timelaps',
+			actionName : 'camera_network_msgs/CameraControlAction'  
+	  	});  
+		
+		feedback.subscribe(function(msg){
+			$("#device_timelaps_feedback").text(msg.feedback.picture_taken);
+		});
+
+		result.subscribe(function(msg){
+			$("#device_timelaps_result").text(msg.result.total_picture);
+		});	
+		
+	    status.subscribe(function(message) {
+			statusList = message.status_list;
+			if(statusList.length > 0){
+				//console.log(message.status_list[0].status);
+				$("#device_timelaps_status").text("Busy");
+				$("#device_timelaps_status").css("color","red");
+			}
+			else{
+				$("#device_timelaps_status").text("Idle");
+				$("#device_timelaps_status").css("color","green");
+			}
+		});  
+	
+	}
 
 	this.setAction = function sendGoal(form){
 		var goal = new ROSLIB.Goal({
-			actionClient : _current_device.action,
+			actionClient : action,
 			goalMessage : {
 				picture_qty : parseFloat(form.device_timelaps_qty.value),
-				inter_picture_delay_s : parseFloat(form.device_timelaps_frequency.value)
+				inter_picture_delay_s : parseFloat(form.device_timelaps_frequency.value),
+				is_hdr : $('#device_hdr').is(':checked')
 			}
 		});
 		goal.send();
 	}  
 
 	this.stopAction = function(){
-		this.action.cancel();
+		action.cancel();
 	}
 
     this.removeSequence = function() {
@@ -267,7 +302,9 @@ function device(name,ip){
 	}
 
 	this.refresh = function(){
-		this.param.get(function(value){
+		$("#device_name").text(name);
+    	$("#device_ip").text(ip);
+		param.get(function(value){
 	    	if(value != null && value["camera_model"] != null){
 	    		$("#device_camera").text(value["camera_model"]);
 	    		$("#device_camera").css("color","black");
@@ -298,49 +335,23 @@ function device(name,ip){
 	}
 	
 	this.clean = function(){
-		this.status.unsubscribe();
+		status.unsubscribe();
 	}
    
-   this.drawPreview = function(form){
+    this.drawPreview = function(form){
 		var preview = new ROSLIB.Service({
 			ros : ros,
 			name : '/' + name + '/preview_camera',
-			serviceType : 'camera_network_msgs/InCameraData'
+			serviceType : 'std_srvs/Empty'
 		});
-		var request = new ROSLIB.ServiceRequest({
-			iso: "",
-			aperture : "",
-			imageformat: "",
-			shutterspeed: ""
-		});
+		var request = new ROSLIB.ServiceRequest({});
 	  preview.callService(request);
 	  
 	}
-	   
-	this.feedback.subscribe(function(msg){
-		$("#device_timelaps_feedback").text(msg.feedback.picture_taken);
-	});
 
-	this.result.subscribe(function(msg){
-		$("#device_timelaps_result").text(msg.result.total_picture);
-	});	
-	
-    this.status.subscribe(function(message) {
-		statusList = message.status_list;
-		if(statusList.length > 0){
-			//console.log(message.status_list[0].status);
-			$("#device_timelaps_status").text("Busy");
-			$("#device_timelaps_status").css("color","red");
-		}
-		else{
-			$("#device_timelaps_status").text("Idle");
-			$("#device_timelaps_status").css("color","green");
-		}
-	});  
-	
-    $("#device_name").text(this.name);
-    $("#device_ip").text(this.ip);
-
+	this.getIp = function(){
+		return ip;
+	}
 }
 
 //   ----  Instantces   -----
@@ -356,7 +367,8 @@ img.src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?he
 function selectEvent(select){
 	if(select.selectedIndex != 0){
 		currentDevice = select.options[select.selectedIndex].text;
-		_current_device = new device(currentDevice,select.value);
+		_current_device = new device();
+		_current_device.createRosAttribute(currentDevice,select.value);
 		_current_device.refresh();
 	}
 	else{
@@ -379,11 +391,11 @@ function cleanDevicePage(){
 }
 
 function refreshScreen(){
-	if (typeof(_current_device) != "undefined"){
-		_current_device.refresh();
+	if (_current_device == undefined){
+		cleanDevicePage();
 	}
 	else{
-		cleanDevicePage();
+		_current_device.refresh();
 	}
 }
 
@@ -392,19 +404,30 @@ function refreshCanvas(){
 };
 
 function refreshSelect(){
-	var IpList = new ROSLIB.Param({
+	IpList = new ROSLIB.Param({
 		ros : ros,
 		name : '/IP'
 	});
 	IpList.get(function(value) {
-	$("#deviceList").empty(); 
-	var select = document.getElementById("deviceList");
-	select.options[0] = new Option("Online Devices", "index0");
-	$.each( value, function( key, value ) {
-		select.options[select.options.length] = new Option(key, value);
+		$("#deviceList").empty(); 
+		var select = document.getElementById("deviceList");
+		select.options[0] = new Option("Online Devices", "index0");
+		$.each( value, function( key, value ) {
+			select.options[select.options.length] = new Option(key, value);
+		});
+		if(_current_device != undefined){
+			$("#deviceList").val(_current_device.getIp());	
+		}
 	});
-	});
+}
 
+function deviceSelected(){
+	if(_current_device == undefined){
+		return false;
+	}
+	else{
+		return true;
+	}
 }
 
 /*function init(){
@@ -423,4 +446,4 @@ function refreshSelect(){
 
 setInterval(refreshScreen, 1000);
 setInterval(refreshCanvas, 500);
-setInterval(refreshSelect,500);
+setInterval(refreshSelect,2000);

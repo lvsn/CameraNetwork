@@ -44,8 +44,12 @@ class TimelapsServer:
         self.picture_count = 0
         while self.picture_count < picture_goal:
             self.picture_count += 1
-            self.cam_handler.takeHDRPicture(self.picture_count)
-            feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count)
+            if(goal.is_hdr == True):
+                self.cam_handler.takeHDRPicture(self.picture_count)
+            else:
+                self.cam_handler.takeSinglePicture(self.picture_count)
+            feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count) \
+            + '/' + str(picture_goal) + ' (' + str(hz) + 'Hz)'
             self.server.publish_feedback(feedback_msg)
             r.sleep()
             if self.server.is_preempt_requested() or not self.server.is_active():

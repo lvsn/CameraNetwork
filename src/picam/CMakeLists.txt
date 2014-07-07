@@ -8,11 +8,13 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+#  cv_bridge
+#  image_transport
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+#find_package(OpenCV REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -95,6 +97,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+#  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -104,6 +107,7 @@ include_directories(
 
 ## Declare a cpp executable
 # add_executable(picam_node src/picam_node.cpp)
+#add_executable(cameraStream src/cameraStream.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -113,6 +117,8 @@ include_directories(
 # target_link_libraries(picam_node
 #   ${catkin_LIBRARIES}
 # )
+
+#target_link_libraries (cameraStream ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
 #############
 ## Install ##
