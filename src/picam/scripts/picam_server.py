@@ -80,6 +80,7 @@ class picam_server:
             rospy.logwarn("aperture is not supported on picam")
         if(req.shutterspeed != ""):
             self.picam.shutter_speed = int(float(req.shutterspeed))
+        
 
         return "Picam set"
 

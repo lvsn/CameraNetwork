@@ -30,6 +30,7 @@ class network_capture_server:
         
     def execute(self,goal):
         feedback_msg = CameraControlActionFeedback
+        self.msg.isHdr = goal.is_hdr
         hz = 0
         singleShotFlag = False
         try:
@@ -50,7 +51,8 @@ class network_capture_server:
         while self.picture_count < picture_goal:
             self.picture_count += 1
             self.publisher.publish(self.msg)
-            feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count)
+            feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count) \
+            + '/' + str(picture_goal) + ' (' + str(hz) + 'Hz)'
             self.server.publish_feedback(feedback_msg)
             r.sleep()
             if self.server.is_preempt_requested() or not self.server.is_active() or singleShotFlag:
