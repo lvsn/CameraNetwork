@@ -8,13 +8,18 @@ Created on Thu June 05 09:17:30 2014
 import roslib; roslib.load_manifest('picam')
 import rospy
 from camera_network_msgs.srv import *
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+import std_srvs.srv
 
+import cv2
 import picamera
 import wiringpi2 as gpio
 import os
 import time
 import picamParameterHandler as pph
-
+import io
+import numpy as np
 
 class picam_server:
     def __init__(self):
@@ -37,7 +42,7 @@ class picam_server:
         self.camParam.set_camera_parameters()
         self.homePath = "/home/CameraNetwork"
         self.tmpPath = self.homePath + '/tmp'
-
+        self.bridge = CvBridge()
         #creating a large id generator so pictures are not overwrited
         self.id_gen = self._id_generator()
 
@@ -45,6 +50,8 @@ class picam_server:
         rospy.Service('load_camera',Load,self.load_camera_cb)
         rospy.Service('get_camera',OutCameraData,self.get_camera_cb)
         rospy.Service('set_camera',InCameraData,self.set_camera_cb)
+        rospy.Service('stream_video',VideoStream,self.stream_video_cb)
+        self.image_publisher = rospy.Publisher("/preview",Image)
         rospy.loginfo("Camera Ready")
         self.flash_led(nflash=4)
         rospy.spin()
@@ -69,6 +76,20 @@ class picam_server:
         self.picam.capture( pictureFileName, format=self.camParam.get_format())
         self.flash_led(nflash=2)
         return 'image saved as ' + pictureFileName
+
+    def stream_video_cb(self,req):
+        stream = io.BytesIO()
+        rospy.loginfo("Start Video streaming with " + str(req.frames) + " frames.")
+        for i in range(req.frames):
+            stream.flush()
+            stream.seek(0)
+            self.picam.capture(stream, format='jpeg')
+            data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+            image = cv2.imdecode(data, 1)
+            try:
+                self.image_publisher.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
+            except CvBridgeError, e:
+                rospy.logwarn(e)
 
     def load_camera_cb(self,req):
         #reset generator
