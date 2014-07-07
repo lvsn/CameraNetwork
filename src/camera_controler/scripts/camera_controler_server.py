@@ -15,10 +15,12 @@ import parameter_save as ps
 import os
 import std_srvs.srv
 
+
 class server:
     
     def __init__(self):
         rospy.init_node('timelaps_server')
+        
         self.cam_handler = ch.CameraHandler()
         self.timelapsServer = ts.TimelapsServer(self.cam_handler)
         self.listener = ncl.network_capture_listener(self.cam_handler)
@@ -36,7 +38,7 @@ class server:
         rospy.delete_param('camera_setting')
         rospy.delete_param('file')
         rospy.delete_param('/IP/' + os.environ['CAMERA_NAME'])
-        
+
     def preview_image_cb(self,req):
         self.cam_handler.takePreview()
         directory = "/home/CameraNetwork/preview/"
@@ -57,8 +59,7 @@ class server:
                 except:
                     rospy.logerr("Problem while renaming" + directory+filename)
         return []
-        
+            
 
 if __name__ == "__main__":
-    
     serverInstance = server()
