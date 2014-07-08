@@ -80,6 +80,7 @@ class picam_server:
     def stream_video_cb(self,req):
         stream = io.BytesIO()
         rospy.loginfo("Start Video streaming with " + str(req.frames) + " frames.")
+        gpio.digitalWrite(self.led,True)
         for i in range(req.frames):
             stream.flush()
             stream.seek(0)
@@ -90,6 +91,8 @@ class picam_server:
                 self.image_publisher.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
             except CvBridgeError, e:
                 rospy.logwarn(e)
+        gpio.digitalWrite(self.led,False);
+        return {}
 
     def load_camera_cb(self,req):
         #reset generator
