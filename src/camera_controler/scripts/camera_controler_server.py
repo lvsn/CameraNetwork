@@ -44,9 +44,9 @@ class server:
         directory = "/home/CameraNetwork/preview/"
         filelist = os.listdir(directory)
         for filename in filelist:
-            f, e = os.path.splitext(filename)
-            if e not in [".jpg",".jpeg",".JPG",".JPEG"]:
-                rospy.logwarn("Camera is not set to JPG: current format = " + e)
+            f, extention = os.path.splitext(filename)
+            if extention not in [".jpg",".jpeg",".JPG",".JPEG"]:
+                rospy.logwarn("Camera is not set to JPG: current format = " + extention)
                 try:
                     os.remove(directory + filename)
                 except:

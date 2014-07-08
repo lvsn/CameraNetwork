@@ -221,6 +221,18 @@ function device(){
 		var request = new ROSLIB.ServiceRequest({});
 		save.callService(request, function(result) {});
 	}
+	
+	this.streamVideo = function(){
+		var stream_srv = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name + '/stream_video',
+			serviceType : 'camera_network_msgs/VideoStream'
+		});
+		var request = new ROSLIB.ServiceRequest({
+			frames : parseInt($("#device_stream_frames").val())
+		});
+		stream_srv.callService(request,function(result){});
+	}
 
 	this.addSequence = function(form){
 		var setting = new ROSLIB.Param({
@@ -364,18 +376,6 @@ img.src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?he
 
 //   ---   Functions   ----
 
-function selectEvent(select){
-	if(select.selectedIndex != 0){
-		currentDevice = select.options[select.selectedIndex].text;
-		_current_device = new device();
-		_current_device.createRosAttribute(currentDevice,select.value);
-		_current_device.refresh();
-	}
-	else{
-		_current_device = undefined;
-	}
-}
-
 function cleanDevicePage(){
 	$("#device_name").text("");
 	$("#device_ip").text("");
@@ -421,26 +421,99 @@ function refreshSelect(){
 	});
 }
 
-function deviceSelected(){
+function noDeviceAlert(){
 	if(_current_device == undefined){
-		return false;
+		alert("No device selected");
+		return true;
 	}
 	else{
-		return true;
+		return false;
 	}
 }
 
-/*function init(){
-	var viewer = new MJPEGCANVAS.MultiStreamViewer({
-		divID : 'mjpeg',
-		host : 'pimaster.jflalonde.org',
-		width : 640,
-		height : 480,
-		topics : ['/preview'],
-		labels : ['test'],
-		port : 8181
-	});	
-}*/
+// ---- events ----
+
+function selectEvent(select){
+	if(select.selectedIndex != 0){
+		currentDevice = select.options[select.selectedIndex].text;
+		_current_device = new device();
+		_current_device.createRosAttribute(currentDevice,select.value);
+		_current_device.refresh();
+	}
+	else{
+		_current_device.clean();
+		_current_device = undefined;
+	}
+}
+
+function networkTimelapsEvent(form,isStart){
+	if(isStart){
+		_network_timelaps.setAction(form);
+	}
+	else{
+		_network_timelaps.stopAction();
+	}
+}
+
+function networkDownloadEvent(form,isStart){
+	if(isStart){
+		_network_download.setAction(form);
+	}
+	else{
+		_network_download.stopAction();
+	}
+}
+
+function setParametersEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.setParameters(form);		
+	}
+}
+
+function getInformationEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.getInformation();		
+	}
+}
+
+function removeSequenceEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.removeSequence();		
+	}
+}
+
+function addSequenceEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.addSequence(form);		
+	}
+}
+
+function saveSequenceEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.saveSequence();		
+	}
+}
+
+function deviceTimelapsEvent(form,isStart){
+	if(isStart){
+		_current_device.setAction(form);
+	}
+	else{
+		_current_device.stopAction();
+	}
+}
+
+function streamVideoEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.streamVideo();		
+	}
+}
+
+function drawPreviewEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.drawPreview();		
+	}
+}
 
 //    ----   Dynamic page   -----
 
