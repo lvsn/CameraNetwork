@@ -10,6 +10,7 @@ import rospy
 import actionlib
 import camera_handler as ch
 from camera_network_msgs.msg import *
+import math
 
 
 class TimelapsServer:
@@ -25,34 +26,18 @@ class TimelapsServer:
     
     
     def execute(self,goal):
-
-        feedback_msg = CameraControlActionFeedback
-        hz = 0
-        try:
-            hz = 1/goal.inter_picture_delay_s
-            rospy.loginfo("Capturing at a rate of "+str(hz)+" hz")
-        except ZeroDivisionError:
-            hz = 1
-            rospy.logwarn("Can't set a 0 delay for Capture")
-            
-        r = rospy.Rate(hz) # hz 
-        if goal.picture_qty < 0:
-            picture_goal = float('inf')
-        else:
-            picture_goal = goal.picture_qty
-            
+        
+        hz = self._sec_to_hz(goal.inter_picture_delay_s)
+        picture_goal = self._get_frame_qty(goal.picture_qty)
         self.picture_count = 0
+        r = rospy.Rate(hz)
+            
         while self.picture_count < picture_goal:
             self.picture_count += 1
-            if(goal.is_hdr == True):
-                self.cam_handler.takeHDRPicture(self.picture_count)
-            else:
-                self.cam_handler.takeSinglePicture(self.picture_count)
-            feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count) \
-            + '/' + str(picture_goal) + ' (' + str(hz) + 'Hz)'
-            self.server.publish_feedback(feedback_msg)
+            self._take_picture(goal.is_hdr,self.picture_count)
+            self._send_feedback(self.picture_count,picture_goal,hz)
             r.sleep()
-            if self.server.is_preempt_requested() or not self.server.is_active():
+            if self.server.is_preempt_requested() or not self.server.is_active() or hz <= 0:
                 break
         
 
@@ -60,7 +45,35 @@ class TimelapsServer:
         succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.server.set_succeeded(succes_msg)
 
-
+    def _sec_to_hz(self,Tsec):
+        try:
+            hz = math.fabs(1/Tsec)
+            rospy.loginfo("Frequency set to " + str(hz) + " hz.")
+        except ZeroDivisionError:
+            hz = -1
+            rospy.logwarn("Can not set 0 as frequency... setting frequency to 1 hz")
+        return hz
+            
+    def _get_frame_qty(self,Qty):
+        if Qty < 0:
+            frame_qty = float('inf')
+        else:
+            frame_qty = Qty
+        return frame_qty
+        
+    def _take_picture(self,isHdr,pictureId):
+        if(isHdr == True):
+            self.cam_handler.takeHDRPicture(pictureId)
+        else:
+            self.cam_handler.takeSinglePicture(pictureId)
+            
+    def _send_feedback(self,count,goal,frequency):
+        feedback_msg = CameraControlActionFeedback
+        feedback_msg.picture_taken = 'Picture taken:' + str(count) \
+            + '/' + str(goal) + ' (' + str(frequency) + 'Hz)'
+        self.server.publish_feedback(feedback_msg)
+        
+            
 
 if __name__ == "__main__":
     rospy.init_node('timelaps_server')

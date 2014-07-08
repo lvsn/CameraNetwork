@@ -11,6 +11,7 @@ import rospy
 from camera_network_msgs.srv import *
 from camera_network_msgs.msg import *
 import actionlib
+import math
 
 class network_capture_server:
     
@@ -29,39 +30,46 @@ class network_capture_server:
 
         
     def execute(self,goal):
-        feedback_msg = CameraControlActionFeedback
         self.msg.isHdr = goal.is_hdr
-        hz = 0
-        singleShotFlag = False
-        try:
-            hz = 1/goal.inter_picture_delay_s
-            rospy.loginfo("Capturing at a rate of "+str(hz)+" hz")
-        except ZeroDivisionError:
-            hz = 1
-            singleShotFlag = True
-            rospy.logwarn("Can't set a 0 delay for Capture")
-            
-        r = rospy.Rate(hz) # hz 
-        if goal.picture_qty < 0:
-            picture_goal = float('inf')
-        else:
-            picture_goal = goal.picture_qty
-            
+        hz = self._sec_to_hz(goal.inter_picture_delay_s)
+        picture_goal = self._get_frame_qty(goal.picture_qty)
         self.picture_count = 0
+        
+        r = rospy.Rate(hz)
         while self.picture_count < picture_goal:
             self.picture_count += 1
             self.publisher.publish(self.msg)
-            feedback_msg.picture_taken = 'Picture taken:' + str(self.picture_count) \
-            + '/' + str(picture_goal) + ' (' + str(hz) + 'Hz)'
-            self.server.publish_feedback(feedback_msg)
+            self._send_feedback(self.picture_count,picture_goal,hz)
             r.sleep()
-            if self.server.is_preempt_requested() or not self.server.is_active() or singleShotFlag:
+            if self.server.is_preempt_requested() or not self.server.is_active() or hz <= 0:
                 break
         
 
         succes_msg = CameraControlActionResult
         succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.server.set_succeeded(succes_msg)
+        
+    def _sec_to_hz(self,Tsec):
+        try:
+            hz = math.fabs(1/Tsec)
+            rospy.loginfo("Frequency set to " + str(hz) + " hz.")
+        except ZeroDivisionError:
+            hz = -1
+            rospy.logwarn("Can not set 0 as frequency... setting frequency to 1 hz")
+        return hz
+            
+    def _get_frame_qty(self,Qty):
+        if Qty < 0:
+            frame_qty = float('inf')
+        else:
+            frame_qty = Qty
+        return frame_qty
+            
+    def _send_feedback(self,count,goal,frequency):
+        feedback_msg = CameraControlActionFeedback
+        feedback_msg.picture_taken = 'Picture taken:' + str(count) \
+            + '/' + str(goal) + ' (' + str(frequency) + 'Hz)'
+        self.server.publish_feedback(feedback_msg)
 
 if __name__ == '__main__':
     # Initialize the node and name it.

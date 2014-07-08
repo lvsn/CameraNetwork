@@ -34,9 +34,9 @@
         		<dt>Result:</dt>
           			<dd id="network_timelaps_result"></dd>
       		</dl>
-			<input type="submit" class="styleButton" onclick="_network_timelaps.setAction(this.form)" value="Set">
+			<input type="submit" class="styleButton" onclick="networkTimelapsEvent(this.form,true)" value="Set">
     	</form>
-		<button type="button" class="styleButton" onclick = "_network_timelaps.stopAction()">Stop</button>
+		<button type="button" class="styleButton" onclick = "networkTimelapsEvent(this.form,false)">Stop</button>
 
     	
 	</div> 
@@ -55,9 +55,9 @@
 				<dt>Result:</dt>
 					<dd id="network_download_result"></dd>
 			</dl>
-			<input type="submit" class="styleButton" onclick="_network_download.setAction(this.form)" value="Download">
+			<input type="submit" class="styleButton" onclick="networkDownloadEvent(this.form,true)" value="Download">
 		</form> 
-		<button type="button" class="styleButton" onclick = "_network_download.stopAction()">Stop</button>
+		<button type="button" class="styleButton" onclick = "networkDownloadEvent(this.form,false)">Stop</button>
 
 	</div>  
   
@@ -104,9 +104,9 @@
 				<label>Format : </label>
 				<input id="device_parameter_imageformat"  value='' name="device_parameter_imageformat" >
 				</br>
-				<input type="submit" class="styleButton" onclick="_current_device.setParameters(this.form)" value="Set">
+				<input type="submit" class="styleButton" onclick="setParametersEvent(this.form)" value="Set">
 			</form>
-			<button type="button" class="styleButton" onclick = "_current_device.getInformation()">Help</button>
+			<button type="button" class="styleButton" onclick = "getInformationEvent(this.form)">Help</button>
 		</div>
 
 		<!-- Parameter interface -->
@@ -116,7 +116,7 @@
 				<p id="device_parameters"></p>
 			</div>
 			<div class="right">
-				<button type="button" class="styleButton" onclick = "_current_device.removeSequence()">Reset</button>
+				<button type="button" class="styleButton" onclick = "removeSequenceEvent(this.form)">Reset</button>
 				<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
 					<label>Aperture : </label>	
 					<input id="device_sequence_aperture"  value='' name="device_sequence_aperture" >
@@ -124,9 +124,9 @@
 					<label>Shutter Speed : </label>
 					<input id="device_sequence_shutterspeed" value='' name="device_sequence_shutterspeed" >
 					</br>
-					<input type="submit" class="styleButton" onclick="_current_device.addSequence(this.form)" value="Add">
+					<input type="submit" class="styleButton" onclick="addSequenceEvent(this.form)" value="Add">
 				</form>
-				<button type="button" class="styleButton" onclick = "_current_device.saveSequence()">Save</button>
+				<button type="button" class="styleButton" onclick = "saveSequenceEvent()">Save</button>
 			</div>
 		</div>
 
@@ -148,15 +148,19 @@
 						<dd id="device_timelaps_result"></dd>
 				</dl>
   
-				<input type="submit" class="styleButton" onclick="_current_device.setAction(this.form)" value="Set">
+				<input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form,true)" value="Set">
 			</form>
-			<button type="button" class="styleButton" onclick = "_current_device.stopAction()">Stop</button>
+			<button type="button" class="styleButton" onclick = "deviceTimelapsEvent(this.form,false)">Stop</button>
 
 		</div> 
-  
+  		<!-- preview interface -->
 		<div class="timelapsStyle">
+			<form class="right" name="stream" action="javascript:void(0)" method="get">
+				<button type="button" class="styleButton" onclick = "streamVideoEvent()">(beta)Stream</button>
+				Frames:<input id="device_stream_frames" type="number" value=10 name="device_stream_frames" >
+			</form>
 			<img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480">
-			<button type="button" class="styleButton" onclick = "_current_device.drawPreview()">Preview</button>
+			<button type="button" class="styleButton" onclick = "drawPreviewEvent()">Preview</button>
 		</div>
 	</div> 
   

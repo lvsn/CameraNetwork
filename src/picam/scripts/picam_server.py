@@ -27,46 +27,29 @@ class picam_server:
             self.picam = picamera.PiCamera()
         except:
             rospy.logfatal("Check if the Picam is free or installed")
-
-        self.picam.awb_mode = 'off'
-        self.picam.awb_gains = 1.5
         
-        self.led = 5
-        os.system("gpio export " + str(self.led) + " out")
-        if gpio.wiringPiSetupSys() != 0:
-            rospy.logfatal("Unable to setup gpio")
-        gpio.digitalWrite(self.led,False)
-
-
+        #variable Declaration
+        self.bridge = CvBridge()
+        self.id_gen = self._id_generator()
         self.camParam = pph.PicameraParameterHandler()
-        self.camParam.set_camera_parameters()
         self.homePath = "/home/CameraNetwork"
         self.tmpPath = self.homePath + '/tmp'
-        self.bridge = CvBridge()
-        #creating a large id generator so pictures are not overwrited
-        self.id_gen = self._id_generator()
-
-        rospy.Service('capture_camera',CaptureService,self.capture_image_cb)
-        rospy.Service('load_camera',Load,self.load_camera_cb)
-        rospy.Service('get_camera',OutCameraData,self.get_camera_cb)
-        rospy.Service('set_camera',InCameraData,self.set_camera_cb)
-        rospy.Service('stream_video',VideoStream,self.stream_video_cb)
+        
+        #initialisation
+        self._init_picamera()
+        self._init_picamera_led()
+        
+        #ros function
+        self._launch_services();
         self.image_publisher = rospy.Publisher("/preview",Image)
+        
         rospy.loginfo("Camera Ready")
-        self.flash_led(nflash=4)
+        self._flash_led(nflash=4)
         rospy.spin()
 
     def __del__(self):
-        self.flash_led(nflash=3)
+        self._flash_led(nflash=3)
         self.picam.close()
-
-    def flash_led(self,nflash=1,delay=0.1):
-        #nflash is the number of blink the led will make
-        for n in range(nflash):
-            gpio.digitalWrite(self.led,True)
-            rospy.sleep(delay)
-            gpio.digitalWrite(self.led,False)
-            rospy.sleep(delay)
 
     def capture_image_cb(self,req):
         rospy.loginfo("Taking Picture")
@@ -74,7 +57,7 @@ class picam_server:
             os.makedirs( self.tmpPath)
         pictureFileName =  self.tmpPath + '/unloaded_' + self.id_gen.next() + '.' + self.camParam.get_format() 
         self.picam.capture( pictureFileName, format=self.camParam.get_format())
-        self.flash_led(nflash=2)
+        self._flash_led(nflash=2)
         return 'image saved as ' + pictureFileName
 
     def stream_video_cb(self,req):
@@ -97,6 +80,7 @@ class picam_server:
     def load_camera_cb(self,req):
         #reset generator
         self.id_gen = self._id_generator()
+        
         loadPath = self.homePath + "/" + self._filename_format(req.path,0,'dummy')  #to make sure it create the right path
         if loadPath.find('..') != -1:
             rospy.logwarn("use of .. is prohibed")
@@ -149,6 +133,34 @@ class picam_server:
     def _id_generator(self):
         for i in range(10000000):
             yield str(i)
+            
+    def _launch_services(self):
+        rospy.Service('capture_camera',CaptureService,self.capture_image_cb)
+        rospy.Service('load_camera',Load,self.load_camera_cb)
+        rospy.Service('get_camera',OutCameraData,self.get_camera_cb)
+        rospy.Service('set_camera',InCameraData,self.set_camera_cb)
+        rospy.Service('stream_video',VideoStream,self.stream_video_cb)
+    
+    def _init_picamera(self):
+        self.picam.awb_mode = 'off'
+        self.picam.awb_gains = 1.5
+        self.camParam.set_camera_parameters()
+        
+    def _init_picamera_led(self):
+        self.led = 5
+        os.system("gpio export " + str(self.led) + " out")
+        if gpio.wiringPiSetupSys() != 0:
+            rospy.logfatal("Unable to setup gpio")
+        gpio.digitalWrite(self.led,False)
+        
+    def _flash_led(self,nflash=1,delay=0.1):
+        #nflash is the number of blink the led will make
+        for n in range(nflash):
+            gpio.digitalWrite(self.led,True)
+            rospy.sleep(delay)
+            gpio.digitalWrite(self.led,False)
+            rospy.sleep(delay)
+        
 
 
 if __name__ == "__main__":
