@@ -56,6 +56,7 @@ class picam_server:
         if not os.path.exists( self.tmpPath):
             os.makedirs( self.tmpPath)
         pictureFileName =  self.tmpPath + '/unloaded_' + self.id_gen.next() + '.' + self.camParam.get_format() 
+        gpio.digitalWrite(self.led,True)
         self.picam.capture( pictureFileName, format=self.camParam.get_format())
         self._flash_led(nflash=2)
         return 'image saved as ' + pictureFileName
