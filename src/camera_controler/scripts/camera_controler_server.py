@@ -64,7 +64,7 @@ class server:
         return []
     
     def shutdown_device_cb(self,req):       
-        if req.option is in ['','-h','-r']:
+        if req.option in ['','-h','-r']:
             command = "/usr/bin/sudo /sbin/shutdown " + req.option +" now"
             process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
             process.communicate()[0]
