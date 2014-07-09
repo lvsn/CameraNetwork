@@ -115,7 +115,8 @@ $ catkin_make
 ```
 
 ### install
-If you want the device to reboot when the network is down:
+If you want the device to reboot when the network is down (Beware, for now the scipt ping google every 5 min, if it fail, it reboot.
+make sure your network setup are up before doing this):
 ```
 #!bash
 $ sudo ./install.sh netrst
@@ -142,14 +143,6 @@ here, set the interface of your choice, and the master's URL/IP
 #!bash
 $ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.launch --interface wlan0 --master http://<MASTER'S URL>:11311 --setup /home/pi/ros_catkin_ws/install_isolated/setup.bash 
 ```
-add these lines at the beginning of /etc/init/camera.conf:
-```
- setuid pi  
- setgid plugdev   //for Gphoto
- setgid video      //for Picam
-```
-
-** you can't add the two setgid! **
 
 
 add this line in /usr/sbin/camera-start:
