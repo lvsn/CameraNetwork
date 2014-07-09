@@ -4,6 +4,13 @@ For now, Camera Network is compatible with gphoto and the picamera module.
 
 You can communicate with the network directly with ROS, or with the WebGUI (if the master-server is launched with the right webserver url)
 
+Applications : Used mostly for reserch data aquisition.
+- Synchronise multiple cameras for taking pictures
+- Easily take HDR pictures
+- Set one or multiple devices for a timelaps aquisition
+- Basic web streaming
+- High camera control over network
+
 # Dependencys #
 
 ## Master Server Setup ##
