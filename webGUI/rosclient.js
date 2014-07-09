@@ -222,6 +222,26 @@ function device(){
 		save.callService(request, function(result) {});
 	}
 	
+	this.shutdownDevice = function(){
+		var shutdown = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name + '/shutdown_device',
+			serviceType : 'std_srvs/Empty'
+		});
+		var request = new ROSLIB.ServiceRequest({true});
+		shutdown.callService(request, function(result) {});
+	}
+	
+	this.rebootDevice = function(){
+		var shutdown = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name + '/shutdown_device',
+			serviceType : 'std_srvs/Empty'
+		});
+		var request = new ROSLIB.ServiceRequest({false});
+		shutdown.callService(request, function(result) {});
+	}
+	
 	this.streamVideo = function(){
 		var stream_srv = new ROSLIB.Service({
 			ros : ros,
@@ -514,6 +534,25 @@ function drawPreviewEvent(form){
 		_current_device.drawPreview();		
 	}
 }
+
+function shutdownDeviceEvent(form){
+	if(!noDeviceAlert()){
+		var r = confirm("Are you sure you want to shudown device?");
+		if (r == true) {
+		    _current_device.shutdownDevice();
+		}		
+	}
+}
+
+function rebootDeviceEvent(form){
+	if(!noDeviceAlert()){
+		var r = confirm("Are you sure you want to reboot device?");
+		if (r == true) {
+		    _current_device.rebootDevice();
+		}		
+	}
+}
+
 
 //    ----   Dynamic page   -----
 
