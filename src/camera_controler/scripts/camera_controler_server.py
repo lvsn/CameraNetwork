@@ -14,7 +14,7 @@ import camera_handler as ch
 import parameter_save as ps
 import os
 import std_srvs.srv
-from std_msgs.msg import Bool
+from camera_network_msgs.srv import *
 import subprocess
 
 
@@ -30,7 +30,11 @@ class server:
         #setup server to set camera init parameters
         self.paramSaver = ps.save_server()
         rospy.Service('preview_camera', std_srvs.srv.Empty(), self.preview_image_cb)
+<<<<<<< HEAD
         rospy.Service('shutdown_device', Bool(),self.shutdown_device_cb)
+=======
+        rospy.Service('shutdown_device', CommandOption,self.shutdown_device_cb)
+>>>>>>> 9db5284a0d8ab395629d9c15df3cf3a90deeeff5
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
 
@@ -63,17 +67,14 @@ class server:
                     rospy.logerr("Problem while renaming" + directory+filename)
         return []
     
-    def shutdown_device_cb(self,req):
-        option = ''        
-        if req.data :
-            option = "-h"
-            rospy.loginfo('Shutting down device')
+    def shutdown_device_cb(self,req):       
+        if req.option is in ['','-h','-r']:
+            command = "/usr/bin/sudo /sbin/shutdown " + req.option +" now"
+            process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+            process.communicate()[0]
+            rospy.loginfo("Shutdown command launched with option : " + req.option)
         else:
-            option = "-r"
-            rospy.loginfo('Rebooting device')
-        command = "/usr/bin/sudo /sbin/shutdown " + option +" now"
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-        process.communicate()[0]
+            rospy.logwarn("Option Invalid")
         return []
             
 
