@@ -126,7 +126,7 @@ class sftp_server:
                 localFile = self.localImagePath + deviceName + '/' + f
                 sftp.get(remoteFile,localFile)
                 sftp.remove(remoteFile)
-                feedback_msg.picture_downloaded = str(float(count/len(filelist)*100)) + '% of Device ' + deviceName
+                feedback_msg.picture_downloaded = "{0:.2f}".format(float(count/len(filelist)*100)) + '% of Device ' + deviceName
                 self.server.publish_feedback(feedback_msg)
                 count += 1;
         return len(filelist)
