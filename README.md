@@ -100,7 +100,7 @@ will generate camera-network folder:
 ### setup ROS workspace ###
 ```
 #!bash
-$ git clone https://MathieuGaron@bitbucket.org/MathieuGaron/camera-network.git
+$ git clone https://github.com/MathGaron/CameraNetwork.git
 $ cd camera-network/src
 $ catkin_init_workspace
 $ cd ..
