@@ -226,9 +226,9 @@ function device(){
 		var shutdown = new ROSLIB.Service({
 			ros : ros,
 			name : '/' + name + '/shutdown_device',
-			serviceType : 'std_srvs/Empty'
+			serviceType : 'camera_network_msgs/CommandOption'
 		});
-		var request = new ROSLIB.ServiceRequest({true});
+		var request = new ROSLIB.ServiceRequest({"-h"});
 		shutdown.callService(request, function(result) {});
 	}
 	
@@ -236,9 +236,9 @@ function device(){
 		var shutdown = new ROSLIB.Service({
 			ros : ros,
 			name : '/' + name + '/shutdown_device',
-			serviceType : 'std_srvs/Empty'
+			serviceType : 'camera_network_msgs/CommandOption'
 		});
-		var request = new ROSLIB.ServiceRequest({false});
+		var request = new ROSLIB.ServiceRequest({"-r"});
 		shutdown.callService(request, function(result) {});
 	}
 	
