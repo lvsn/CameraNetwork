@@ -30,7 +30,7 @@ class server:
         #setup server to set camera init parameters
         self.paramSaver = ps.save_server()
         rospy.Service('preview_camera', std_srvs.srv.Empty(), self.preview_image_cb)
-        rospy.Service('shutdown_device', Bool,self.shutdown_device_cb)
+        rospy.Service('shutdown_device', Bool(),self.shutdown_device_cb)
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
 
