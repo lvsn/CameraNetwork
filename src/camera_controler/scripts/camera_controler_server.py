@@ -14,6 +14,7 @@ import camera_handler as ch
 import parameter_save as ps
 import os
 import std_srvs.srv
+from std_msgs.msg import Bool
 import subprocess
 
 
@@ -29,7 +30,7 @@ class server:
         #setup server to set camera init parameters
         self.paramSaver = ps.save_server()
         rospy.Service('preview_camera', std_srvs.srv.Empty(), self.preview_image_cb)
-        rospy.Service('shutdown_device', std_srvs.srv.Empty(),self.shutdown_device_cb)
+        rospy.Service('shutdown_device', Bool,self.shutdown_device_cb)
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
 
@@ -63,10 +64,17 @@ class server:
         return []
     
     def shutdown_device_cb(self,req):
-        command = "/usr/bin/sudo /sbin/shutdown -r now"
+        option = ''        
+        if req.data :
+            option = "-h"
+            rospy.loginfo('Shutting down device')
+        else:
+            option = "-r"
+            rospy.loginfo('Rebooting device')
+        command = "/usr/bin/sudo /sbin/shutdown " + option +" now"
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         process.communicate()[0]
-        rospy.loginfo('Shutting down device')
+        return []
             
 
 if __name__ == "__main__":
