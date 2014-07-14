@@ -59,7 +59,7 @@ class CameraHandler:
         picturePath = self._generatePictureName(pictureName)
         if setCamera:
             self.updateCameraSetting()
-        self.capture_camera_service('dummy')
+        self.capture_camera_service(0)
         if loadCamera:
             self.load_camera_service(picturePath)
         
@@ -71,14 +71,14 @@ class CameraHandler:
         for setting in settingList:
             if setCamera:
                 self.updateCameraSetting(setting)
-            self.capture_camera_service('dummy')
+            self.capture_camera_service(0)
         if loadCamera:
             self.load_camera_service(picturePath)
             
     def takePreview(self):
         self.updateCameraSetting()
         picturePath = 'preview/send.%C'
-        self.capture_camera_service('dummy')
+        self.capture_camera_service(0)
         self.load_camera_service(picturePath)
      
     def _generatePictureName(self,name):

@@ -228,7 +228,7 @@ function device(){
 			name : '/' + name + '/shutdown_device',
 			serviceType : 'camera_network_msgs/CommandOption'
 		});
-		var request = new ROSLIB.ServiceRequest({"-h"});
+		var request = new ROSLIB.ServiceRequest({option:"-h"});
 		shutdown.callService(request, function(result) {});
 	}
 	
@@ -238,7 +238,7 @@ function device(){
 			name : '/' + name + '/shutdown_device',
 			serviceType : 'camera_network_msgs/CommandOption'
 		});
-		var request = new ROSLIB.ServiceRequest({"-r"});
+		var request = new ROSLIB.ServiceRequest({option:"-r"});
 		shutdown.callService(request, function(result) {});
 	}
 	
@@ -540,6 +540,8 @@ function shutdownDeviceEvent(form){
 		var r = confirm("Are you sure you want to shudown device?");
 		if (r == true) {
 		    _current_device.shutdownDevice();
+		    _current_device.clean();
+			_current_device = undefined;
 		}		
 	}
 }
@@ -549,6 +551,8 @@ function rebootDeviceEvent(form){
 		var r = confirm("Are you sure you want to reboot device?");
 		if (r == true) {
 		    _current_device.rebootDevice();
+		    _current_device.clean();
+			_current_device = undefined;
 		}		
 	}
 }
@@ -557,5 +561,5 @@ function rebootDeviceEvent(form){
 //    ----   Dynamic page   -----
 
 setInterval(refreshScreen, 1000);
-setInterval(refreshCanvas, 500);
+setInterval(refreshCanvas, 100);
 setInterval(refreshSelect,2000);

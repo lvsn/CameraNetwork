@@ -31,16 +31,13 @@ class sftp_server:
         rospy.loginfo('Wrinting log to ' + self.localLogPath)
         rospy.loginfo('Setting up sftp Server')
         
-        self.server = actionlib.SimpleActionServer('sftp',CameraDownloadAction,
-                                                   self.execute,False)
+        self.server = actionlib.SimpleActionServer('sftp',CameraDownloadAction, self.execute,False)
         self.server.start()
         
         self.ipDict = {}
-        
-        if not os.path.exists(self.localLogPath):
-            os.makedirs(self.localLogPath)
  
         # setup logging
+        self.create_dir(self.localLogPath)
         paramiko.util.log_to_file(self.localLogPath + time.strftime('%d%B%Hh') + '.log')
 
     def execute(self,goal):
@@ -112,10 +109,7 @@ class sftp_server:
         feedback_msg = CameraDownloadActionFeedback
         filelist = sftp.listdir(self.imagePath + self.dateFolder)
         rospy.loginfo('found ' + str(len(filelist)) + ' files')
-                
-                
-        if not os.path.exists(self.localImagePath + deviceName):
-            os.makedirs(self.localImagePath + deviceName)
+        self.create_dir(self.localImagePath + deviceName)
         count = 1.0;                     
         if len(filelist) == 0:
             rospy.loginfo("No file to download")
@@ -130,6 +124,10 @@ class sftp_server:
                 self.server.publish_feedback(feedback_msg)
                 count += 1;
         return len(filelist)
+        
+    def create_dir(self,path):
+        if not os.path.exists(path):
+            os.makedirs(path)
         
     
 

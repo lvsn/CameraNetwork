@@ -56,7 +56,7 @@ class picam_server:
         if not os.path.exists( self.tmpPath):
             os.makedirs( self.tmpPath)
         pictureFileName =  self.tmpPath + '/unloaded_' + self.id_gen.next() + '.' + self.camParam.get_format() 
-        
+        self._set_timer(req.timer)
         self.picam.capture( pictureFileName, format=self.camParam.get_format())
         self._flash_led(nflash=2)
         return 'image saved as ' + pictureFileName
@@ -73,7 +73,7 @@ class picam_server:
             try:
                 self.image_publisher.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
             except CvBridgeError, e:
-                rospy.logwarn(e)
+                rospy.logwarn("stream_video_cb : " + e)
 
     def load_camera_cb(self,req):
         #reset generator
@@ -158,6 +158,29 @@ class picam_server:
             rospy.sleep(delay)
             gpio.digitalWrite(self.led,False)
             rospy.sleep(delay)
+            
+    def _set_timer(delay_second):
+        """
+        This function set a timer in seconds, and toggle the led every 300 ms. Once the timer have 2 seconds left, the
+        led flash faster so the user know that the picture will be taken.
+        """
+        startTime = rospy.get_rostime().secs
+        endTimerTime = rospy.Time(startTime+delay_second)
+
+        gpioState = False        
+        blinkTime = rospy.get_rostime()
+        blinkDelay_nsec = 300000000
+        endBlinkTime = rospy.Time(blinkTime.secs,(blinkTime.nsecs+blinkDelay_nsec))
+        
+        while rospy.get_rostime().secs < endTimerTime.secs:
+            if rospy.get_rostime() > endBlinkTime:
+                gpioState = not gpioState
+                if endTimerTime.secs - rospy.get_rostime().secs < 2:
+                    blinkDelay_nsec = 100000000
+                blinkTime = rospy.get_rostime()
+                endBlinkTime = rospy.Time(blinkTime.secs,(blinkTime.nsecs+blinkDelay_nsec))
+            gpio.digitalWrite(self.led,gpioState)
+        return
         
 
 
