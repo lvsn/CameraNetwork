@@ -36,13 +36,14 @@ $ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr:" | cut -d: -f2 | awk "{
 $ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc   
 ```
 
-### Installing Paramiko (sftp transfer) ###
+### Installing Paramiko (sftp transfer) and chrony ###
 ```
 #!bash
 $ wget https://github.com/paramiko/paramiko/archive/master.zip
 $ unzip master.zip
 $ cd paramiko-master
 $ sudo easy_install ./
+$ sudo apt-get install chrony
 ```
 
 ## Raspberry Pi Installation ##
@@ -98,6 +99,15 @@ $ cd WiringPi2-Python
 $ sudo python setup.py install
 
 ```
+### For Time synchronisation ###
+
+#!bash
+$ sudo apt-get install chrony
+
+```
+in /etc/chrony/chrony.conf add the following line :
+server <SERVERIP> minpoll 0 maxpoll 5 maxdelay .0005
+where SERVERIP is the ip address of the master computer
 
 
 # Install Camera Network #
