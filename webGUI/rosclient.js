@@ -90,15 +90,19 @@ function network_download(){
       	actionName : 'camera_network_msgs/CameraDownloadAction'
     }); 
 	
-	this.setAction = function sendGoal(form){
-		var goal = new ROSLIB.Goal({
-			actionClient : _network_download.action,
-			goalMessage : {
-				dowload_frequency_s : parseFloat(form.network_download_frequency.value)
-			}
-		});
-		goal.send();
-	}  
+    	this.setAction = function sendGoal(form){
+            time = new Date();
+           time.setHours(parseInt(form.network_download_hour.value),parseInt(form.network_download_minute.value))
+
+    		var goal = new ROSLIB.Goal({
+    			actionClient : _network_download.action,
+    			goalMessage : {
+    				dowload_frequency_s : parseFloat(form.network_download_frequency.value),
+                      start_time : time.getTime()/1000
+    			}
+    		});
+    		goal.send();
+    	}  
 
     this.stopAction = function(){
 		this.action.cancel();

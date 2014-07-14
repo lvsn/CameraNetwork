@@ -41,14 +41,10 @@ class sftp_server:
         paramiko.util.log_to_file(self.localLogPath + time.strftime('%d%B%Hh') + '.log')
 
     def execute(self,goal):
-        hz = 0
         totalCount = 0
-        try:
-            hz = 1/goal.dowload_frequency_s
-            rospy.loginfo("Downloading at a rate of "+str(hz)+" hz")
-        except ZeroDivisionError:
-            hz = 1            
-            rospy.loginfo("Instant Download")
+            
+        hz = self._sec_to_hz(goal.dowload_frequency_s)
+        self._sleep_until(req.start_time)
             
         r = rospy.Rate(hz)
         while True:
@@ -118,8 +114,12 @@ class sftp_server:
                 rospy.loginfo('Downloading ' + f)
                 remoteFile = self.imagePath + self.dateFolder + f
                 localFile = self.localImagePath + deviceName + '/' + f
-                sftp.get(remoteFile,localFile)
-                sftp.remove(remoteFile)
+                try:
+                    sftp.get(remoteFile,localFile)
+                    sftp.remove(remoteFile)
+                except:
+                    rospy.logwarn("Raised Exception when accessing remote file.")
+                    H
                 feedback_msg.picture_downloaded = "{0:.2f}".format(float(count/len(filelist)*100)) + '% of Device ' + deviceName
                 self.server.publish_feedback(feedback_msg)
                 count += 1;
@@ -128,6 +128,24 @@ class sftp_server:
     def create_dir(self,path):
         if not os.path.exists(path):
             os.makedirs(path)
+            
+    def _sec_to_hz(self,Tsec):
+        try:
+            hz = math.fabs(1/Tsec)
+            rospy.loginfo("Download Frequency set to " + str(hz) + " hz.")
+        except ZeroDivisionError:
+            hz = -1
+            rospy.logwarn("Can not set 0 as frequency... setting frequency to 1 hz")
+        return hz
+        
+    def _sleep_until(self,timestamp):
+        delta = timestamp - rospy.get_time()
+        if delta > 0:
+            rospy.sleep(delta)
+            while timestamp > rospy.get_time():
+                rospy.sleep(5) 
+                if self.server.is_preempt_requested() or not self.server.is_active():
+                    break
         
     
 
