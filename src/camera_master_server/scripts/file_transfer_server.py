@@ -9,6 +9,7 @@ Created on Fri May 23 14:27:55 2014
 
 import os
 import time
+import math
 import actionlib
 
 import roslib; roslib.load_manifest('camera_controler')
@@ -44,7 +45,7 @@ class sftp_server:
         totalCount = 0
             
         hz = self._sec_to_hz(goal.dowload_frequency_s)
-        self._sleep_until(req.start_time)
+        self._sleep_until(goal.start_time)
             
         r = rospy.Rate(hz)
         while True:
@@ -96,10 +97,14 @@ class sftp_server:
         return imageQty
     
     def _createSession(self,ip,port=22):
-         t = paramiko.Transport((ip, port))
-         t.connect(username='pi', password='raspberry')
-         sftp = paramiko.SFTPClient.from_transport(t)
-         return (sftp,t)
+        try:
+            t = paramiko.Transport((ip, port))
+            t.connect(username='pi', password='raspberry')
+            sftp = paramiko.SFTPClient.from_transport(t)
+        except:
+            rospy.logwarn("Unable to connect to " + str(ip))
+            raise RuntimeError("unable to connect to device")   
+        return (sftp,t)
                
     def _downloadImageFolder(self,sftp,deviceName=''):
         feedback_msg = CameraDownloadActionFeedback
@@ -141,10 +146,11 @@ class sftp_server:
     def _sleep_until(self,timestamp):
         delta = timestamp - rospy.get_time()
         if delta > 0:
-            rospy.sleep(delta)
+            rospy.loginfo("Wainting for " + str(delta) + " seconds")
             while timestamp > rospy.get_time():
                 rospy.sleep(5) 
                 if self.server.is_preempt_requested() or not self.server.is_active():
+                    rospy.loginfo("Download timer interupted")
                     break
         
     

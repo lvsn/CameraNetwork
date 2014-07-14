@@ -1,6 +1,6 @@
 #goal
 float32 dowload_frequency_s
-time start_time
+float32 start_time
 ---
 #result
 string total_downloaded

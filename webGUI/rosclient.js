@@ -8,6 +8,10 @@ var ros = new ROSLIB.Ros({
     url : 'ws://pimaster.jflalonde.org:9090'
 });
 
+now = new Date()
+$('#input_hour').val(now.getHours())
+$('#input_minute').val(now.getMinutes())
+
 //   ---- Class ---- 
  
 function network_timelaps(){
