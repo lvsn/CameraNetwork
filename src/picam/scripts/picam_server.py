@@ -64,16 +64,19 @@ class picam_server:
     def stream_video_cb(self,req):
         stream = io.BytesIO()
         rospy.loginfo("Start Video streaming with " + str(req.frames) + " frames.")
+        gpio.digitalWrite(self.led,True)
         for i in range(req.frames):
             stream.flush()
             stream.seek(0)
-            self.picam.capture(stream, format='jpeg')
+            self.picam.capture(stream, format='jpeg', resize=(320,240))
             data = np.fromstring(stream.getvalue(), dtype=np.uint8)
             image = cv2.imdecode(data, 1)
             try:
                 self.image_publisher.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
             except CvBridgeError, e:
                 rospy.logwarn("stream_video_cb : " + e)
+        gpio.digitalWrite(self.led,False);
+        return {}
 
     def load_camera_cb(self,req):
         #reset generator
@@ -159,7 +162,7 @@ class picam_server:
             gpio.digitalWrite(self.led,False)
             rospy.sleep(delay)
             
-    def _set_timer(delay_second):
+    def _set_timer(self,delay_second):
         """
         This function set a timer in seconds, and toggle the led every 300 ms. Once the timer have 2 seconds left, the
         led flash faster so the user know that the picture will be taken.

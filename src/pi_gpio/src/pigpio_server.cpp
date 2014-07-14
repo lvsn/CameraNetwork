@@ -56,7 +56,7 @@ void gpio_input_handler::publishNetworkShot(){
 void gpio_input_handler::callShotService(){
     camera_network_msgs::CaptureService::Request req;
     camera_network_msgs::CaptureService::Response resp;
-    req.time = "heh";
+    req.timer= 0;
     bool success = mCapture_client.call(req,resp);
     if (!success)
         ROS_WARN_STREAM("error calling capture_image client : check if camera's service are online");
