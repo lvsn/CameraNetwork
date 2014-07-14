@@ -32,6 +32,7 @@ class gphoto_server():
 
     def capture_image_cb(self,req):
         rospy.loginfo("Taking Picture")
+        rospy.sleep(req.timer)
         msg = gphoto.run(" --capture-image --wait-event=1s")
         return msg
     

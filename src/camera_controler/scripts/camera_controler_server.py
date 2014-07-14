@@ -45,22 +45,14 @@ class server:
     def preview_image_cb(self,req):
         self.cam_handler.takePreview()
         directory = "/home/CameraNetwork/preview/"
-        filelist = os.listdir(directory)
-        for filename in filelist:
+        for filename in os.listdir(directory):
             f, extention = os.path.splitext(filename)
             if extention not in [".jpg",".jpeg",".JPG",".JPEG"]:
                 rospy.logwarn("Camera is not set to JPG: current format = " + extention)
-                try:
-                    os.remove(directory + filename)
-                except:
-                    rospy.logerr("Problem while deleting " + directory+filename)
-
+                self._delete_file(filename,directory)
             else:
                 rospy.loginfo("file " + f + ".jpeg is ready")
-                try:
-                    os.rename(directory + filename, directory+f+".jpeg")
-                except:
-                    rospy.logerr("Problem while renaming" + directory+filename)
+                self._rename_file(filename,directory)
         return []
     
     def shutdown_device_cb(self,req):       
@@ -72,7 +64,18 @@ class server:
         else:
             rospy.logwarn("Option Invalid")
         return []
-            
+        
+    def _delete_file(self,filename,directory=""):
+        try:
+            os.remove(directory + filename)
+        except:
+            rospy.logerr("Problem while deleting " + directory+filename)
+        
+    def _rename_file(self,filename,directory=""):
+        try:
+            os.rename(directory + filename, directory+f+".jpeg")
+        except:
+            rospy.logerr("Problem while renaming" + directory+filename)
 
 if __name__ == "__main__":
     serverInstance = server()
