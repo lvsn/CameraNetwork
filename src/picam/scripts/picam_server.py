@@ -68,7 +68,7 @@ class picam_server:
         for i in range(req.frames):
             stream.flush()
             stream.seek(0)
-            self.picam.capture(stream, format='jpeg')
+            self.picam.capture(stream, format='jpeg', resize=(320,240))
             data = np.fromstring(stream.getvalue(), dtype=np.uint8)
             image = cv2.imdecode(data, 1)
             try:
