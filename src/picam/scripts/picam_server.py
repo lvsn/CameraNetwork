@@ -56,11 +56,7 @@ class picam_server:
         if not os.path.exists( self.tmpPath):
             os.makedirs( self.tmpPath)
         pictureFileName =  self.tmpPath + '/unloaded_' + self.id_gen.next() + '.' + self.camParam.get_format() 
-<<<<<<< HEAD
-        gpio.digitalWrite(self.led,True)
-=======
         self._set_timer(req.timer)
->>>>>>> 5d9897f67ce0dd0b5bcdba3af143e4cf52e55d84
         self.picam.capture( pictureFileName, format=self.camParam.get_format())
         self._flash_led(nflash=2)
         return 'image saved as ' + pictureFileName
@@ -166,7 +162,7 @@ class picam_server:
             gpio.digitalWrite(self.led,False)
             rospy.sleep(delay)
             
-    def _set_timer(delay_second):
+    def _set_timer(self,delay_second):
         """
         This function set a timer in seconds, and toggle the led every 300 ms. Once the timer have 2 seconds left, the
         led flash faster so the user know that the picture will be taken.
