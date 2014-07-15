@@ -28,6 +28,11 @@ else:
     tree.find('.//version').text = newVersion
     tree.write(camera_controlerPath)
     
+    camera_controlerPath = 'src/pi_gpio/package.xml'
+    tree = et.parse(camera_controlerPath)
+    tree.find('.//version').text = newVersion
+    tree.write(camera_controlerPath)
+    
     camera_controlerPath = 'src/picam/package.xml'
     tree = et.parse(camera_controlerPath)
     tree.find('.//version').text = newVersion
