@@ -1,4 +1,5 @@
 <launch>
+  <param name="/IP" value="" />
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" > 
       <arg name="port" value="9090"/>
   </include>

@@ -7,7 +7,6 @@
 <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
 <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script type="text/javascript" src="rosclient.js"></script>
 
 <link rel="stylesheet" href="style.css" type="text/css" media="screen, projection" />
 </head>
@@ -25,6 +24,7 @@
 			<input id="network_frequency" type="number" value=0 name="network_timelaps_frequency" >
         	<label>Quantity (<0 = infinite) : </label>
         	<input id="network_quantity" type="number" value=0 name="network_timelaps_qty" >
+        	<input type="checkbox" id="network_hdr" value="HDR">HDR<br>
       		<dl>
         		<dt>Status:</dt>
           			<dd id ="network_timelaps_status"></dd>
@@ -33,10 +33,9 @@
         		<dt>Result:</dt>
           			<dd id="network_timelaps_result"></dd>
       		</dl>
-      
-			<input type="submit" class="styleButton" onclick="_network_timelaps.setAction(this.form)" value="Set">
+			<input type="submit" class="styleButton" onclick="networkTimelapsEvent(this.form,true)" value="Set">
     	</form>
-		<button type="button" class="styleButton" onclick = "_network_timelaps.stopAction()">Stop</button>
+		<button type="button" class="styleButton" onclick = "networkTimelapsEvent(this.form,false)">Stop</button>
 
     	
 	</div> 
@@ -44,20 +43,45 @@
 
   <!-- Download interface -->
 	<div class="mainStyle">
-		<form name="download" action="javascript:void(0)" method="get">
+        
+		<form  name="download" action="javascript:void(0)" method="get">
 			<label> Download frequency (s) (0 = one time) : </label>
 	 		<input id="input_frequency" type="number" value=0 name="network_download_frequency" >
+                <label> Start at : </label>
+	 		<input id="input_hour" type="number" value=0 name="network_download_hour" >
+                <label> hour </label>
+	 		<input id="input_minute" type="number" value=0 name="network_download_minute" >
+                <label> minute </label>
+
 			<dl>
 				<dt>Status:</dt>
 					<dd id ="network_download_status"></dd>
 				<dt>Feedback:</dt>
 					<dd id="network_download_feedback"></dd>
 				<dt>Result:</dt>
-					<dd id="network_download_termination"></dd>
+					<dd id="network_download_result"></dd>
 			</dl>
-			<input type="submit" class="styleButton" onclick="_network_download.setAction(this.form)" value="Download">
+			<input type="submit" class="styleButton" onclick="networkDownloadEvent(this.form,true)" value="Download">
 		</form> 
-		<button type="button" class="styleButton" onclick = "_network_download.stopAction()">Stop</button>
+		<button type="button" class="styleButton" onclick = "networkDownloadEvent(this.form,false)">Stop</button>
+
+            <div class="right">
+			<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
+				<label>Device Name : </label>	
+				<input id="download_name"  value='' name="download_name" >
+				</br>
+				<label>Username : </label>
+				<input id="download_username" value='' name="download_username" >
+				</br>
+                      <label>Password : </label>
+				<input id="download_password" value='' name="download_password" >
+				</br>
+				<input type="submit" class="styleButton" onclick="_network_download.addUser(form)" value="Add">
+			</form>
+                 <button type="button" class="styleButton" onclick = "_network_download.delUsers(form)">Delete</button>
+			<button type="button" class="styleButton" onclick = "_network_download.saveUsers(form)">Save</button>
+                <button type="button" class="styleButton" onclick = "_network_download.getUsers(form)">Get</button>
+		</div>
 
 	</div>  
   
@@ -104,8 +128,9 @@
 				<label>Format : </label>
 				<input id="device_parameter_imageformat"  value='' name="device_parameter_imageformat" >
 				</br>
-				<input type="submit" class="styleButton" onclick="_current_device.setParameters(this.form)" value="Set">
+				<input type="submit" class="styleButton" onclick="setParametersEvent(this.form)" value="Set">
 			</form>
+			<button type="button" class="styleButton" onclick = "getInformationEvent(this.form)">Help</button>
 		</div>
 
 		<!-- Parameter interface -->
@@ -115,7 +140,7 @@
 				<p id="device_parameters"></p>
 			</div>
 			<div class="right">
-				<button type="button" class="styleButton" onclick = "_current_device.removeSequence()">Reset</button>
+				<button type="button" class="styleButton" onclick = "removeSequenceEvent(this.form)">Reset</button>
 				<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
 					<label>Aperture : </label>	
 					<input id="device_sequence_aperture"  value='' name="device_sequence_aperture" >
@@ -123,9 +148,9 @@
 					<label>Shutter Speed : </label>
 					<input id="device_sequence_shutterspeed" value='' name="device_sequence_shutterspeed" >
 					</br>
-					<input type="submit" class="styleButton" onclick="_current_device.addSequence(this.form)" value="Add">
+					<input type="submit" class="styleButton" onclick="addSequenceEvent(this.form)" value="Add">
 				</form>
-				<button type="button" class="styleButton" onclick = "_current_device.saveSequence()">Save</button>
+				<button type="button" class="styleButton" onclick = "saveSequenceEvent()">Save</button>
 			</div>
 		</div>
 
@@ -137,6 +162,7 @@
 				<input id="device_timelaps_frequency" type="number" value=0 name="device_timelaps_frequency" >
 				<label>Quantity (<0 = infinite) : </label>
 				<input id="device_timelaps_qty" type="number" value=0 name="device_timelaps_qty" >
+				<input type="checkbox" id="device_hdr" value="HDR">HDR<br>
 				<dl>
 					<dt>Status:</dt>
 						<dd id ="device_timelaps_status"></dd>
@@ -146,17 +172,26 @@
 						<dd id="device_timelaps_result"></dd>
 				</dl>
   
-				<input type="submit" class="styleButton" onclick="_current_device.setAction(this.form)" value="Set">
+				<input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form,true)" value="Set">
 			</form>
-			<button type="button" class="styleButton" onclick = "_current_device.stopAction()">Stop</button>
+			<button type="button" class="styleButton" onclick = "deviceTimelapsEvent(this.form,false)">Stop</button>
 
 		</div> 
-  
+  		<!-- preview interface -->
 		<div class="timelapsStyle">
+			<form class="right" name="stream" action="javascript:void(0)" method="get">
+				<button type="button" class="styleButton" onclick = "streamVideoEvent()">(beta)Stream</button>
+				Frames:<input id="device_stream_frames" type="number" value=10 name="device_stream_frames" >
+			</form>
 			<img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480">
-			<button type="button" class="styleButton" onclick = "_current_device.drawPreview()">Preview</button>
+			<button type="button" class="styleButton" onclick = "drawPreviewEvent()">Preview</button>
+		</div>
+		<div class="timelapsStyle">
+			<button type="button" class="styleButton" onclick = "shutdownDeviceEvent()">Shutdown Device</button>
+			<button type="button" class="styleButton" onclick = "rebootDeviceEvent()">Reboot Device</button>
 		</div>
 	</div> 
   
 </body>
+<script type="text/javascript" src="rosclient.js"></script>
 </html>
