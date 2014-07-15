@@ -43,7 +43,8 @@
 
   <!-- Download interface -->
 	<div class="mainStyle">
-		<form name="download" action="javascript:void(0)" method="get">
+        
+		<form  name="download" action="javascript:void(0)" method="get">
 			<label> Download frequency (s) (0 = one time) : </label>
 	 		<input id="input_frequency" type="number" value=0 name="network_download_frequency" >
                 <label> Start at : </label>
@@ -63,6 +64,24 @@
 			<input type="submit" class="styleButton" onclick="networkDownloadEvent(this.form,true)" value="Download">
 		</form> 
 		<button type="button" class="styleButton" onclick = "networkDownloadEvent(this.form,false)">Stop</button>
+
+            <div class="right">
+			<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
+				<label>Device Name : </label>	
+				<input id="download_name"  value='' name="download_name" >
+				</br>
+				<label>Username : </label>
+				<input id="download_username" value='' name="download_username" >
+				</br>
+                      <label>Password : </label>
+				<input id="download_password" value='' name="download_password" >
+				</br>
+				<input type="submit" class="styleButton" onclick="_network_download.addUser(form)" value="Add">
+			</form>
+                 <button type="button" class="styleButton" onclick = "_network_download.delUsers(form)">Delete</button>
+			<button type="button" class="styleButton" onclick = "_network_download.saveUsers(form)">Save</button>
+                <button type="button" class="styleButton" onclick = "_network_download.getUsers(form)">Get</button>
+		</div>
 
 	</div>  
   

@@ -111,6 +111,53 @@ function network_download(){
     this.stopAction = function(){
 		this.action.cancel();
 	}
+
+    this.addUser = function(form){
+		var add = new ROSLIB.Service({
+			ros : ros,
+			name : '/master/add_user',
+			serviceType : 'camera_network_msgs/User'
+		});
+		var request = new ROSLIB.ServiceRequest({
+                                name : form.download_name.value,
+                                username : form.download_username.value,
+                                password : form.download_password.value
+
+            });
+		add.callService(request, function(result) {});
+	}
+
+    this.delUsers = function(form){
+		var del = new ROSLIB.Service({
+			ros : ros,
+			name : '/master/delete_users',
+			serviceType : 'std_srvs/Empty'
+		});
+		var request = new ROSLIB.ServiceRequest({});
+		del.callService(request, function(result) {});
+	}
+
+    this.saveUsers = function(form){
+		var save = new ROSLIB.Service({
+			ros : ros,
+			name : '/master/save_users',
+			serviceType : 'std_srvs/Empty'
+		});
+		var request = new ROSLIB.ServiceRequest({});
+		save.callService(request, function(result) {});
+	}
+
+    this.getUsers = function(form){
+		var get = new ROSLIB.Service({
+			ros : ros,
+			name : '/master/get_users',
+			serviceType : 'camera_network_msgs/BackMessage'
+		});
+		var request = new ROSLIB.ServiceRequest({});
+		get.callService(request, function(result) {
+                alert(result.message);
+            });
+	}
    
 	this.feedback.subscribe(function(msg){
 		$("#network_download_feedback").text(msg.feedback.picture_downloaded);
@@ -491,6 +538,7 @@ function networkDownloadEvent(form,isStart){
 		_network_download.stopAction();
 	}
 }
+
 
 function setParametersEvent(form){
 	if(!noDeviceAlert()){
