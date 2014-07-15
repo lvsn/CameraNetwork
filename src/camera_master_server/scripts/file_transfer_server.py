@@ -17,6 +17,8 @@ import roslib; roslib.load_manifest('camera_controler')
 import rospy
 import rospkg
 from camera_network_msgs.msg import *
+from camera_network_msgs.srv import *
+import std_srvs.srv
 
 import paramiko
 
@@ -36,6 +38,10 @@ class sftp_server:
         
         self.server = actionlib.SimpleActionServer('sftp',CameraDownloadAction, self.execute,False)
         self.server.start()
+        rospy.Service('add_user', User, self.add_user)
+        rospy.Service('delete_users', std_srvs.srv.Empty(), self.delete_users)
+        rospy.Service('save_users', std_srvs.srv.Empty(), self.save_users)
+        rospy.Service('get_users', BackMessage, self.get_users)
         
         self.ipDict = {}
         self.userDict = {}
@@ -67,6 +73,28 @@ class sftp_server:
         self.rospack = rospkg.RosPack()
         self.server.set_succeeded(succes_msg)
         
+    def add_user(self,req):
+        self.userDict[req.name] = (req.username,req.password)
+        rospy.loginfo("Users : " + str(self.userDict))
+        return []
+        
+    def delete_users(self,req):
+        rospy.loginfo("Users deleted")
+        self.userDict = {}
+        return[]
+        
+    def save_users(self,req):
+        rospy.loginfo("users.xml updated")
+        self._create_userXML()
+        return []
+        
+    def get_users(self,req):
+        rospy.loginfo("Send users information")
+        msg = ''
+        for key in self.userDict:
+            usr,passw = self.userDict[key]
+            msg += key + ': Username=' + usr + ' Password=' + passw + '\n'
+        return msg
 
     def refresh_ip(self):
         self.ipDict = rospy.get_param('/IP',{})
@@ -167,7 +195,33 @@ class sftp_server:
                 self.userDict[deviceName] = (username,password)
         except:
             rospy.logwarn("Unable to load users.xml, will use default raspberry pi user for all devices")
-            rospy.logwarn(rospkg.RosPack().get_path('camera_master_server'))
+            
+    def _create_userXML(self, filename = 'users.xml'):
+        xmldoc = minidom.Document()
+        data = xmldoc.createElement('data')
+        xmldoc.appendChild(data)
+        for key in self.userDict:
+            (username,password) = self.userDict[key]
+            device = xmldoc.createElement('device')
+            data.appendChild(device)
+            
+            name = xmldoc.createElement('name')
+            name_content = xmldoc.createTextNode(key)
+            name.appendChild(name_content)
+            device.appendChild(name)
+            
+            user = xmldoc.createElement('user')
+            user_content = xmldoc.createTextNode(username)
+            user.appendChild(user_content)
+            device.appendChild(user)
+            
+            passw = xmldoc.createElement('pass')
+            passw_content = xmldoc.createTextNode(password)
+            passw.appendChild(passw_content)
+            device.appendChild(passw)
+        with open(rospkg.RosPack().get_path('camera_master_server') + '/' + filename, 'w') as f:
+            f.write(xmldoc.toprettyxml(indent="    ", encoding="utf-8"))
+            
             
     def _get_user_and_passw(self,name):
         if name in self.userDict:

@@ -59,6 +59,8 @@ find_package(catkin REQUIRED COMPONENTS
    OutCameraData.srv
    VideoStream.srv
    CommandOption.srv
+   User.srv
+   BackMessage.srv
  )
 
 ## Generate actions in the 'action' folder
