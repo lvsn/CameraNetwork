@@ -8,6 +8,7 @@
 mkdir /home/CameraNetwork
 mkdir /home/CameraNetwork/preview
 mkdir /home/CameraNetwork/log
+mkdir /home/CameraNetwork/master
 
 chmod -R 777 /home/CameraNetwork
 

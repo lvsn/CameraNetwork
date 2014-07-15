@@ -1,0 +1,15 @@
+<data>
+
+    <device>
+        <name>pi0</name>
+        <user>pi</user>
+        <pass>raspberry</pass>
+    </device>
+
+    <device>
+        <name>pi1</name>
+        <user>pi</user>
+        <pass>raspberry</pass>
+    </device>
+
+</data>

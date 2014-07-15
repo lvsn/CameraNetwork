@@ -11,9 +11,11 @@ import os
 import time
 import math
 import actionlib
+from xml.dom import minidom
 
 import roslib; roslib.load_manifest('camera_controler')
 import rospy
+import rospkg
 from camera_network_msgs.msg import *
 
 import paramiko
@@ -24,7 +26,7 @@ class sftp_server:
     def __init__(self,imagePath):
         self.imagePath = imagePath + '/'
         self.dateFolder = ''
-        self.localImagePath = self.imagePath + self.dateFolder
+        self.localImagePath = self.imagePath + 'master/' + self.dateFolder
         self.localLogPath = self.imagePath + 'log/'
         self.fileQty = 0
         
@@ -36,6 +38,8 @@ class sftp_server:
         self.server.start()
         
         self.ipDict = {}
+        self.userDict = {}
+        self._parse_userXML()
  
         # setup logging
         self.create_dir(self.localLogPath)
@@ -60,6 +64,7 @@ class sftp_server:
         succes_msg = CameraDownloadActionResult
         succes_msg.total_downloaded = 'Downloaded ' + str(totalCount) + ' pictures from ' + str(len(self.ipDict)) + ' devices.'
 
+        self.rospack = rospkg.RosPack()
         self.server.set_succeeded(succes_msg)
         
 
@@ -69,7 +74,7 @@ class sftp_server:
         
     def refresh_date(self):
         self.dateFolder = time.strftime("%B") + '/'
-        self.localImagePath = self.imagePath + self.dateFolder
+        self.localImagePath = self.imagePath + 'master/' + self.dateFolder
         
 
     def download_all_images_from_network(self):
@@ -81,12 +86,11 @@ class sftp_server:
         for name,ip in self.ipDict.items():
             try:
                 rospy.loginfo('start sftp session with '+ name + ' on ip ' + ip + ' and port 22')
-                sftp,t = self._createSession(ip)
-                imageQty += self._downloadImageFolder(sftp,name)
-                
-                t.close()
-                rospy.loginfo('Session with ' + ip + ' closed')
-
+                sftp,t = self._createSession(ip,name)
+                if sftp != None and t != None:
+                    imageQty += self._downloadImageFolder(sftp,name)
+                    t.close()
+                    rospy.loginfo('Session with ' + ip + ' closed')
 
             except Exception as e:
                 rospy.logwarn('*** Caught exception: %s: %s' % (e.__class__, e))
@@ -96,14 +100,15 @@ class sftp_server:
                     pass
         return imageQty
     
-    def _createSession(self,ip,port=22):
+    def _createSession(self,ip,name,port=22):
         try:
             t = paramiko.Transport((ip, port))
-            t.connect(username='pi', password='raspberry')
+            (username,passw) = self._get_user_and_passw(name)
+            t.connect(username = username, password=passw)
             sftp = paramiko.SFTPClient.from_transport(t)
         except:
             rospy.logwarn("Unable to connect to " + str(ip))
-            raise RuntimeError("unable to connect to device")   
+            return (None,None)
         return (sftp,t)
                
     def _downloadImageFolder(self,sftp,deviceName=''):
@@ -152,6 +157,24 @@ class sftp_server:
                 if self.server.is_preempt_requested() or not self.server.is_active():
                     rospy.loginfo("Download timer interupted")
                     break
+                
+    def _parse_userXML(self, filename = 'users.xml'):
+        try:
+            xmldoc = minidom.parse(rospkg.RosPack().get_path('camera_master_server') + '/' + filename)
+            for node in xmldoc.getElementsByTagName('device'):
+                deviceName = node.getElementsByTagName('name')[0].childNodes[0].data
+                (username,password) = node.getElementsByTagName('user')[0].childNodes[0].data, node.getElementsByTagName('pass')[0].childNodes[0].data
+                self.userDict[deviceName] = (username,password)
+        except:
+            rospy.logwarn("Unable to load users.xml, will use default raspberry pi user for all devices")
+            rospy.logwarn(rospkg.RosPack().get_path('camera_master_server'))
+            
+    def _get_user_and_passw(self,name):
+        if name in self.userDict:
+            return self.userDict[name]
+        else:
+            return ('pi','raspberry')
+
         
     
 
