@@ -57,7 +57,7 @@ find_package(catkin REQUIRED COMPONENTS
    CaptureService.srv
    InCameraData.srv
    OutCameraData.srv
-   VideoStream.srv
+   Uint32.srv
    CommandOption.srv
    User.srv
    BackMessage.srv

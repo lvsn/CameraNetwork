@@ -301,10 +301,10 @@ function device(){
 		var stream_srv = new ROSLIB.Service({
 			ros : ros,
 			name : '/' + name + '/stream_video',
-			serviceType : 'camera_network_msgs/VideoStream'
+			serviceType : 'camera_network_msgs/Uint32'
 		});
 		var request = new ROSLIB.ServiceRequest({
-			frames : parseInt($("#device_stream_frames").val())
+			integer : parseInt($("#device_stream_frames").val())
 		});
 		stream_srv.callService(request,function(result){});
 	}

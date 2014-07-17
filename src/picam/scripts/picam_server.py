@@ -63,9 +63,9 @@ class picam_server:
 
     def stream_video_cb(self,req):
         stream = io.BytesIO()
-        rospy.loginfo("Start Video streaming with " + str(req.frames) + " frames.")
+        rospy.loginfo("Start Video streaming with " + str(req.integer) + " frames.")
         gpio.digitalWrite(self.led,True)
-        for i in range(req.frames):
+        for i in range(req.integer):
             stream.flush()
             stream.seek(0)
             self.picam.capture(stream, format='jpeg', resize=(320,240))
@@ -76,6 +76,18 @@ class picam_server:
             except CvBridgeError, e:
                 rospy.logwarn("stream_video_cb : " + e)
         gpio.digitalWrite(self.led,False);
+        return {}
+
+    def capture_video_cb(self,req):
+        rospy.loginfo("Capturing Video")
+        if not os.path.exists(self.tmpPath):
+            os.makedirs(self.tmpPath)
+        videoFileName = self.tmpPath + '/video_' + self._filename_format('%Hh%Mm%Ss.h264')
+        gpio.digitalWrite(self.led,True)
+        self.picam.start_recording(videoFileName)
+        self.picam.wait_recording(req.integer)
+        self.picam.stop_recording()
+        gpio.digitalWrite(self.led,False)
         return {}
 
     def load_camera_cb(self,req):
@@ -140,8 +152,9 @@ class picam_server:
         rospy.Service('load_camera',Load,self.load_camera_cb)
         rospy.Service('get_camera',OutCameraData,self.get_camera_cb)
         rospy.Service('set_camera',InCameraData,self.set_camera_cb)
-        rospy.Service('stream_video',VideoStream,self.stream_video_cb)
-    
+        rospy.Service('stream_video',Uint32,self.stream_video_cb)
+        rospy.Service('capture_video',Uint32,self.capture_video_cb)
+
     def _init_picamera(self):
         self.picam.awb_mode = 'off'
         self.picam.awb_gains = 1.5
