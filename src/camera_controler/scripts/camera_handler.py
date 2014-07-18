@@ -15,10 +15,12 @@ class CameraHandler:
         rospy.wait_for_service('set_camera')
         rospy.wait_for_service('capture_camera')
         rospy.wait_for_service('load_camera')
+        rospy.wait_for_service('capture_video')
          
         self.capture_camera_service = rospy.ServiceProxy('capture_camera', CaptureService)
         self.set_camera_service = rospy.ServiceProxy('set_camera', InCameraData)
         self.load_camera_service = rospy.ServiceProxy('load_camera', Load)
+        self.capture_video_service = rospy.ServiceProxy('capture_video',Uint32)
         self.updateCameraSetting()
         
         
@@ -74,6 +76,9 @@ class CameraHandler:
             self.capture_camera_service(0)
         if loadCamera:
             self.load_camera_service(picturePath)
+            
+    def takeVideo(self,time):
+        self.capture_video_service(time)            
             
     def takePreview(self):
         self.updateCameraSetting()

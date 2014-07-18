@@ -13,8 +13,10 @@ import network_capture_listener as ncl
 import camera_handler as ch
 import parameter_save as ps
 import os
+import std_msgs.msg
 import std_srvs.srv
 from camera_network_msgs.srv import *
+from camera_network_msgs.msg import *
 import subprocess
 
 
@@ -25,8 +27,9 @@ class server:
         
         self.cam_handler = ch.CameraHandler()
         self.timelapsServer = ts.TimelapsServer(self.cam_handler)
-        self.listener = ncl.network_capture_listener(self.cam_handler)
-        self.listener.listen()
+        rospy.Subscriber('/network_capture_chatter', Capture, self.capture_listen_cb,queue_size=1)
+        rospy.Subscriber('/network_capture_video_chatter', std_msgs.msg.Uint32, self.capture_video_listen_cb,queue_size=1)
+
         #setup server to set camera init parameters
         self.paramSaver = ps.save_server()
         rospy.Service('preview_camera', std_srvs.srv.Empty(), self.preview_image_cb)
@@ -54,6 +57,18 @@ class server:
                 rospy.loginfo("file " + f + ".jpeg is ready")
                 self._rename_file(filename,directory)
         return []
+        
+    def capture_listen_cb(self,req):
+        # Simply print out values in our custom message.
+        if req.isHdr:
+            rospy.loginfo("Taking hdr picture")
+            self.cam_handler.takeHDRPicture(0,setCamera=False)
+        else:
+            rospy.loginfo("Taking single picture")
+            self.cam_handler.takeSinglePicture(0,setCamera=False)
+            
+    def capture_video_listen_cb(self,req):
+        self.cam_handler.capture_video_service(req.data)
     
     def shutdown_device_cb(self,req):       
         if req.option in ['','-h','-r']:
