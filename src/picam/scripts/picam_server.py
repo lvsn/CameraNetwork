@@ -82,7 +82,7 @@ class picam_server:
         rospy.loginfo("Capturing Video")
         if not os.path.exists(self.tmpPath):
             os.makedirs(self.tmpPath)
-        videoFileName = self.tmpPath + '/video_' + self._filename_format('%Hh%Mm%Ss.h264')
+        videoFileName = self.tmpPath + '/unloaded_' + self.id_gen.next() + '.h264'
         gpio.digitalWrite(self.led,True)
         self.picam.start_recording(videoFileName)
         self.picam.wait_recording(req.integer)
@@ -138,7 +138,7 @@ class picam_server:
         
         return {'iso':iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
-    def _filename_format(self,string,pictureId,pictureFormat):
+    def _filename_format(self,string,pictureId=0,pictureFormat='jpeg'):
         string = string.replace('%C',pictureFormat)
         string = string.replace('%n', str(pictureId))
         return time.strftime(string)

@@ -78,7 +78,8 @@ class CameraHandler:
             self.load_camera_service(picturePath)
             
     def takeVideo(self,time):
-        self.capture_video_service(time)            
+        self.capture_video_service(time)
+        self.load_camera_service(self._generatePictureName("video"))        
             
     def takePreview(self):
         self.updateCameraSetting()
