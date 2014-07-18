@@ -9,7 +9,6 @@ Created on Wed May 28 16:19:15 2014
 import roslib; roslib.load_manifest('camera_controler')
 import rospy
 import timelaps_server as ts
-import network_capture_listener as ncl
 import camera_handler as ch
 import parameter_save as ps
 import os
