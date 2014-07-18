@@ -39,6 +39,7 @@ class gphoto_server():
         
     def capture_video_cb(self,req):
         rospy.logwarn("Gphoto2 does not support video capture at this moment!")
+        return []
     
     def load_camera_cb(self,req):
         rospy.sleep(3)

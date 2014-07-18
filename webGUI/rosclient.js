@@ -530,6 +530,21 @@ function networkTimelapsEvent(form,isStart){
 	}
 }
 
+var cmdVideo = new ROSLIB.Topic({
+    ros : ros,
+    name : '/network_capture_video_chatter',
+    messageType : 'std_msgs/UInt32'
+});
+
+function networkVideoEvent(form){
+
+    var msg = new ROSLIB.Message({
+        data : parseInt(form.video_time.value)
+    });
+    cmdVideo.publish(msg);
+
+}
+
 function networkDownloadEvent(form,isStart){
 	if(isStart){
 		_network_download.setAction(form);

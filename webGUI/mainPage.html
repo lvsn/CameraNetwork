@@ -34,12 +34,21 @@
           			<dd id="network_timelaps_result"></dd>
       		</dl>
 			<input type="submit" class="styleButton" onclick="networkTimelapsEvent(this.form,true)" value="Set">
-    	</form>
+        	</form>
 		<button type="button" class="styleButton" onclick = "networkTimelapsEvent(this.form,false)">Stop</button>
 
     	
 	</div> 
- 
+
+   <!-- Video interface -->
+     <div class="mainStyle">
+		<form name="video" action="javascript:void(0)" method="get">
+            	<label>Video capture Time (s) : </label>
+            	<input id="video_time" type="number" value=0 name="video_time" >
+        		<button type="button" class="styleButton" onclick = "networkVideoEvent(this.form)">Start</button>
+            </form>
+    	
+	</div> 
 
   <!-- Download interface -->
 	<div class="mainStyle">

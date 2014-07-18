@@ -27,7 +27,7 @@ class server:
         self.cam_handler = ch.CameraHandler()
         self.timelapsServer = ts.TimelapsServer(self.cam_handler)
         rospy.Subscriber('/network_capture_chatter', Capture, self.capture_listen_cb,queue_size=1)
-        rospy.Subscriber('/network_capture_video_chatter', std_msgs.msg.Uint32, self.capture_video_listen_cb,queue_size=1)
+        rospy.Subscriber('/network_capture_video_chatter', std_msgs.msg.UInt32, self.capture_video_listen_cb,queue_size=1)
 
         #setup server to set camera init parameters
         self.paramSaver = ps.save_server()
@@ -38,7 +38,6 @@ class server:
 
     def shutdown(self):
         del self.cam_handler
-        del self.listener
         del self.timelapsServer
         rospy.delete_param('camera_setting')
         rospy.delete_param('file')
