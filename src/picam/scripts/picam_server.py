@@ -138,7 +138,7 @@ class picam_server:
         
         return {'iso':iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
-    def _filename_format(self,string,pictureId,pictureFormat):
+    def _filename_format(self,string,pictureId=0,pictureFormat='jpeg'):
         string = string.replace('%C',pictureFormat)
         string = string.replace('%n', str(pictureId))
         return time.strftime(string)

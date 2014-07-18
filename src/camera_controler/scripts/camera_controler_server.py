@@ -26,6 +26,7 @@ class server:
         self.cam_handler = ch.CameraHandler()
         self.timelapsServer = ts.TimelapsServer(self.cam_handler)
         self.listener = ncl.network_capture_listener(self.cam_handler)
+        
         self.listener.listen()
         #setup server to set camera init parameters
         self.paramSaver = ps.save_server()
