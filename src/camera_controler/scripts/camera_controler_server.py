@@ -66,7 +66,7 @@ class server:
             self.cam_handler.takeSinglePicture(0,setCamera=False)
             
     def capture_video_listen_cb(self,req):
-        self.cam_handler.capture_video_service(req.data)
+        self.cam_handler.takeVideo(req.data)
     
     def shutdown_device_cb(self,req):       
         if req.option in ['','-h','-r']:

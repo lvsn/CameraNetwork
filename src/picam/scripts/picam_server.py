@@ -85,7 +85,7 @@ class picam_server:
         videoFileName = self.tmpPath + '/unloaded_' + self.id_gen.next() + '.h264'
         gpio.digitalWrite(self.led,True)
         self.picam.start_recording(videoFileName)
-        self.picam.wait_recording(req.integer)
+        rospy.sleep(req.integer)
         self.picam.stop_recording()
         gpio.digitalWrite(self.led,False)
         return {}
