@@ -79,7 +79,8 @@ class CameraHandler:
             
     def takeVideo(self,time):
         self.capture_video_service(time)
-        self.load_camera_service(self._generatePictureName("video"))        
+        picture = self._generatePictureName('video')
+        self.load_camera_service(picture)        
             
     def takePreview(self):
         self.updateCameraSetting()

@@ -158,6 +158,8 @@ class picam_server:
     def _init_picamera(self):
         self.picam.awb_mode = 'off'
         self.picam.awb_gains = 1.5
+        self.picam.resolution = (1296,972)
+        self.picam.framerate = 40
         self.camParam.set_camera_parameters()
         
     def _init_picamera_led(self):
