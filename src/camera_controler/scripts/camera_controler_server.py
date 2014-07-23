@@ -88,7 +88,7 @@ class server:
         try:
             os.rename(directory + filename, directory+f+".jpeg")
         except:
-            rospy.logerr("Problem while renaming" + directory+filename)
+            rospy.logerr("Problem while renaming " + directory+filename)
 
 if __name__ == "__main__":
     serverInstance = server()
