@@ -71,6 +71,9 @@ class picam_server:
             self.picam.capture(stream, format='jpeg', resize=(320,240))
             data = np.fromstring(stream.getvalue(), dtype=np.uint8)
             image = cv2.imdecode(data, 1)
+            height, width, depth = image.shape
+            cv2.line(image,(0,height/2),(width,height/2),(0,0,255),1)
+            cv2.line(image,(width/2,0),(width/2,height),(0,0,255),1)
             try:
                 self.image_publisher.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
             except CvBridgeError, e:
@@ -80,15 +83,65 @@ class picam_server:
 
     def capture_video_cb(self,req):
         rospy.loginfo("Capturing Video")
-        if not os.path.exists(self.tmpPath):
-            os.makedirs(self.tmpPath)
+        self._mkdir(self.tmpPath)
         videoFileName = self.tmpPath + '/unloaded_' + self.id_gen.next() + '.h264'
-        gpio.digitalWrite(self.led,True)
-        self.picam.start_recording(videoFileName)
-        rospy.sleep(req.integer)
-        self.picam.stop_recording()
-        gpio.digitalWrite(self.led,False)
+        self._record_video(videoFileName,req.integer)
         return {}
+
+    def calibrate_picture_cb(self,req):
+        rospy.loginfo("Picture Calibration")
+        rospy.logwarn("not Yet supported!")
+        #self.picam.shutter_speed = 0
+        #self.picam.awb_mode = 'auto'
+        #rospy.sleep(3)
+        #new_awb = self.picam.awb_gains
+        #new_exp = self.picam.exposure_speed
+        #self.picam.awb_mode = 'off'
+        #self.picam.awb_gains = new_awb
+        #self.picam.shutter_speed = new_exp
+        #self._flash_led(nflash = 6)
+        return {}
+
+    def calibrate_video_cb(self,req):
+        rospy.loginfo("Video Calibration")
+        self._mkdir(self.tmpPath)
+        videoFileName = self.tmpPath + '/Calibration.h264'
+        saturationFlag = False
+        while(True):
+            self._record_video(videoFileName,0.2)
+            video = cv2.VideoCapture(videoFileName)
+            pixelVal = self._get_center_pixel_value(video)
+            if(pixelVal > 254):
+                self.picam.brightness = self.picam.brightness - 2;
+                saturationFlag = True
+            else:
+                if(saturationFlag):  #this condition mean that we are at the edge of saturation
+                    break
+                self.picam.brightness = self.picam.brightness + 2;
+                saturationFlag = False
+
+        self._flash_led(nflash=6,delay=0.1)
+        return {}
+
+    def _get_center_pixel_value(self,video):
+        pixelMean = 0
+        pixels = 0
+        while (video.isOpened()):
+            ret, frame = video.read()
+            if not ret:
+                break
+            gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+            height, width = gray.shape
+            pixels += 5 
+            pixelMean += gray[height/2,width/2]
+            pixelMean += gray[(height/2)+1,width/2]
+            pixelMean += gray[(height/2)-1,width/2]
+            pixelMean += gray[height/2,(width/2)+1]
+            pixelMean += gray[height/2,(width/2)-1]
+        pixelMean = pixelMean/pixels
+        rospy.loginfo("Mean value : " + str(pixelMean) + " pixels : " + str(pixels))
+        video.release()
+        return pixelMean
 
     def load_camera_cb(self,req):
         #reset generator
@@ -154,10 +207,17 @@ class picam_server:
         rospy.Service('set_camera',InCameraData,self.set_camera_cb)
         rospy.Service('stream_video',Uint32,self.stream_video_cb)
         rospy.Service('capture_video',Uint32,self.capture_video_cb)
+        rospy.Service('calibrate_picture',std_srvs.srv.Empty,self.calibrate_picture_cb)
+        rospy.Service('calibrate_video',std_srvs.srv.Empty,self.calibrate_video_cb)
+
+    def _mkdir(self,dirPath):
+        if not os.path.exists(dirPath):
+            os.makedirs(dirPath)
 
     def _init_picamera(self):
+        self.picam.exposure_mode = 'fixedfps'
         self.picam.awb_mode = 'off'
-        self.picam.awb_gains = 1.5
+        self.picam.awb_gains = 1.4
         self.picam.resolution = (1296,972)
         self.picam.framerate = 40
         self.camParam.set_camera_parameters()
@@ -199,7 +259,14 @@ class picam_server:
                 endBlinkTime = rospy.Time(blinkTime.secs,(blinkTime.nsecs+blinkDelay_nsec))
             gpio.digitalWrite(self.led,gpioState)
         return
-        
+       
+    def _record_video(self,filename,delay):
+        gpio.digitalWrite(self.led,True)
+        self.picam.start_recording(filename)
+        rospy.sleep(delay)
+        self.picam.stop_recording()
+        gpio.digitalWrite(self.led,False)
+
 
 
 if __name__ == "__main__":
