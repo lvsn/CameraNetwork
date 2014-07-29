@@ -90,16 +90,15 @@ class picam_server:
 
     def calibrate_picture_cb(self,req):
         rospy.loginfo("Picture Calibration")
-        rospy.logwarn("not Yet supported!")
-        #self.picam.shutter_speed = 0
-        #self.picam.awb_mode = 'auto'
-        #rospy.sleep(3)
-        #new_awb = self.picam.awb_gains
-        #new_exp = self.picam.exposure_speed
-        #self.picam.awb_mode = 'off'
-        #self.picam.awb_gains = new_awb
-        #self.picam.shutter_speed = new_exp
-        #self._flash_led(nflash = 6)
+        self.picam.shutter_speed = 0
+        self.picam.awb_mode = 'auto'
+        rospy.sleep(1)
+        new_awb = self.picam.awb_gains
+        new_exp = self.picam.exposure_speed
+        self.picam.awb_mode = 'off'
+        self.picam.awb_gains = new_awb
+        self.picam.shutter_speed = new_exp
+        self._flash_led(nflash = 6)
         return {}
 
     def calibrate_video_cb(self,req):
@@ -120,7 +119,11 @@ class picam_server:
                 self.picam.brightness = self.picam.brightness + 2;
                 saturationFlag = False
 
-        self._flash_led(nflash=6,delay=0.1)
+        try:
+            os.remove(videoFileName)
+        except:
+            rospy.logwarn("error deleting calibration file")
+        self._flash_led(nflash=6)
         return {}
 
     def _get_center_pixel_value(self,video):

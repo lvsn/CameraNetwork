@@ -33,6 +33,7 @@ class server:
         self.paramSaver = ps.save_server()
         rospy.Service('preview_camera', std_srvs.srv.Empty(), self.preview_image_cb)
         rospy.Service('shutdown_device', CommandOption,self.shutdown_device_cb)
+        rospy.Service('calibrate_device',std_srvs.srv.Empty(),self.calibrate_device_cb) 
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
 
@@ -53,7 +54,7 @@ class server:
                 self._delete_file(filename,directory)
             else:
                 rospy.loginfo("file " + f + ".jpeg is ready")
-                self._rename_file(filename,directory)
+                self._rename_file(filename,directory,f)
         return []
         
     def capture_listen_cb(self,req):
@@ -67,7 +68,11 @@ class server:
             
     def capture_video_listen_cb(self,req):
         self.cam_handler.takeVideo(req.data)
-    
+
+    def calibrate_device_cb(self,req):
+        self.cam_handler.calibrate()
+        return []
+
     def shutdown_device_cb(self,req):       
         if req.option in ['','-h','-r']:
             command = "/usr/bin/sudo /sbin/shutdown " + req.option +" now"
@@ -84,9 +89,9 @@ class server:
         except:
             rospy.logerr("Problem while deleting " + directory+filename)
         
-    def _rename_file(self,filename,directory=""):
+    def _rename_file(self,filename,directory,newName):
         try:
-            os.rename(directory + filename, directory+f+".jpeg")
+            os.rename(directory + filename, directory+newName+".jpeg")
         except:
             rospy.logerr("Problem while renaming" + directory+filename)
 
