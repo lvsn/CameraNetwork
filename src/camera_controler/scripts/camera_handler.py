@@ -99,6 +99,7 @@ class CameraHandler:
         settingDict = {}
         settingDict['iso'] = setting.iso
         settingDict['shutterspeed'] = setting.shutterspeed
+        settingDict['aperture'] = setting.aperture
         self.updateCameraSetting(settingDict)
 
     def _generatePictureName(self,name):
