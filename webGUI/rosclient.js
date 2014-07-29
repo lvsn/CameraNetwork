@@ -447,6 +447,16 @@ function device(){
 	  
 	}
 
+    this.calibratePicture = function(form){
+		var cal = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name + '/calibrate_device',
+			serviceType : 'std_srvs/Empty'
+		});
+		var request = new ROSLIB.ServiceRequest({});
+	  cal.callService(request);
+    }
+
 	this.getIp = function(){
 		return ip;
 	}
@@ -620,6 +630,12 @@ function drawPreviewEvent(form){
 function calibrateVideoEvent(form){
 	if(!noDeviceAlert()){
 		_current_device.calibrateVideo();		
+	}
+}
+
+function calibratePictureEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.calibratePicture();		
 	}
 }
 
