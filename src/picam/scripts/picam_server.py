@@ -172,7 +172,7 @@ class picam_server:
         if(req.imageformat != ""):
             self.camParam.set_format(req.imageformat)
         if(req.aperture != ""):
-            rospy.logwarn("aperture is not supported on picam")
+            self.picam.brightness = int(float(req.aperture))
         if(req.shutterspeed != ""):
             self.picam.shutter_speed = int(float(req.shutterspeed))
         
@@ -183,14 +183,14 @@ class picam_server:
         rospy.loginfo("Getting camera's Configuration")
         iso = str(self.picam.ISO)
         imageformat = str(self.camParam.get_format())
-        aperture = "not supported"
+        aperture = str(self.picam.brightness)
         shutterspeed = str(self.picam.shutter_speed)
         
         if req.getAllInformation:
             iso = "current ISO : " + iso + "\n Choice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800\n"
             imageformat = "current Image format : " + imageformat + "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra\n"
             shutterspeed = "current Shutterspeed : " + shutterspeed + "\nChoice : 0(auto)\nChoice : (int)usec\n"
-            aperture = "current aperture : " + aperture + "\n"
+            aperture = "current aperture : " + aperture + "\nChoice : 0 - 100\n"
         
         return {'iso':iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     

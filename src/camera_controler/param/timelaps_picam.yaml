@@ -5,4 +5,5 @@ captureSequence:
 - {shutterspeed: '11000'}
 imageformat: 'jpeg'
 iso: '100'
-shutterspeed: '5000'
+shutterspeed: '10000'
+aperture: '50'
