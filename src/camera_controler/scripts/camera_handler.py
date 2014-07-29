@@ -6,21 +6,26 @@ Created on Thu May 22 16:21:09 2014
 @author: mathieugaron
 """
 import rospy
+import std_srvs.srv
 from camera_network_msgs.srv import * 
 
 class CameraHandler:
     
     def __init__(self):
-        rospy.loginfo("Setting up camera Handler")        
+        rospy.loginfo("Setting up camera Handler")
+        rospy.wait_for_service('get_camera')
         rospy.wait_for_service('set_camera')
         rospy.wait_for_service('capture_camera')
         rospy.wait_for_service('load_camera')
         rospy.wait_for_service('capture_video')
-         
+        rospy.wait_for_service('calibrate_picture')
+
+        self.get_camera_service = rospy.ServiceProxy('get_camera',OutCameraData)
         self.capture_camera_service = rospy.ServiceProxy('capture_camera', CaptureService)
         self.set_camera_service = rospy.ServiceProxy('set_camera', InCameraData)
         self.load_camera_service = rospy.ServiceProxy('load_camera', Load)
         self.capture_video_service = rospy.ServiceProxy('capture_video',Uint32)
+        self.calibrate_picture_service = rospy.ServiceProxy('calibrate_picture',std_srvs.srv.Empty)
         self.updateCameraSetting()
         
         
@@ -87,7 +92,15 @@ class CameraHandler:
         picturePath = 'preview/send.%C'
         self.capture_camera_service(0)
         self.load_camera_service(picturePath)
-     
+
+    def calibrate(self):
+        self.calibrate_picture_service();
+        setting = self.get_camera_service(False)
+        settingDict = {}
+        settingDict['iso'] = setting.iso
+        settingDict['shutterspeed'] = setting.shutterspeed
+        self.updateCameraSetting(settingDict)
+
     def _generatePictureName(self,name):
         return '%B/' + name + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
         
