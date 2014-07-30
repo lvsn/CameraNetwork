@@ -20,17 +20,17 @@
 <body>
 <h1>Camera Network</h1>
 
-    <div id="main-content">
-    <div id="sub-content">
 
-    <div class="menu2">
-        <nav>
-            <a href="networkPage.html" class="current"  >Network</a>
-            <a href="devicePage.html">Device</a>
-        </nav>
-    </div>
 
-  
+    <nav>
+        <a href="networkPage.html">Network</a>
+        <a href="devicePage.html">Device</a>
+        <a class="dummy">&nbsp;</a>
+    </nav>
+
+      <div id="main-content">
+      <div id="sub-content">
+      <script>$('nav').addClass('current')</script>
 	<!-- Network interface -->
 	<p class="title">Network Interface</p>
 	<div class="mainStyle">
@@ -48,9 +48,13 @@
             		<dt>Result:</dt>
               			<dd id="network_timelaps_result"></dd>
       		</dl>
-			<input type="submit" class="styleButton" onclick="networkTimelapsEvent(this.form,true)" value="Set">
+                <div class="floatleft">
+			<input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form,true)" value="Set">
+                </div>
+                <div class="floatright">
+                <input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form,false)" value="Stop">
+                </div>
         	</form>
-		<button type="button" class="styleButton" onclick = "networkTimelapsEvent(this.form,false)">Stop</button>
 
     	
 	</div> 
@@ -59,15 +63,32 @@
      <div class="mainStyle">
 		<form name="video" action="javascript:void(0)" method="get">
             	<label>Video capture Time (s) : </label>
-            	<input id="video_time" type="number" value="0" name="video_time" >
-        		<button type="button" class="styleButton" onclick = "networkVideoEvent(this.form)">Start</button>
+            	<input id="video_time" type="number" value="0" name="video_time" ><br>
+        		<button type="button" class="floatleft" onclick = "networkVideoEvent(this.form)">Start</button>
             </form>
     	
 	</div> 
 
   <!-- Download interface -->
 	<div class="mainStyle">
-        
+        <div class="parameterStyle right">
+			<form name="timelaps" action="javascript:void(0)" method="get">
+				<label>Device Name : </label>	
+				<input id="download_name" type="text"  value='' name="download_name" >
+				<br>
+				<label>Username : </label>
+				<input id="download_username" type="text" value='' name="download_username" >
+				<br>
+                      <label>Password : </label>
+				<input id="download_password" type="password" value='' name="download_password" >
+				<br>
+				<input type="submit" class="styleButton" onclick="_network_download.addUser(form)" value="Add">
+			</form>
+                 <button type="button" class="styleButton" onclick = "_network_download.delUsers(form)">Delete</button>
+			<button type="button" class="styleButton" onclick = "_network_download.saveUsers(form)">Save</button>
+                <button type="button" class="styleButton" onclick = "_network_download.getUsers(form)">Get</button>
+		</div>
+
 		<form  name="download" action="javascript:void(0)" method="get">
 			<label> Download frequency (s) (0 = one time) : </label>
 	 		<input id="input_frequency" type="number" value="0" name="network_download_frequency" >
@@ -85,27 +106,14 @@
 				<dt>Result:</dt>
 					<dd id="network_download_result"></dd>
 			</dl>
-			<input type="submit" class="styleButton" onclick="networkDownloadEvent(this.form,true)" value="Download">
+                <div class="floatleft">
+			<input type="submit" class="floatleft" onclick="networkDownloadEvent(this.form,true)" value="Download">
+                </div>
+                <div class="floatright">
+                 <input type="submit" class="floatright" onclick = "networkDownloadEvent(this.form,false)" value="Stop">
+                </div>
 		</form> 
-		<button type="button" class="styleButton" onclick = "networkDownloadEvent(this.form,false)">Stop</button>
-
-            <div class="right">
-			<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
-				<label>Device Name : </label>	
-				<input id="download_name" type="text"  value='' name="download_name" >
-				<br>
-				<label>Username : </label>
-				<input id="download_username" type="text" value='' name="download_username" >
-				<br>
-                      <label>Password : </label>
-				<input id="download_password" type="text" value='' name="download_password" >
-				<br>
-				<input type="submit" class="styleButton" onclick="_network_download.addUser(form)" value="Add">
-			</form>
-                 <button type="button" class="styleButton" onclick = "_network_download.delUsers(form)">Delete</button>
-			<button type="button" class="styleButton" onclick = "_network_download.saveUsers(form)">Save</button>
-                <button type="button" class="styleButton" onclick = "_network_download.getUsers(form)">Get</button>
-		</div>
+            
 
 	</div>  
 

@@ -496,7 +496,9 @@ function refreshScreen(){
 }
 
 function refreshCanvas(){
-    document.getElementById('imagePreview').src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
+    if($('#imagePreview').length){
+        document.getElementById('imagePreview').src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
+    }
 };
 
 function refreshSelect(){
@@ -505,6 +507,7 @@ function refreshSelect(){
 		name : '/IP'
 	});
 	IpList.get(function(value) {
+        if($("#deviceList").length){
 		$("#deviceList").empty(); 
 		var select = document.getElementById("deviceList");
 		select.options[0] = new Option("Online Devices", "index0");
@@ -514,6 +517,7 @@ function refreshSelect(){
 		if(_current_device != undefined){
 			$("#deviceList").val(_current_device.getIp());	
 		}
+        }
 	});
 }
 
@@ -661,3 +665,6 @@ function rebootDeviceEvent(form){
 	}
 }
 
+setInterval(refreshSelect,2000);
+setInterval(refreshCanvas, 100);
+setInterval(refreshScreen, 1000);
