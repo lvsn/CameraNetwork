@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+
+<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="rosclient.js"></script>
+<script type="text/javascript" src="dynamicPage.js"></script>
+
+<link rel="stylesheet" href="style.css" type="text/css" media="screen, projection" />
+
+<title>Camera Network</title>
+
+</head>
+
+
+<body>
+<h1>Camera Network</h1>
+
+    <div id="main-content">
+    <div id="sub-content">
+
+    <div class="menu2">
+        <nav>
+            <a href="networkPage.html" >Network</a>
+            <a href="devicePage.html" class="current" >Device</a>
+        </nav>
+    </div>
+
+    <!-- Device interface -->
+	<p class="title">Device Interface</p>
+	<div class="mainStyle">
+		<div class="parameterStyle">
+			<div class="left">
+				<select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
+					<option value="index0">Online Devices</option>
+				</select> 
+				<dl>
+					<dt>Device:</dt>
+						<dd id="device_name"></dd>
+					<dt>IP:</dt>
+						<dd id="device_ip"></dd>
+					<dt>Camera Type:</dt>
+						<dd id="device_camera"></dd>
+				</dl> 
+			  
+			  	<dl>
+					<dt>ISO:</dt>
+						<dd id="device_iso"></dd>
+					<dt>Aperture:</dt>
+						<dd id="device_aperture"></dd>
+					<dt>Shutter speed:</dt>
+						<dd id="device_shutterspeed"></dd>
+					<dt>Image format :</dt>
+						<dd id ="device_imageformat"></dd>
+					</dl>
+			</div>
+				
+			<form class="right" name="timelaps" action="javascript:void(0)" method="get">
+				<label>iso : </label>
+				<input id="device_parameter_iso" type="text" value='' name="device_parameter_iso" >
+				<br>
+				<label>Aperture :</label>
+				<input id="device_parameter_aperture" type="text"  value='' name="device_parameter_aperture" >
+				<br>
+				<label>Shutter Speed :</label>
+				<input id="device_parameter_shutterspeed" type="text" value='' name="device_parameter_shutterspeed">
+				<br>
+				<label>Format : </label>
+				<input id="device_parameter_imageformat" type="text"  value='' name="device_parameter_imageformat" >
+				<br>
+				<input type="submit" class="styleButton" onclick="setParametersEvent(this.form)" value="Set">
+			</form>
+                		<button type="button" class="styleButton" onclick = "calibratePictureEvent(this.form)">Auto</button>
+
+			<button type="button" class="styleButton" onclick = "getInformationEvent(this.form)">Help</button>
+		</div>
+
+		<!-- Parameter interface -->
+		<div class="parameterStyle" id="capture_mode">
+			<div class="left">
+				<p>Capture Parameters:</p>
+				<p id="device_parameters"></p>
+			</div>
+			<div class="right">
+				<button type="button" class="styleButton" onclick = "removeSequenceEvent(this.form)">Reset</button>
+				<form class="parameterStyle" name="timelaps" action="javascript:void(0)" method="get">
+					<label>Aperture : </label>	
+					<input id="device_sequence_aperture" type="text" value='' name="device_sequence_aperture" >
+					<br>
+					<label>Shutter Speed : </label>
+					<input id="device_sequence_shutterspeed" type="text" value='' name="device_sequence_shutterspeed" >
+					<br>
+					<input type="submit" class="styleButton" onclick="addSequenceEvent(this.form)" value="Add">
+				</form>
+				<button type="button" class="styleButton" onclick = "saveSequenceEvent()">Save</button>
+			</div>
+		</div>
+
+    
+	<!-- Timelaps interface -->
+		<div class="timelapsStyle">
+			<form name="timelaps" action="javascript:void(0)" method="get">
+				<label>Frequency (s) : </label>
+				<input id="device_timelaps_frequency" type="number" value="0" name="device_timelaps_frequency" >
+				<label>Quantity (&lt;0 = infinite) : </label>
+				<input id="device_timelaps_qty" type="number" value="0" name="device_timelaps_qty" >
+				<input type="checkbox" id="device_hdr" value="HDR">HDR<br>
+				<dl>
+					<dt>Status:</dt>
+						<dd id ="device_timelaps_status"></dd>
+					<dt>Feedback:</dt>
+						<dd id="device_timelaps_feedback"></dd>
+					<dt>Termination:</dt>
+						<dd id="device_timelaps_result"></dd>
+				</dl>
+  
+				<input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form,true)" value="Set">
+			</form>
+			<button type="button" class="styleButton" onclick = "deviceTimelapsEvent(this.form,false)">Stop</button>
+
+		</div> 
+  		<!-- preview interface -->
+		<div class="timelapsStyle">
+			<form class="right" name="stream" action="javascript:void(0)" method="get">
+				<button type="button" class="styleButton" onclick = "streamVideoEvent()">(beta)Stream</button>
+				Frames:<input id="device_stream_frames" type="number" value="10" name="device_stream_frames" >
+			</form>
+			<img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480" alt="preview window">
+			<button type="button" class="styleButton" onclick = "drawPreviewEvent()">Preview</button>
+		</div>
+           <button type="button" class="styleButton" onclick = "calibrateVideoEvent()">(beta)Calibrate Video</button>
+		<div class="timelapsStyle">
+			<button type="button" class="styleButton" onclick = "shutdownDeviceEvent()">Shutdown Device</button>
+			<button type="button" class="styleButton" onclick = "rebootDeviceEvent()">Reboot Device</button>
+		</div>
+	</div> 
+    <script>
+        setInterval(refreshSelect,2000);
+        setInterval(refreshCanvas, 100);
+        setInterval(refreshScreen, 1000);
+    </script>
+
+    </div>
+    </div>
+
+</body>
+</html>

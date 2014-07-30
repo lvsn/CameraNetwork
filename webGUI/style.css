@@ -2,11 +2,46 @@ html, body, .container
 {
 height: 100%; 
 min-height: 100%;
+
+
+}
+
+
+div.menu2
+{
+    /*width:500px;margin:0 auto;*//*Uncomment this line to make the menu center-aligned.*/
+    text-align:center;
+    background-image: url(bg1.jpg);
+    border:1px solid black;
+    font-size:0;
+}
+
+div.menu2 a
+{
+    display: inline-block;
+    padding: 0 20px;
+    background-image: url(bg.jpg);
+    color:White;
+    text-decoration:none;
+    font: bold 12px Arial;
+    line-height: 32px;
+}
+
+div.menu2 a:hover, div.menu2 a.current
+{
+    background-position:0 -60px;
+}
+
+div.menu2 a.dummy
+{
+    width:2px;
+    padding:0 0;
 }
 
 h1 {
 color: gray;
 text-align: center;
+text-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
 .title{
@@ -113,4 +148,34 @@ border-color:rgb(150,150,150);
 .styleButton:active {
 	position:relative;
 	top:1px;
+}
+
+/*change Cursor to pointer on these elements*/
+a[href], input[type='submit'], input[type='checkbox'], label[for], select, button, .pointer {
+       cursor: pointer;
+}
+
+/*Glowing edit box*/
+input[type='number'],input[type='text'], textarea {
+  -webkit-transition: all 0.30s ease-in-out;
+  -moz-transition: all 0.30s ease-in-out;
+  -ms-transition: all 0.30s ease-in-out;
+  -o-transition: all 0.30s ease-in-out;
+  outline: none;
+  padding: 3px 0px 3px 3px;
+  margin: 5px 1px 3px 0px;
+  border: 1px solid #DDDDDD;
+}
+ 
+input[type='number']:focus, textarea:focus {
+  box-shadow: 0 0 5px rgba(81, 81, 81, 1);
+  padding: 3px 0px 3px 3px;
+  margin: 5px 1px 3px 0px;
+  border: 1px solid rgba(81, 81, 81, 1);
+}
+input[type='text']:focus, textarea:focus {
+  box-shadow: 0 0 5px rgba(81, 81, 81, 1);
+  padding: 3px 0px 3px 3px;
+  margin: 5px 1px 3px 0px;
+  border: 1px solid rgba(81, 81, 81, 1);
 }

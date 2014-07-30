@@ -661,9 +661,3 @@ function rebootDeviceEvent(form){
 	}
 }
 
-
-//    ----   Dynamic page   -----
-
-setInterval(refreshScreen, 1000);
-setInterval(refreshCanvas, 100);
-setInterval(refreshSelect,2000);
