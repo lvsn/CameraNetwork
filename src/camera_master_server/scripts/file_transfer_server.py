@@ -157,7 +157,6 @@ class sftp_server:
                     sftp.remove(remoteFile)
                 except:
                     rospy.logwarn("Raised Exception when accessing remote file.")
-                    H
                 feedback_msg.picture_downloaded = "{0:.2f}".format(float(count/len(filelist)*100)) + '% of Device ' + deviceName
                 self.server.publish_feedback(feedback_msg)
                 count += 1;
