@@ -447,6 +447,16 @@ function device(){
 	  
 	}
 
+    this.calibratePicture = function(form){
+		var cal = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name + '/calibrate_device',
+			serviceType : 'std_srvs/Empty'
+		});
+		var request = new ROSLIB.ServiceRequest({});
+	  cal.callService(request);
+    }
+
 	this.getIp = function(){
 		return ip;
 	}
@@ -486,7 +496,9 @@ function refreshScreen(){
 }
 
 function refreshCanvas(){
-    document.getElementById('imagePreview').src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
+    if($('#imagePreview').length){
+        document.getElementById('imagePreview').src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
+    }
 };
 
 function refreshSelect(){
@@ -495,6 +507,7 @@ function refreshSelect(){
 		name : '/IP'
 	});
 	IpList.get(function(value) {
+        if($("#deviceList").length){
 		$("#deviceList").empty(); 
 		var select = document.getElementById("deviceList");
 		select.options[0] = new Option("Online Devices", "index0");
@@ -504,6 +517,7 @@ function refreshSelect(){
 		if(_current_device != undefined){
 			$("#deviceList").val(_current_device.getIp());	
 		}
+        }
 	});
 }
 
@@ -623,6 +637,12 @@ function calibrateVideoEvent(form){
 	}
 }
 
+function calibratePictureEvent(form){
+	if(!noDeviceAlert()){
+		_current_device.calibratePicture();		
+	}
+}
+
 function shutdownDeviceEvent(form){
 	if(!noDeviceAlert()){
 		var r = confirm("Are you sure you want to shudown device?");
@@ -645,9 +665,6 @@ function rebootDeviceEvent(form){
 	}
 }
 
-
-//    ----   Dynamic page   -----
-
-setInterval(refreshScreen, 1000);
-setInterval(refreshCanvas, 100);
 setInterval(refreshSelect,2000);
+setInterval(refreshCanvas, 100);
+setInterval(refreshScreen, 1000);
