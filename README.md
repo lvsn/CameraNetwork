@@ -18,12 +18,13 @@ This layer interact directly with the camera, it is used by camera controler so 
 
 This layer is normally not launched directly by the user. Camera controler's launcher will do it
 
+
 #Camera Controler
 
-This layer interact with the Camera drivers. It can handle network task and individual task. The user should never call camera driver services (ROS give no protection although) but always call Camera Controler. The webGUI is entirely communicating with Camera Controler, so it dont care what kind of camera each device are using. ** The button with (beta) mean that it interact with the device, using it wrongly could lead to errors **
+This layer interact with the Camera drivers. It can handle network task and individual task. The user should never call camera driver services (ROS give no protection although) but always call Camera Controler. The webGUI is entirely communicating with Camera Controler, so it dont care what kind of camera each device are using. **The button with (beta) mean that it interact with the device, using it wrongly could lead to errors**
 
 To launch the controler you need to make a ROS launchfile with these steps (use the one in this repo as templates):
-- Your computer must have the env CAMERA_NAME to set a unique namespace
+- Your computer must have the env variable CAMERA_NAME to set a unique namespace
 - The launch file must set a parameter in /IP wich is the interface's IP adress
 - It must load a yaml file (check template timelaps_nikon.yaml)
 - It must load a camera driver (gphoto or picam), camera controler, and image_streamer.
@@ -58,7 +59,7 @@ Actions:
   * get_users: return the entire list (may be removed, it was for debugging purpose)
 
 Its Launchfile call mjpeg_server for streaming and rosbridge_websocket for javascript bridge. 
-Master have no namespace.
+This node have master as namespace.
 
 #Special
 pigpio is a special feature for raspberry pi only. It enable the use of three buttons with its gpio interface to call ROS services. It can be added in camera controler launch file. The three buttons must be interfaced on:
@@ -66,5 +67,18 @@ pin 4: take picture with device
 pin 22: take network picture
 pin 23: set predefined timelaps
 The pins are software debounced, and react on falling edge, no need of super user to call them.
+
+#Parameter Server
+* /IP : this namespace contain a dictionnarie of device name with there IP adress as value
+* /"DeviceName" : every device have its own namespace
+  * file : yaml file for timelaps
+  * camerasetting : camera's information
+    * iso
+    * aperture
+    * shutterspeed
+    * imageformat
+    * captureSequence : dictionnary of camerasetting to take hdr pictures
+
+**None of these are dynamic parameter**
 
 
