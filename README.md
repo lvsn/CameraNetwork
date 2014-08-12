@@ -8,7 +8,9 @@ The system is mainly used for still pictures. The ROS interface is made of two a
 
 #Camera Driver
 
-This layer interact directly with the camera, it is used by camera controler so it need to implement right services to make it compatible with the system. The services are :
+This layer interact directly with the camera, it is used by camera controler so it need to implement right services to make it compatible with the system. The two actual drivers are : gphoto and picamera. USB could be supported in the futur.
+
+The services are :
 * capture_camera : service that take picture and store it in default place
 * capture_video : service that take video and store it in default place
 * load_camera : service that upload default's picture place to user's place it place the file and rename it with a standard
