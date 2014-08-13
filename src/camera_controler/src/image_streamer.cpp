@@ -8,6 +8,17 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+/*
+Created on Wed May 21 14:59:35 2014
+
+@author: mathieugaron
+@email: mathieugaron1991@hotmail.com
+
+(need to be improved) This node only take send.jpg picture in a path and
+publish it to streamer It could be done with python directly after picture taken
+(it would help for speed)
+*/
+
 
 inline bool exists (const std::string& name) {
   struct stat buffer;   
@@ -29,7 +40,6 @@ int main(int argc, char** argv)
   ros::Time time = ros::Time::now();
   sensor_msgs::Image im;
 
-  //cv::WImageBuffer3_b image( cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR) );
 
   ros::Rate loop_rate(1);
   while (nh.ok()) {

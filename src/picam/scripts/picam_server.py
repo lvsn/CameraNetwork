@@ -71,9 +71,6 @@ class picam_server:
             self.picam.capture(stream, format='jpeg', resize=(320,240))
             data = np.fromstring(stream.getvalue(), dtype=np.uint8)
             image = cv2.imdecode(data, 1)
-            height, width, depth = image.shape
-            cv2.line(image,(0,height/2),(width,height/2),(0,0,255),1)
-            cv2.line(image,(width/2,0),(width/2,height),(0,0,255),1)
             try:
                 self.image_publisher.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
             except CvBridgeError, e:

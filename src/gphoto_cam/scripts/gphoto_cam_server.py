@@ -4,6 +4,10 @@
 Created on Wed May 14 14:00:06 2014
 
 @author: mathieugaron
+@email: mathieugaron1991@hotmail.com
+
+Gphoto driver, implement all basic services to make cameracontroler able to communicate
+with it.
 """
 
 import roslib; roslib.load_manifest('gphoto_cam')
@@ -11,8 +15,7 @@ import rospy
 from camera_network_msgs.srv import *
 from CameraParameterHandler import *
 
-import gphoto2_cli_caller as gphoto
-import os    
+import gphoto2_cli_caller as gphoto 
     
     
 class gphoto_server():

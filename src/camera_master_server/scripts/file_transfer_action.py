@@ -4,6 +4,9 @@
 Created on Fri May 23 14:27:55 2014
 
 @author: mathieugaron
+@email: mathieugaron1991@hotmail.com
+
+
 """
 
 
@@ -23,7 +26,7 @@ import std_srvs.srv
 import paramiko
 
 
-class sftp_server:
+class sftp_action:
     
     def __init__(self,imagePath):
         self.imagePath = imagePath + '/'
@@ -34,10 +37,10 @@ class sftp_server:
         
         rospy.loginfo('Writing files to ' + self.localImagePath)
         rospy.loginfo('Wrinting log to ' + self.localLogPath)
-        rospy.loginfo('Setting up sftp Server')
+        rospy.loginfo('Setting up sftp Action')
         
-        self.server = actionlib.SimpleActionServer('sftp',CameraDownloadAction, self.execute,False)
-        self.server.start()
+        self.action = actionlib.SimpleActionServer('sftp',CameraDownloadAction, self.execute,False)
+        self.action.start()
         rospy.Service('add_user', User, self.add_user)
         rospy.Service('delete_users', std_srvs.srv.Empty(), self.delete_users)
         rospy.Service('save_users', std_srvs.srv.Empty(), self.save_users)
@@ -65,13 +68,13 @@ class sftp_server:
             pictureQty = self.download_all_images_from_network()
             totalCount += pictureQty
             r.sleep()
-            if self.server.is_preempt_requested() or not self.server.is_active() or goal.dowload_frequency_s == 0:
+            if self.action.is_preempt_requested() or not self.action.is_active() or goal.dowload_frequency_s == 0:
                 break
         succes_msg = CameraDownloadActionResult
         succes_msg.total_downloaded = 'Downloaded ' + str(totalCount) + ' pictures from ' + str(len(self.ipDict)) + ' devices.'
 
         self.rospack = rospkg.RosPack()
-        self.server.set_succeeded(succes_msg)
+        self.action.set_succeeded(succes_msg)
         
     def add_user(self,req):
         self.userDict[req.name] = (req.username,req.password)
@@ -84,12 +87,12 @@ class sftp_server:
         return[]
         
     def save_users(self,req):
-        rospy.loginfo("users.xml updated")
+        rospy.loginfo("users.xml saved")
         self._create_userXML()
         return []
         
     def get_users(self,req):
-        rospy.loginfo("Send users information")
+        rospy.loginfo("Get users information")
         msg = ''
         for key in self.userDict:
             usr,passw = self.userDict[key]
@@ -158,7 +161,7 @@ class sftp_server:
                 except:
                     rospy.logwarn("Raised Exception when accessing remote file.")
                 feedback_msg.picture_downloaded = "{0:.2f}".format(float(count/len(filelist)*100)) + '% of Device ' + deviceName
-                self.server.publish_feedback(feedback_msg)
+                self.action.publish_feedback(feedback_msg)
                 count += 1;
         return len(filelist)
         
@@ -181,7 +184,7 @@ class sftp_server:
             rospy.loginfo("Wainting for " + str(delta) + " seconds")
             while timestamp > rospy.get_time():
                 rospy.sleep(5) 
-                if self.server.is_preempt_requested() or not self.server.is_active():
+                if self.action.is_preempt_requested() or not self.action.is_active():
                     rospy.loginfo("Download timer interupted")
                     break
                 
@@ -232,7 +235,7 @@ class sftp_server:
     
 
 if __name__ == "__main__":
-    rospy.init_node('sftp_server')
-    sftp = sftp_server()
+    rospy.init_node('sftp_action')
+    sftp = sftp_action()
     rospy.spin()
 

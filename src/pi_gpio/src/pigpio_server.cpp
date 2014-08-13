@@ -26,11 +26,6 @@ gpio_input_handler::gpio_input_handler(ros::NodeHandle nh){
         ROS_INFO_STREAM("piGPIO node ready");
     }
     
-    //pinMode does nothing in Sys mode but at least it says the pin configuration
-    //pinMode(4,INPUT);
-    //pinMode(22,INPUT);
-    //pinMode(23,INPUT);
-    
     //Setup ISRs
     if( wiringPiISR(4,INT_EDGE_SETUP,&setShotInterupt) < 0){
         ROS_WARN_STREAM("Unable to setup Shot Interupt!");

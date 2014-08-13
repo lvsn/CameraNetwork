@@ -1,54 +1,54 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Created on Wed May 28 13:05:43 2014
+Created on Wed May 21 14:59:35 2014
 
 @author: mathieugaron
-"""
+@email: mathieugaron1991@hotmail.com
 
-import roslib; roslib.load_manifest('camera_master_server')
+Object that implement a Timelaps action : use a camera handler to take picture
+in a timelaps manner with HDR capabilities.
+"""
+import roslib; roslib.load_manifest('camera_controler')
 import rospy
-from camera_network_msgs.srv import *
-from camera_network_msgs.msg import *
 import actionlib
+import camera_handler as ch
+from camera_network_msgs.msg import *
 import math
 
-class network_capture_server:
+
+class TimelapsAction:
     
-    def __init__(self):
-        rospy.loginfo("Initialising Network timlaps server")
-        self.publisher = rospy.Publisher("/network_capture_chatter", Capture, queue_size=1)
-        rospy.sleep(0.5) #let time for connections
-        self.server = actionlib.SimpleActionServer('network_timelaps',CameraControlAction,
-                                                   self.execute,False)                                               
-        self.server.start()
+    def __init__(self,cam_handler):
+        rospy.loginfo("Setting up Timelaps Action")
         
         self.picture_count = 0
-        self.msg = Capture()
-        self.msg.isHdr = True
-        
-
-        
+        self.action = actionlib.SimpleActionServer('timelaps',CameraControlAction,
+                                                   self.execute,False)                                               
+        self.action.start()
+        self.cam_handler = cam_handler
+    
+    
     def execute(self,goal):
-        self.msg.isHdr = goal.is_hdr
+        
         hz = self._sec_to_hz(goal.inter_picture_delay_s)
         picture_goal = self._get_frame_qty(goal.picture_qty)
         self.picture_count = 0
-        
         r = rospy.Rate(hz)
+            
         while self.picture_count < picture_goal:
             self.picture_count += 1
-            self.publisher.publish(self.msg)
+            self._take_picture(goal.is_hdr,self.picture_count)
             self._send_feedback(self.picture_count,picture_goal,hz)
             r.sleep()
-            if self.server.is_preempt_requested() or not self.server.is_active() or hz <= 0:
+            if self.action.is_preempt_requested() or not self.action.is_active() or hz <= 0:
                 break
         
 
         succes_msg = CameraControlActionResult
         succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
-        self.server.set_succeeded(succes_msg)
-        
+        self.action.set_succeeded(succes_msg)
+
     def _sec_to_hz(self,Tsec):
         try:
             hz = math.fabs(1/Tsec)
@@ -64,16 +64,23 @@ class network_capture_server:
         else:
             frame_qty = Qty
         return frame_qty
+        
+    def _take_picture(self,isHdr,pictureId):
+        if(isHdr == True):
+            self.cam_handler.takeHDRPicture(pictureId)
+        else:
+            self.cam_handler.takeSinglePicture(pictureId)
             
     def _send_feedback(self,count,goal,frequency):
         feedback_msg = CameraControlActionFeedback
         feedback_msg.picture_taken = 'Picture taken:' + str(count) \
             + '/' + str(goal) + ' (' + str(frequency) + 'Hz)'
-        self.server.publish_feedback(feedback_msg)
+        self.action.publish_feedback(feedback_msg)
+        
+            
 
-if __name__ == '__main__':
-    # Initialize the node and name it.
-    rospy.init_node('network_capture_talker')
-    # Go to class functions that do all the heavy lifting. Do error checking.
-    t = network_capture_server()
+if __name__ == "__main__":
+    rospy.init_node('timelaps_server')
+    camH = ch.CameraHandler()
+    action = TimelapsAction(camH)
     rospy.spin()

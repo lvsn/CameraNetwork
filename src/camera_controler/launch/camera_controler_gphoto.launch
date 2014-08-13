@@ -8,7 +8,7 @@
     <node name="camera_controler_server" pkg="camera_controler" type="camera_controler_server.py" />
     <node name="image_streamer" pkg="camera_controler" type="image_streamer" />
     <!-- Uncomment this line for button interface -->
-    <!-- <node name="pigio_server" pkg="pi_gpio" type="pigpio_server" /> -->
+    <!-- <node name="pigpio_server" pkg="pi_gpio" type="pigpio_server" /> -->
   </group>
 
 </launch>

@@ -4,6 +4,9 @@
 Created on Wed May 14 14:58:49 2014
 
 @author: mathieugaron
+@email: mathieugaron1991@hotmail.com
+
+Function to call gphoto2 and return answer
 """
 
 import subprocess

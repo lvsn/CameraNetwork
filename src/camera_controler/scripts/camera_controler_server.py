@@ -4,13 +4,20 @@
 Created on Wed May 28 16:19:15 2014
 
 @author: mathieugaron
+@email: mathieugaron1991@hotmail.com
+
+This class init the camera's controler node. It implement directly the services
+and instantiate timelaps action.
 """
 
-import roslib; roslib.load_manifest('camera_controler')
+import roslib
+roslib.load_manifest("rosparam")
+roslib.load_manifest("camera_controler")
 import rospy
-import timelaps_server as ts
+import rospkg
+import rosparam
+import timelaps_action as ta
 import camera_handler as ch
-import parameter_save as ps
 import os
 import std_msgs.msg
 import std_srvs.srv
@@ -25,12 +32,12 @@ class server:
         rospy.init_node('timelaps_server')
         
         self.cam_handler = ch.CameraHandler()
-        self.timelapsServer = ts.TimelapsServer(self.cam_handler)
+        self.TimelapsAction = ta.TimelapsAction(self.cam_handler)
         rospy.Subscriber('/network_capture_chatter', Capture, self.capture_listen_cb,queue_size=1)
         rospy.Subscriber('/network_capture_video_chatter', std_msgs.msg.UInt32, self.capture_video_listen_cb,queue_size=1)
 
         #setup server to set camera init parameters
-        self.paramSaver = ps.save_server()
+        rospy.Service('save_config', std_srvs.srv.Empty(), self.save_settings_cb)
         rospy.Service('preview_camera', std_srvs.srv.Empty(), self.preview_image_cb)
         rospy.Service('shutdown_device', CommandOption,self.shutdown_device_cb)
         rospy.Service('calibrate_device',std_srvs.srv.Empty(),self.calibrate_device_cb) 
@@ -39,13 +46,23 @@ class server:
 
     def shutdown(self):
         del self.cam_handler
-        del self.timelapsServer
+        del self.TimelapsAction
         rospy.delete_param('camera_setting')
         rospy.delete_param('file')
         rospy.delete_param('/IP/' + os.environ['CAMERA_NAME'])
 
+    def save_settings_cb(self,req):
+        rospack = rospkg.RosPack()
+        path = rospack.get_path('camera_controler')
+        yamlFile = rospy.get_param('file')
+        #this function overwrite yamlfile and dump camera_setting current values
+        rosparam.yamlmain(['rosparam', 'dump',path + '/param/' + yamlFile,'camera_setting'])
+        rospy.loginfo("Saved camera_setting parameters to : " + path + '/param/' + yamlFile )
+        return {}
+
     def preview_image_cb(self,req):
         self.cam_handler.takePreview()
+        #streamer use preview directory to stream send.jpg
         directory = "/home/CameraNetwork/preview/"
         for filename in os.listdir(directory):
             f, extention = os.path.splitext(filename)

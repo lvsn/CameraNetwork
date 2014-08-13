@@ -4,6 +4,9 @@
 Created on Thu May 15 16:13:10 2014
 
 @author: mathieugaron
+@email: mathieugaron1991@hotmail.com
+
+Maintain camera's parameters
 """
 
 import rospy

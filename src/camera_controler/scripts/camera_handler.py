@@ -4,6 +4,10 @@
 Created on Thu May 22 16:21:09 2014
 
 @author: mathieugaron
+@email: mathieugaron1991@hotmail.com
+
+Object Facade object for the Camera Driver. Make the use of it easier or 
+controler's services.
 """
 import rospy
 import std_srvs.srv
@@ -27,11 +31,6 @@ class CameraHandler:
         self.capture_video_service = rospy.ServiceProxy('capture_video',Uint32)
         self.calibrate_picture_service = rospy.ServiceProxy('calibrate_picture',std_srvs.srv.Empty)
         self.updateCameraSetting()
-        
-        
-    #def __del__(self):
-        #rospy.delete_param('camera_setting')
-        #rospy.delete_param('file')
         
                         
     def updateCameraSetting(self,configDict = {}):
