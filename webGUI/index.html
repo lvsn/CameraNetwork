@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+
+<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="rosclient.js"></script>
+<script type="text/javascript" src="dynamicPage.js"></script>
+
+<link rel="stylesheet" href="style.css" type="text/css" media="screen, projection" />
+
+<title>Camera Network</title>
+
+</head>
+
+
+<body>
+<h1>Camera Network</h1>
+<script>$('#navigation a').click(function() {
+    $('#navigation a').removeClass("current");
+    $(this).addClass("current");
+});</script>
+
+
+    <nav>
+        <a href="networkPage.html">Network</a>
+        <a href="devicePage.html" >Device</a>
+        <a class="dummy">&nbsp;</a>
+    </nav>
+
+    <div id="main-content">
+    <div id="sub-content">
+        <p class="title"> Network : Control all cameras as if it was one camera, and download all images to server </p>
+        <p class="title"> Device : Control only selected device and see its status </p>
+    </div>
+    </div>
+
+</body>
+</html>

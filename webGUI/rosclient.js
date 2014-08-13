@@ -470,7 +470,7 @@ var _current_device;
 var img = new Image;
 img.src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
 
-//   ---   Functions   ----
+//   ---   GUI Functions   ----
 
 function cleanDevicePage(){
 	$("#device_name").text("");
