@@ -68,7 +68,8 @@ pigpio is a special feature for raspberry pi only. It enable the use of three bu
 * pin 4: take picture with device
 * pin 22: take network picture
 * pin 23: set predefined timelaps
-The pins are software debounced, and react on falling edge, no need of super user access to call them, see INSTALL.
+
+**The pins are software debounced, and react on falling edge, no need of super user access to call them, see INSTALL.**
 
 #Parameter Server
 * /IP : this namespace contain a dictionnarie of device name with there IP adress as value
