@@ -18,11 +18,12 @@ from CameraParameterHandler import *
 import tarfile
 import os
 import time
+import camera_driver as cd
 
 import gphoto2_cli_caller as gphoto 
     
     
-class gphoto_server():
+class gphoto_server(cd.camera_driver):
     
     def __init__(self):
         #init gphoto cam

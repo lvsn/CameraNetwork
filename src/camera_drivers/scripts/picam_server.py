@@ -20,8 +20,9 @@ import time
 import picamParameterHandler as pph
 import io
 import numpy as np
+import camera_driver as cd
 
-class picam_server:
+class picam_server(cd.camera_driver):
     def __init__(self):
         try:
             self.picam = picamera.PiCamera()

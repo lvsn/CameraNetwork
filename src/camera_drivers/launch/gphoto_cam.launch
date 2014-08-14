@@ -1,0 +1,3 @@
+<launch>
+  <node name="gphoto_cam" pkg="camera_drivers" type="gphoto_cam_server.py" />
+</launch>

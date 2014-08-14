@@ -1,3 +1,0 @@
-<launch>
-  <node name="gphoto_cam" pkg="gphoto_cam" type="gphoto_cam_server.py" />
-</launch>

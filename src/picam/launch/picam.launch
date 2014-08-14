@@ -1,5 +1,0 @@
-<launch>
-
-  <node name="picam" pkg="picam" type="picam_server.py" />
-
-</launch>

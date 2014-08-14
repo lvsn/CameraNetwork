@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(gphoto_cam)
+project(camera_drivers)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -8,8 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  message_generation
-  camera_network_msgs
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -55,10 +54,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
-#   Capture.srv
-#   InCameraData.srv
-#   OutCameraData.srv
-#   Load.srv
+#   Service1.srv
+#   Service2.srv
 # )
 
 ## Generate actions in the 'action' folder
@@ -85,8 +82,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES gphoto_cam
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  LIBRARIES camera_drivers
+#  CATKIN_DEPENDS roscpp rospy std_msgs std_srvs
 #  DEPENDS system_lib
 )
 
@@ -102,19 +99,19 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(gphoto_cam
-#   src/${PROJECT_NAME}/gphoto_cam.cpp
+# add_library(camera_drivers
+#   src/${PROJECT_NAME}/camera_drivers.cpp
 # )
 
 ## Declare a cpp executable
-# add_executable(gphoto_cam_node src/gphoto_cam_node.cpp)
+# add_executable(camera_drivers_node src/camera_drivers_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(gphoto_cam_node gphoto_cam_generate_messages_cpp)
+# add_dependencies(camera_drivers_node camera_drivers_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(gphoto_cam_node
+# target_link_libraries(camera_drivers_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -133,7 +130,7 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS gphoto_cam gphoto_cam_node
+# install(TARGETS camera_drivers camera_drivers_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -158,7 +155,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_gphoto_cam.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_camera_drivers.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
