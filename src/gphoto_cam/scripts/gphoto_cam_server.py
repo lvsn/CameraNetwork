@@ -12,8 +12,12 @@ with it.
 
 import roslib; roslib.load_manifest('gphoto_cam')
 import rospy
+import std_srvs.srv
 from camera_network_msgs.srv import *
 from CameraParameterHandler import *
+import tarfile
+import os
+import time
 
 import gphoto2_cli_caller as gphoto 
     
@@ -30,6 +34,7 @@ class gphoto_server():
         rospy.Service('set_camera', InCameraData, self.set_camera_cb)
         rospy.Service('load_camera',Load,self.load_camera_cb)
         rospy.Service('capture_video',Uint32,self.capture_video_cb)
+        rospy.Service('calibrate_picture',std_srvs.srv.Empty,self.calibrate_video_cb)
         
         rospy.loginfo("Camera Ready")
         rospy.spin()
@@ -46,7 +51,7 @@ class gphoto_server():
     
     def load_camera_cb(self,req):
         rospy.sleep(3)
-        rootPath = '/home/CameraNetwork/'
+        rootPath = '/home/CameraNetwork/data/'
         filename = " --filename " + rootPath + req.path
         if filename.find('..') != -1:
             rospy.logwarn("use of .. is prohibed")
@@ -57,7 +62,20 @@ class gphoto_server():
         
         rospy.loginfo("Deleting camera's pictures")
         gphoto.run(" -D --recurse")
+        #self._make_tarfile(time.strftime('/home/CameraNetwork/%B.tar.gz'), rootPath)
+        #self._delete_directory(rootPath)
         return msg
+        
+    def _delete_directory(self,directory):
+        try:
+            for f in os.listdir(directory):
+                os.remove(directory + f)
+        except:
+            rospy.logerr("Problem while deleting " + directory)
+        
+    def _make_tarfile(self,output_filename, source_dir):
+        with tarfile.open(output_filename, "w:gz") as tar:
+            tar.add(source_dir, arcname=os.path.basename(source_dir))
         
     
     def set_camera_cb(self,req):
@@ -97,6 +115,8 @@ class gphoto_server():
                 
         return {'iso': iso,'imageformat':imageformat,'aperture':aperture,'shutterspeed':shutterspeed}
     
+    def calibrate_video_cb(self,req):
+        rospy.logwarn("Not supported with gphoto driver!")
     
     def _parse_current_value(self,string):
         

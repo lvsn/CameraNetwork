@@ -102,5 +102,5 @@ class CameraHandler:
         self.updateCameraSetting(settingDict)
 
     def _generatePictureName(self,name):
-        return '%B/' + name + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
+        return name + '-%n_%d%B%y_%Hh%Mm%Ss.%C' 
         

@@ -144,7 +144,7 @@ class sftp_action:
                
     def _downloadImageFolder(self,sftp,deviceName=''):
         feedback_msg = CameraDownloadActionFeedback
-        filelist = sftp.listdir(self.imagePath + self.dateFolder)
+        filelist = sftp.listdir(self.imagePath + self.dateFolder) #data folder and compress on this computer!
         rospy.loginfo('found ' + str(len(filelist)) + ' files')
         self.create_dir(self.localImagePath + deviceName)
         count = 1.0;                     
@@ -230,6 +230,7 @@ class sftp_action:
             return self.userDict[name]
         else:
             return ('pi','raspberry')
+            
 
         
     
