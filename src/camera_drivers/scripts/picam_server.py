@@ -5,7 +5,7 @@ Created on Thu June 05 09:17:30 2014
 
 @author: Mathieu Garon
 """
-import roslib; roslib.load_manifest('picam')
+import roslib; roslib.load_manifest('camera_drivers')
 import rospy
 from camera_network_msgs.srv import *
 from sensor_msgs.msg import Image
@@ -41,7 +41,9 @@ class picam_server(cd.camera_driver):
         self._init_picamera_led()
         
         #ros function
-        self._launch_services();
+        super(picam_server, self).__init__()
+        rospy.Service('stream_video',Uint32,self.stream_video_cb)
+        rospy.Service('calibrate_video',std_srvs.srv.Empty,self.calibrate_video_cb)
         self.image_publisher = rospy.Publisher("/preview",Image)
         
         rospy.loginfo("Camera Ready")
@@ -201,15 +203,6 @@ class picam_server(cd.camera_driver):
         for i in range(10000000):
             yield str(i)
             
-    def _launch_services(self):
-        rospy.Service('capture_camera',CaptureService,self.capture_image_cb)
-        rospy.Service('load_camera',Load,self.load_camera_cb)
-        rospy.Service('get_camera',OutCameraData,self.get_camera_cb)
-        rospy.Service('set_camera',InCameraData,self.set_camera_cb)
-        rospy.Service('stream_video',Uint32,self.stream_video_cb)
-        rospy.Service('capture_video',Uint32,self.capture_video_cb)
-        rospy.Service('calibrate_picture',std_srvs.srv.Empty,self.calibrate_picture_cb)
-        rospy.Service('calibrate_video',std_srvs.srv.Empty,self.calibrate_video_cb)
 
     def _mkdir(self,dirPath):
         if not os.path.exists(dirPath):

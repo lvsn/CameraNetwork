@@ -10,7 +10,7 @@ Gphoto driver, implement all basic services to make cameracontroler able to comm
 with it.
 """
 
-import roslib; roslib.load_manifest('gphoto_cam')
+import roslib; roslib.load_manifest('camera_drivers')
 import rospy
 import std_srvs.srv
 from camera_network_msgs.srv import *
@@ -26,16 +26,11 @@ import gphoto2_cli_caller as gphoto
 class gphoto_server(cd.camera_driver):
     
     def __init__(self):
-        #init gphoto cam
         self.camParam = CameraParameterHandler()
         self.camParam.set_camera_parameters()
-        #Start services
-        rospy.Service('capture_camera', CaptureService, self.capture_image_cb)
-        rospy.Service('get_camera', OutCameraData, self.get_camera_cb)
-        rospy.Service('set_camera', InCameraData, self.set_camera_cb)
-        rospy.Service('load_camera',Load,self.load_camera_cb)
-        rospy.Service('capture_video',Uint32,self.capture_video_cb)
-        rospy.Service('calibrate_picture',std_srvs.srv.Empty,self.calibrate_video_cb)
+        
+        super(gphoto_server, self).__init__()
+        
         
         rospy.loginfo("Camera Ready")
         rospy.spin()
