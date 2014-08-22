@@ -4,124 +4,84 @@ For now, Camera Network is compatible with gphoto and the picamera module.
 
 You can communicate with the network directly with ROS, or with the WebGUI (if the master-server is launched with the right webserver url)
 
-# Dependencys #
+The system is mainly used for still pictures. The ROS interface is made of two abstraction layers : Camera's driver and Camera controler.
 
-## Master Server Setup ##
-This installation process is compatible with ubuntu distros.
-The application is tested with hydro and indigo versions of ROS
+#Camera Driver
 
-### Installing Ros ###
-http://wiki.ros.org/hydro/Installation/Ubuntu   
-http://wiki.ros.org/indigo/Installation/Ubuntu
+This layer interact directly with the camera, it is used by camera controler so it need to implement right services to make it compatible with the system. The two actual drivers are : gphoto and picamera. USB could be supported in the futur.
 
-(from now on chande <rosversion> depending on wich one you installed)
+The services are :
+* capture_camera : service that take picture and store it in default place
+* capture_video : service that take video and store it in default place
+* load_camera : service that upload default's picture place to user's place it place the file and rename it with a standard
+* get_camera : service that return camera's data (iso, aperture, shutterspeed, format)
+* set_camera : service that set camera's data (iso, aperture, shutterspeed, format)
+* calibrate_picture : methode that automatically calibrate camera's parameters
 
-### Installing Additionnal Ros Packages ###
-```
-#!bash
-$ sudo apt-get install ros-<rosversion>-rosbridge-server
-$ sudo apt-get install ros-<rosversion>-mjpeg-server
-```
-### Setting up network ###
-```
-#!bash
-$ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr:" | cut -d: -f2 | awk "{ print $1}")' >> ~/.bashrc  
-$ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc   
-```
-
-### Installing Paramiko (sftp transfer) ###
-```
-#!bash
-$ wget https://github.com/paramiko/paramiko/archive/master.zip
-$ unzip master.zip
-$ cd paramiko-master
-$ sudo easy_install ./
-```
-
-## Raspberry Pi Installation ##
-This one is a bit harder:
-
-### Installing Debian ###
--Install Raspbian (ex : NOOBS : http://www.raspberrypi.org/help/noobs-setup/)
-
-### ROS ###
-Install ros hydro : http://wiki.ros.org/ROSberryPi/Setting%20up%20Hydro%20on%20RaspberryPi
-
-### Ros packages ###
-This part takes a lot of time!
+This layer is normally not launched directly by the user. Camera controler's launcher will do it
 
 
-```
-#!bash
+#Camera Controler
 
-$ cd ~/ros_catkin_ws/src
-$ roslocate info common_msgs | rosws merge -
-$ roslocate info actionlib | rosws merge -
-$ roslocate info class_loader | rosws merge -
-$ roslocate info pluginlib | rosws merge -
-$ roslocate info cv_bridge | rosws merge -
-$ roslocate info image_transport | rosws merge -
-$ rosinstall_generator opencv2 --deps | rosws merge -
-$ rosws update
-$ cd ..
-$ rosdep install  --from-paths src --ignore-src --rosdistro hydro -y --os=debian:wheezy
-$ ./src/catkin/bin/catkin_make_isolated --install
-```
+This layer interact with the Camera drivers. It can handle network task and individual task. The user should never call camera driver services (ROS give no protection although) but always call Camera Controler. The webGUI is entirely communicating with Camera Controler, so it dont care what kind of camera each device are using. **The button with (beta) mean that it interact with the device, using it wrongly could lead to errors**
+
+To launch the controler you need to make a ROS launchfile with these steps (use the one in this repo as templates):
+- Your computer must have the env variable CAMERA_NAME to set a unique namespace
+- The launch file must set a parameter in /IP wich is the interface's IP adress
+- It must load a yaml file (check template timelaps_nikon.yaml)
+- It must load a camera driver (gphoto or picam), camera controler, and image_streamer.
+- You can load pigpio if you want to use the button interface
+
+Here is the services,actions and subscribe the camera Controler offer:
+Subscriber:
+* network_capture_chatter : Publish on this topic to make all device take a picture
+* network_capture_video_chatter : Publish on this topic to make all device take a video
+
+Services:
+* preview_camera : take a picture and stream it to mjpeg to view (the picture is deleted afterward)
+* shutdown_device : can shutdown or reboot the device
+* calibrate_device : call Camera's Driver service to calibrate and update datas
+* save_config: Save HDR configurations to default param file
+
+Action:
+* timelaps : Take picture with parameters : quantity, delay between each pictures and if HDR or normal pictures
+
+#Camera Master
+
+Camera Master is an interface to control the whole network at once with extra network features:
+Actions:
+* sftp : open sftp session with every device on the network, it download every file called by load_camera
+* network_timelaps: Implement the same action as Camera Controler but from the network point of view. Instead of calling devices individually, it publish on topic 
+
+  sftp_node maintain a list of user to log into every device (not safe!) it use user:pi password:raspberry if it cant   find it in the list
+  Services:
+  * add_user: add new user to list
+  * delete_users: remove all users from list
+  * save_users: write to default list file
+  * get_users: return the entire list (may be removed, it was for debugging purpose)
+
+Its Launchfile call mjpeg_server for streaming and rosbridge_websocket for javascript bridge. 
+This node have master as namespace.
+
+#Special
+pigpio is a special feature for raspberry pi only. It enable the use of three buttons with its gpio interface to call ROS services. It can be added in camera controler launch file. The three buttons must be interfaced on:
+* pin 4: take picture with device
+* pin 22: take network picture
+* pin 23: set predefined timelaps
+
+**The pins are software debounced, and react on falling edge, no need of super user access to call them, see INSTALL.**
+
+#Parameter Server
+* /IP : this namespace contain a dictionnarie of device name with there IP adress as value
+* /"DeviceName" : every device have its own namespace
+  * file : yaml file for timelaps
+  * camerasetting : camera's information
+    * iso
+    * aperture
+    * shutterspeed
+    * imageformat
+    * captureSequence : dictionnary of camerasetting to take hdr pictures
+
+**None of these are dynamic parameter**
 
 
-```
-#!bash
-$ sudo apt-get install python-picamera daemontools
-$ echo ‘source /opt/ros/hydro/setup.bash ’ >> ~/.bashrc
-```
-
-
-# Install Camera Network #
-
-will generate camera-network folder:
-
-### setup ROS workspace ###
-```
-#!bash
-$ git clone https://MathieuGaron@bitbucket.org/MathieuGaron/camera-network.git
-$ cd camera-network/src
-$ catkin_init_workspace
-$ cd ..
-$ catkin_make
-$ sudo ./install.sh
-```
-
-### Install gphoto and upstart ###
-```
-#!bash
-$ sudo ./gphoto2-updater.sh 
-$ sudo apt-get install upstart  
-```
-
-### Setup Upstart Job ###
-This section create an upstart job when the desired interface start or stop:
-
-here, set the interface of your choice, and the master's URL/IP
-```
-#!bash
-$ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.launch --interface wlan0 --master http://<MASTER'S URL>:11311 --setup /home/pi/ros_catkin_ws/install_isolated/setup.bash 
-```
-add these lines at the beginning of /etc/init/camera.conf:
-```
- setuid pi  
- setgid plugdev   //for Gphoto
- setgid video      //for Picam
-```
-
-** you can't add the two setgid! **
-
-
-add this line in /usr/sbin/camera-start:
-
-```
-export CAMERA_NAME=<Unique name>
-```
-
-Configure camera_control.launch as you need:
-(the param file can be changed)
-(the camera control launch file can be changed to picam or gphoto)

@@ -2,10 +2,12 @@
  * @author Mathieu Garon
  */
 
+// Set the ROS_MASTER variable to the current server hostname
+var ROS_MASTER = window.location.hostname;
 
 //   ----  ROS Initialisation  ----
 var ros = new ROSLIB.Ros({
-    url : 'ws://pimaster.jflalonde.org:9090'
+    url : 'ws://' + ROS_MASTER + ':9090'
 });
 
 now = new Date()
@@ -468,9 +470,9 @@ var _network_timelaps = new network_timelaps();
 var _network_download = new network_download();
 var _current_device;
 var img = new Image;
-img.src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
+img.src = "http://" + ROS_MASTER + ":8181/stream?topic=/preview?width=640?height=480";
 
-//   ---   Functions   ----
+//   ---   GUI Functions   ----
 
 function cleanDevicePage(){
 	$("#device_name").text("");
@@ -497,7 +499,7 @@ function refreshScreen(){
 
 function refreshCanvas(){
     if($('#imagePreview').length){
-        document.getElementById('imagePreview').src = "http://pimaster.jflalonde.org:8181/stream?topic=/preview?width=640?height=480";
+        document.getElementById('imagePreview').src = "http://" + ROS_MASTER + ":8181/stream?topic=/preview?width=640?height=480";
     }
 };
 

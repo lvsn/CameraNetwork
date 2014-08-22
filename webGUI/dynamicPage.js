@@ -6,6 +6,8 @@ $(function(){
 
     $("nav").delegate("a","click",function(){
         window.location.hash = $(this).attr("href");
+        $('.current').removeClass("current");
+        $(this).addClass("current");
         return false;
     });
 
