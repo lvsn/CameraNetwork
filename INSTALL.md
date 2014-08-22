@@ -21,7 +21,15 @@ $ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr" | awk -F: '{print $2}' 
 $ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc   
 ```
 
-### Installing Paramiko (sftp transfer) ###
+### Python and dependencies ###
+
+Python 2.7 is needed for the Catkin package handler. It is recommended to create a virtual environment for your Python installation. Once it's done, install the following dependencies:
+```
+$ pip install catkin_pkg
+$ pip install empy
+```
+
+#### Installing Paramiko (sftp transfer) ####
 ```
 $ wget https://github.com/paramiko/paramiko/archive/master.zip
 $ unzip master.zip
