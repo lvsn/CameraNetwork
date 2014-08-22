@@ -1,4 +1,4 @@
-# Dependencys #
+# Dependencies #
 
 ## Master Server Setup ##
 This installation process is compatible with ubuntu distros.
@@ -19,7 +19,7 @@ $ sudo apt-get install ros-<rosversion>-mjpeg-server
 ### Setting up network ###
 ```
 #!bash
-$ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr:" | cut -d: -f2 | awk "{ print $1}")' >> ~/.bashrc  
+$ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')' >> ~/.bashrc  
 $ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc   
 ```
 
