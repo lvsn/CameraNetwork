@@ -12,20 +12,17 @@ http://wiki.ros.org/indigo/Installation/Ubuntu
 
 ### Installing Additionnal Ros Packages ###
 ```
-#!bash
 $ sudo apt-get install ros-<rosversion>-rosbridge-server
 $ sudo apt-get install ros-<rosversion>-mjpeg-server
 ```
 ### Setting up network ###
 ```
-#!bash
 $ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr:" | cut -d: -f2 | awk "{ print $1}")' >> ~/.bashrc  
 $ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc   
 ```
 
 ### Installing Paramiko (sftp transfer) ###
 ```
-#!bash
 $ wget https://github.com/paramiko/paramiko/archive/master.zip
 $ unzip master.zip
 $ cd paramiko-master
@@ -46,8 +43,6 @@ This part takes a lot of time!
 
 
 ```
-#!bash
-
 $ cd ~/ros_catkin_ws/src
 $ roslocate info common_msgs | rosws merge -
 $ roslocate info actionlib | rosws merge -
@@ -64,7 +59,6 @@ $ ./src/catkin/bin/catkin_make_isolated --install
 
 
 ```
-#!bash
 $ sudo apt-get install python-picamera daemontools
 $ echo ‘source /opt/ros/hydro/setup.bash ’ >> ~/.bashrc
 ```
@@ -76,7 +70,6 @@ will generate camera-network folder:
 
 ### setup ROS workspace ###
 ```
-#!bash
 $ git clone https://MathieuGaron@bitbucket.org/MathieuGaron/camera-network.git
 $ cd camera-network/src
 $ catkin_init_workspace
@@ -87,20 +80,20 @@ $ sudo ./install.sh
 
 ### Install gphoto and upstart ###
 ```
-#!bash
 $ sudo ./gphoto2-updater.sh 
 $ sudo apt-get install upstart  
 ```
 
 ### Setup Upstart Job ###
-This section create an upstart job when the desired interface start or stop:
+This section launches the camera controller upon interface connection. It is based on robot_upstart (turtlebot). Detail about this system can be found here: http://wiki.ros.org/robot_upstart .
 
-here, set the interface of your choice, and the master's URL/IP
+To create a new upstart service for the device, execute:
 ```
-#!bash
 $ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.launch --interface wlan0 --master http://<MASTER'S URL>:11311 --setup /home/pi/ros_catkin_ws/install_isolated/setup.bash 
 ```
-add these lines at the beginning of /etc/init/camera.conf:
+You will then be able to start and enable the service.
+
+To configure the camera, add these lines at the beginning of /etc/init/camera.conf:
 ```
  setuid pi  
  setgid plugdev   //for Gphoto
