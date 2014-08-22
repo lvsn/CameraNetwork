@@ -21,12 +21,33 @@ $ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr" | awk -F: '{print $2}' 
 $ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc   
 ```
 
-### Installing Paramiko (sftp transfer) ###
+### Python and dependencies ###
+
+Python 2.7 is needed for the Catkin package handler. It is recommended to create a virtual environment for your Python installation. Once it's done, install the following dependencies:
 ```
-$ wget https://github.com/paramiko/paramiko/archive/master.zip
-$ unzip master.zip
-$ cd paramiko-master
-$ sudo easy_install ./
+$ pip install catkin_pkg
+$ pip install empy
+$ pip install pyyaml
+$ pip install rospkg
+$ pip install pillow
+$ pip install paramiko
+```
+
+### Launching ###
+
+TODO: Improve this.
+
+```
+$ cd <this-repo>
+$ cd server
+$ catkin_init_workspace
+$ catkin_make
+$ catkin_make install
+$ source ./install/setup.bash
+$ roscd camera_master_server
+$ ln -s ../../../src/camera_master_server/scripts/* ./
+$ ln -s ../../../src/camera_master_server/launch/* ./
+$ roslaunch camera_master_server.launch
 ```
 
 ## Raspberry Pi Installation ##
