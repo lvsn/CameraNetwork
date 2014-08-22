@@ -33,6 +33,11 @@ $ pip install pillow
 $ pip install paramiko
 ```
 
+Because ROS Indigo uses an old version of PIL to work, you must setup a proxy to the new Image module as such:
+```
+$ echo "from PIL.Image import *" >> <your-python-site-packages>/Image.py
+```
+
 ### Launching ###
 
 TODO: Improve this.
