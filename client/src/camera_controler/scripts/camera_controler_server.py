@@ -62,12 +62,7 @@ class server:
 
     def preview_image_cb(self,req):
         self.cam_handler.takePreview()
-<<<<<<< HEAD:src/camera_controler/scripts/camera_controler_server.py
         directory = "/home/"+os.getlogin()+"/Images/preview/"
-=======
-        #streamer use preview directory to stream send.jpg
-        directory = "/home/CameraNetwork/preview/"
->>>>>>> 91b6ea2bf0ca81f5d482124072d76c468dca4398:client/src/camera_controler/scripts/camera_controler_server.py
         for filename in os.listdir(directory):
             f, extention = os.path.splitext(filename)
             if extention not in [".jpg",".jpeg",".JPG",".JPEG"]:
