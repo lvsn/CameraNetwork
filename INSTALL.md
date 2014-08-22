@@ -30,14 +30,7 @@ $ pip install empy
 $ pip install pyyaml
 $ pip install rospkg
 $ pip install pillow
-```
-
-#### Installing Paramiko (sftp transfer) ####
-```
-$ wget https://github.com/paramiko/paramiko/archive/master.zip
-$ unzip master.zip
-$ cd paramiko-master
-$ sudo easy_install ./
+$ pip install paramiko
 ```
 
 ## Raspberry Pi Installation ##
