@@ -1,0 +1,9 @@
+#goal
+float32 dowload_frequency_s
+float32 start_time
+---
+#result
+string total_downloaded
+---
+#feedback
+string picture_downloaded
