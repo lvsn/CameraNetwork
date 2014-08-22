@@ -33,6 +33,23 @@ $ pip install pillow
 $ pip install paramiko
 ```
 
+### Launching ###
+
+TODO: Improve this.
+
+```
+$ cd <this-repo>
+$ cd server
+$ catkin_init_workspace
+$ catkin_make
+$ catkin_make install
+$ source ./install/setup.bash
+$ roscd camera_master_server
+$ ln -s ../../../src/camera_master_server/scripts/* ./
+$ ln -s ../../../src/camera_master_server/launch/* ./
+$ roslaunch camera_master_server.launch
+```
+
 ## Raspberry Pi Installation ##
 This one is a bit harder:
 
