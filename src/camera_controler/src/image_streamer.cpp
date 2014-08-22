@@ -8,6 +8,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 inline bool exists (const std::string& name) {
   struct stat buffer;   
@@ -19,7 +20,9 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "image_publisher");
   ros::NodeHandle nh;
 
-  std::string homePath = "/home/CameraNetwork";
+  char *username = getlogin();
+  std::string UserName = username;
+  std::string homePath = "/home/"+UserName+"/Images";
   const std::string streamImagePath = homePath + "/preview/send.jpeg";
   ROS_INFO_STREAM("Setting jpeg Streaming path to " << streamImagePath);
 

@@ -15,7 +15,7 @@ import os
 class server:
     
     def __init__(self):
-        self.imagePath = "/home/CameraNetwork"
+        self.imagePath = "/home/"+os.getlogin()+"/Images"
         if not os.path.exists(self.imagePath):
             rospy.logfatal("Install file not executed! : CameraNetwork path not set")
         rospy.init_node('master_server')
