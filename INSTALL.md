@@ -27,6 +27,8 @@ Python 2.7 is needed for the Catkin package handler. It is recommended to create
 ```
 $ pip install catkin_pkg
 $ pip install empy
+$ pip install pyyaml
+$ pip install rospkg
 ```
 
 #### Installing Paramiko (sftp transfer) ####
