@@ -8,9 +8,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-<<<<<<< HEAD:src/camera_controler/src/image_streamer.cpp
+
 #include <unistd.h>
-=======
+
 /*
 Created on Wed May 21 14:59:35 2014
 
@@ -21,8 +21,6 @@ Created on Wed May 21 14:59:35 2014
 publish it to streamer It could be done with python directly after picture taken
 (it would help for speed)
 */
-
->>>>>>> 91b6ea2bf0ca81f5d482124072d76c468dca4398:client/src/camera_controler/src/image_streamer.cpp
 
 inline bool exists (const std::string& name) {
   struct stat buffer;   
