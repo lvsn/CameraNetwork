@@ -111,14 +111,6 @@ $ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.l
 ```
 You will then be able to start and enable the service.
 
-To configure the camera, add these lines at the beginning of /etc/init/camera.conf:
-```
- setuid pi  
- setgid plugdev   //for Gphoto
- setgid video     //for Picam
-```
-
-**Note: you can't add the two setgid. Select only the appropriate one.**
 
 Add this line around the beginning of /usr/sbin/camera-start:
 ```
