@@ -8,6 +8,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#include <unistd.h>
+
 /*
 Created on Wed May 21 14:59:35 2014
 
@@ -19,7 +22,6 @@ publish it to streamer It could be done with python directly after picture taken
 (it would help for speed)
 */
 
-
 inline bool exists (const std::string& name) {
   struct stat buffer;   
   return (stat (name.c_str(), &buffer) == 0); 
@@ -30,7 +32,9 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "image_publisher");
   ros::NodeHandle nh;
 
-  std::string homePath = "/home/CameraNetwork";
+  char *username = getlogin();
+  std::string UserName = username;
+  std::string homePath = "/home/"+UserName+"/Images";
   const std::string streamImagePath = homePath + "/preview/send.jpeg";
   ROS_INFO_STREAM("Setting jpeg Streaming path to " << streamImagePath);
 

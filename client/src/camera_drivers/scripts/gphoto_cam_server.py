@@ -47,7 +47,7 @@ class gphoto_server(cd.camera_driver):
     
     def load_camera_cb(self,req):
         rospy.sleep(3)
-        rootPath = '/home/CameraNetwork/'
+        rootPath = "/home/"+os.getlogin()+"/Images/"
         filename = " --filename " + rootPath + req.path
         if filename.find('..') != -1:
             rospy.logwarn("use of .. is prohibed")

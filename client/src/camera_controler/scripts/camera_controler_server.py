@@ -62,8 +62,7 @@ class server:
 
     def preview_image_cb(self,req):
         self.cam_handler.takePreview()
-        #streamer use preview directory to stream send.jpg
-        directory = "/home/CameraNetwork/preview/"
+        directory = "/home/"+os.getlogin()+"/Images/preview/"
         for filename in os.listdir(directory):
             f, extention = os.path.splitext(filename)
             if extention not in [".jpg",".jpeg",".JPG",".JPEG"]:

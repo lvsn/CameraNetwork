@@ -33,7 +33,7 @@ class picam_server(cd.camera_driver):
         self.bridge = CvBridge()
         self.id_gen = self._id_generator()
         self.camParam = pph.PicameraParameterHandler()
-        self.homePath = "/home/CameraNetwork"
+        self.homePath = "/home/"+os.getlogin()+"/Images"
         self.tmpPath = self.homePath + '/tmp'
         
         #initialisation
