@@ -7,9 +7,11 @@
     <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
     <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="./js/jquery.timepicker.min.js"></script>
     <script type="text/javascript" src="rosclient.js"></script>
     <script type="text/javascript" src="dynamicPage.js"></script>
 
+    <link rel="stylesheet" href="./js/jquery.timepicker.css" type="text/css" media="all" />
     <link rel="stylesheet" href="style.css" type="text/css" media="screen, projection" />
 
     <title>Camera Network</title>
@@ -22,60 +24,66 @@
         <a href="./devicePage.html">Device</a>
     </nav>
 
-      <div id="main-content">
-      <div id="sub-content">
-      <script>$('nav').addClass('current')</script>
+    <div id="main-content">
+    <div id="sub-content">
+
 	<!-- Network interface -->
-	<p class="title">Network Interface</p>
 	<div class="mainStyle">
 		<form name="network" action="javascript:void(0)" method="get">
-        		<label>Frequency (s 0 = single Shot) :</label>
-        		<input id="network_frequency" type="number" value="0" name="network_timelapse_frequency" >
-            	<label>Quantity (&lt;0 = infinite) : </label>
-            	<input id="network_quantity" type="number" value="0" name="network_timelapse_qty" >
-            	<input type="checkbox" id="network_hdr" value="HDR">HDR<br>
+            <label>
+                <span>Frequency (s 0 = single Shot) :</span>
+                <input id="network_frequency" type="number" value="0" name="network_timelapse_frequency" >
+            </label>
+            <label>
+                <span>Quantity (&lt;0 = infinite) :</span>
+                <input id="network_quantity" type="number" value="0" name="network_timelapse_qty" >
+            </label>
+            <label>
+                <input type="checkbox" id="network_hdr" value="HDR">HDR<br>
+            </label>
       		<dl>
-            		<dt>Status:</dt>
-              			<dd id="network_timelapse_status"></dd>
-            		<dt>Feedback:</dt>
-              			<dd id="network_timelapse_feedback"></dd>
-            		<dt>Result:</dt>
-              			<dd id="network_timelapse_result"></dd>
+                <dt>Status:</dt>
+                    <dd id="network_timelapse_status"></dd>
+                <dt>Feedback:</dt>
+                    <dd id="network_timelapse_feedback"></dd>
+                <dt>Result:</dt>
+                    <dd id="network_timelapse_result"></dd>
       		</dl>
-                <div class="floatleft">
-			<input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form,true)" value="Set">
-                </div>
-                <div class="floatright">
+            <div style="clear: both;"></div>
+            <div class="floatleft">
+                <input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form,true)" value="Launch acquisition">
+            </div>
+            <div class="floatright">
                 <input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form,false)" value="Stop">
-                </div>
-        	</form>
-
-    	
+            </div>
+        </form>
 	</div> 
 
    <!-- Video interface -->
      <div class="mainStyle">
 		<form name="video" action="javascript:void(0)" method="get">
-            	<label>Video capture Time (s) : </label>
-            	<input id="video_time" type="number" value="0" name="video_time" ><br>
-        		<button type="button" class="floatleft" onclick = "networkVideoEvent(this.form)">Start</button>
-            </form>
-    	
+            <label>Video capture Time (s) : </label>
+            <input id="video_time" type="number" value="0" name="video_time" ><br>
+            <button type="button" class="floatleft" onclick = "networkVideoEvent(this.form)">Start</button>
+        </form>
 	</div> 
 
   <!-- Download interface -->
 	<div class="mainStyle">
         <div class="parameterStyle right">
 			<form name="timelapse" action="javascript:void(0)" method="get">
-				<label>Device Name : </label>	
-				<input id="download_name" type="text"  value='' name="download_name" >
-				<br>
-				<label>Username : </label>
-				<input id="download_username" type="text" value='' name="download_username" >
-				<br>
-                      <label>Password : </label>
-				<input id="download_password" type="password" value='' name="download_password" >
-				<br>
+				<label>
+                    <span>Device Name :</span>
+                    <input id="download_name" type="text"  value='' name="download_name" >
+                </label>
+				<label>
+                    <span>Username :</span>
+                    <input id="download_username" type="text" value='' name="download_username" >
+                </label>
+                <label>
+                    <span>Password : </span>
+                    <input id="download_password" type="password" value='' name="download_password" >
+                </label>
 				<input type="submit" class="styleButton" onclick="_network_download.addUser(form)" value="Add">
 			</form>
                  <button type="button" class="styleButton" onclick = "_network_download.delUsers(form)">Delete</button>
@@ -84,13 +92,20 @@
 		</div>
 
 		<form  name="download" action="javascript:void(0)" method="get">
-			<label> Download frequency (s) (0 = one time) : </label>
-	 		<input id="input_frequency" type="number" value="0" name="network_download_frequency" >
-                <label> Start at : </label>
-	 		<input id="input_hour" type="number" value="0" name="network_download_hour" >
-                <label> hour </label>
-	 		<input id="input_minute" type="number" value="0" name="network_download_minute" >
-                <label> minute </label>
+			<label>
+                <span>Download frequency (s) (0 = one time) :</span>
+                <input id="input_frequency" type="number" value="0" name="network_download_frequency" >
+            </label>
+            <label>
+                <span>Start at :</span>
+                <input id="download_start_at"/>
+                <script type="text/javascript">
+                    $('#download_start_at').timepicker({
+                        'timeFormat': 'G:i',
+                        'scrollDefault': 'now'
+                    });
+                </script>
+            </label>
 
 			<dl>
 				<dt>Status:</dt>
@@ -100,12 +115,13 @@
 				<dt>Result:</dt>
 					<dd id="network_download_result"></dd>
 			</dl>
-                <div class="floatleft">
-			<input type="submit" class="floatleft" onclick="networkDownloadEvent(this.form,true)" value="Download">
-                </div>
-                <div class="floatright">
+            <div style="clear: both;"></div>
+            <div class="floatleft">
+                <input type="submit" class="floatleft" onclick="networkDownloadEvent(this.form,true)" value="Download">
+            </div>
+            <div class="floatright">
                  <input type="submit" class="floatright" onclick = "networkDownloadEvent(this.form,false)" value="Stop">
-                </div>
+            </div>
 		</form> 
             
 

@@ -5,14 +5,12 @@
 // Set the ROS_MASTER variable to the current server hostname
 var ROS_MASTER = window.location.hostname;
 
+
 //   ----  ROS Initialisation  ----
 var ros = new ROSLIB.Ros({
     url : 'ws://' + ROS_MASTER + ':9090'
 });
 
-now = new Date()
-$('#input_hour').val(now.getHours())
-$('#input_minute').val(now.getMinutes())
 
 //   ---- Class ---- 
  
@@ -96,19 +94,21 @@ function network_download(){
       	actionName : 'camera_network_msgs/CameraDownloadAction'
     }); 
 	
-    	this.setAction = function sendGoal(form){
-            time = new Date();
-           time.setHours(parseInt(form.network_download_hour.value),parseInt(form.network_download_minute.value))
-
-    		var goal = new ROSLIB.Goal({
-    			actionClient : _network_download.action,
-    			goalMessage : {
-    				dowload_frequency_s : parseFloat(form.network_download_frequency.value),
-                      start_time : time.getTime()/1000
-    			}
-    		});
-    		goal.send();
-    	}  
+    this.setAction = function sendGoal(form){
+        var ts = $("#download_start_at").timepicker('getTime', [new Date()]);
+        if (ts == null || ts == undefined || $("#download_start_at").val().match(/\d+:\d\d/) == null) {
+            ts = new Date();
+            $("#download_start_at").timepicker('setTime', ts);
+        }
+        var goal = new ROSLIB.Goal({
+            actionClient : _network_download.action,
+            goalMessage : {
+                dowload_frequency_s : parseFloat(form.network_download_frequency.value),
+                start_time : ts.getTime()/1000
+            }
+        });
+        goal.send();
+    }  
 
     this.stopAction = function(){
 		this.action.cancel();
