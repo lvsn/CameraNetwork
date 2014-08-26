@@ -35,17 +35,17 @@
 	<div class="mainStyle">
 		<form name="network" action="javascript:void(0)" method="get">
         		<label>Frequency (s 0 = single Shot) :</label>
-        		<input id="network_frequency" type="number" value="0" name="network_timelaps_frequency" >
+        		<input id="network_frequency" type="number" value="0" name="network_timelapse_frequency" >
             	<label>Quantity (&lt;0 = infinite) : </label>
-            	<input id="network_quantity" type="number" value="0" name="network_timelaps_qty" >
+            	<input id="network_quantity" type="number" value="0" name="network_timelapse_qty" >
             	<input type="checkbox" id="network_hdr" value="HDR">HDR<br>
       		<dl>
             		<dt>Status:</dt>
-              			<dd id ="network_timelaps_status"></dd>
+              			<dd id ="network_timelapse_status"></dd>
             		<dt>Feedback:</dt>
-              			<dd id="network_timelaps_feedback"></dd>
+              			<dd id="network_timelapse_feedback"></dd>
             		<dt>Result:</dt>
-              			<dd id="network_timelaps_result"></dd>
+              			<dd id="network_timelapse_result"></dd>
       		</dl>
                 <div class="floatleft">
 			<input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form,true)" value="Set">
@@ -71,7 +71,7 @@
   <!-- Download interface -->
 	<div class="mainStyle">
         <div class="parameterStyle right">
-			<form name="timelaps" action="javascript:void(0)" method="get">
+			<form name="timelapse" action="javascript:void(0)" method="get">
 				<label>Device Name : </label>	
 				<input id="download_name" type="text"  value='' name="download_name" >
 				<br>

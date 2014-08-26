@@ -163,4 +163,15 @@ input[type='number']:focus,input[type='text']:focus,input[type='password']:focus
   border: 1px solid rgba(81, 81, 81, 1);
 }
 
+.status-table .dt {
+    display: inline-block;
+    width: 30em;
+}
 
+.status-table .dd {
+    display: inline;
+}
+
+#device_timelapse_status {
+    color: red;
+}

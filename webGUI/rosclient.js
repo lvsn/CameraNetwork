@@ -16,34 +16,34 @@ $('#input_minute').val(now.getMinutes())
 
 //   ---- Class ---- 
  
-function network_timelaps(){
+function network_timelapse(){
 	this.status = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelaps/status',
+		name : '/master/network_timelapse/status',
 		messageType : 'actionlib_msgs/GoalStatusArray',
 	});
 	this.feedback = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelaps/feedback',
+		name : '/master/network_timelapse/feedback',
 		messageType : 'camera_network_msgs/CameraControlActionFeedback'
 	});
 	this.result = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelaps/result',
+		name : '/master/network_timelapse/result',
 		messageType : 'camera_network_msgs/CameraControlActionResult',
 	});	
 	this.action = new ROSLIB.ActionClient({
       	ros : ros,
-   	  	serverName : '/master/network_timelaps',
+   	  	serverName : '/master/network_timelapse',
       	actionName : 'camera_network_msgs/CameraControlAction'
     }); 
     
     this.setAction = function(form){
 		var goal = new ROSLIB.Goal({
-			actionClient : _network_timelaps.action,
+			actionClient : _network_timelapse.action,
 			goalMessage : {
-				picture_qty : parseFloat(form.network_timelaps_qty.value),
-				inter_picture_delay_s : parseFloat(form.network_timelaps_frequency.value),
+				picture_qty : parseFloat(form.network_timelapse_qty.value),
+				inter_picture_delay_s : parseFloat(form.network_timelapse_frequency.value),
 				is_hdr : $('#network_hdr').is(':checked')
 			}
 		});
@@ -55,22 +55,22 @@ function network_timelaps(){
 	}
 	
 	this.feedback.subscribe(function(msg){
-		$("#network_timelaps_feedback").text(msg.feedback.picture_taken);
+		$("#network_timelapse_feedback").text(msg.feedback.picture_taken);
 	});
 	this.status.subscribe(function(message) {
 		statusList = message.status_list;
 		if(statusList.length > 0){
 			//console.log(message.status_list[0].status);
-			$("#network_timelaps_status").text("Busy");
-			$("#network_timelaps_status").css("color","red");
+			$("#network_timelapse_status").text("Busy");
+			$("#network_timelapse_status").css("color", "orange");
 		}
 		else{
-			$("#network_timelaps_status").text("Idle");
-			$("#network_timelaps_status").css("color","green");
+			$("#network_timelapse_status").text("Idle");
+			$("#network_timelapse_status").css("color", "green");
 		}
 	}); 
 	this.result.subscribe(function(msg){
-		$("#network_timelaps_result").text(msg.result.total_picture);
+		$("#network_timelapse_result").text(msg.result.total_picture);
 	});
 };      
 
@@ -174,11 +174,11 @@ function network_download(){
 		if(statusList.length > 0){
 			//console.log(message.status_list[0].status);
 			$("#network_download_status").text("Busy");
-			$("#network_download_status").css("color","red");
+			$("#network_download_status").css("color", "orange");
 		}
 		else{
 			$("#network_download_status").text("Idle");
-			$("#network_download_status").css("color","green");
+			$("#network_download_status").css("color", "green");
 		}
 		
 	}); 
@@ -203,43 +203,43 @@ function device(){
 		}); 
 		status = new ROSLIB.Topic({
 			ros : ros,
-			name :  name + '/timelaps/status',
+			name :  name + '/timelapse/status',
 			messageType : 'actionlib_msgs/GoalStatusArray'
 		});
 		feedback = new ROSLIB.Topic({
 			ros : ros,
-			name : name + '/timelaps/feedback',
+			name : name + '/timelapse/feedback',
 			messageType : 'camera_network_msgs/CameraControlActionFeedback'
 		});
 		result = new ROSLIB.Topic({
 			ros : ros,
-			name : name + '/timelaps/result',
+			name : name + '/timelapse/result',
 			messageType : 'camera_network_msgs/CameraControlActionResult'
 		});
 		action = new ROSLIB.ActionClient({
 			ros : ros,
-			serverName : name + '/timelaps',
+			serverName : name + '/timelapse',
 			actionName : 'camera_network_msgs/CameraControlAction'  
 	  	});  
 		
 		feedback.subscribe(function(msg){
-			$("#device_timelaps_feedback").text(msg.feedback.picture_taken);
+			$("#device_timelapse_feedback").text(msg.feedback.picture_taken);
 		});
 
 		result.subscribe(function(msg){
-			$("#device_timelaps_result").text(msg.result.total_picture);
+			$("#device_timelapse_result").text(msg.result.total_picture);
 		});	
 		
 	    status.subscribe(function(message) {
 			statusList = message.status_list;
 			if(statusList.length > 0){
 				//console.log(message.status_list[0].status);
-				$("#device_timelaps_status").text("Busy");
-				$("#device_timelaps_status").css("color","red");
+				$("#device_timelapse_status").text("Busy");
+				$("#device_timelapse_status").css("color", "orange");
 			}
 			else{
-				$("#device_timelaps_status").text("Idle");
-				$("#device_timelaps_status").css("color","green");
+				$("#device_timelapse_status").text("Idle");
+				$("#device_timelapse_status").css("color", "green");
 			}
 		});  
 	
@@ -249,8 +249,8 @@ function device(){
 		var goal = new ROSLIB.Goal({
 			actionClient : action,
 			goalMessage : {
-				picture_qty : parseFloat(form.device_timelaps_qty.value),
-				inter_picture_delay_s : parseFloat(form.device_timelaps_frequency.value),
+				picture_qty : parseFloat(form.device_timelapse_qty.value),
+				inter_picture_delay_s : parseFloat(form.device_timelapse_frequency.value),
 				is_hdr : $('#device_hdr').is(':checked')
 			}
 		});
@@ -466,7 +466,7 @@ function device(){
 
 //   ----  Instantces   -----
 
-var _network_timelaps = new network_timelaps();
+var _network_timelapse = new network_timelapse();
 var _network_download = new network_download();
 var _current_device;
 var img = new Image;
@@ -483,9 +483,10 @@ function cleanDevicePage(){
 	$("#device_shutterspeed").text("");
 	$("#device_imageformat").text("");
 	$("#device_parameters").text("");
-	$("#device_timelaps_status").text("");
-	$("#device_timelaps_result").text("");
-	$("#device_timelaps_feedback").text("");
+    $("#device_timelapse_status").text("Awaiting connection...");
+    $("#device_timelapse_status").css("color", "red");
+	$("#device_timelapse_result").text("");
+	$("#device_timelapse_feedback").text("");
 }
 
 function refreshScreen(){
@@ -498,7 +499,7 @@ function refreshScreen(){
 }
 
 function refreshCanvas(){
-    if($('#imagePreview').length){
+    if ($('#imagePreview').length){
         document.getElementById('imagePreview').src = "http://" + ROS_MASTER + ":8181/stream?topic=/preview?width=640?height=480";
     }
 };
@@ -550,10 +551,10 @@ function selectEvent(select){
 
 function networkTimelapsEvent(form,isStart){
 	if(isStart){
-		_network_timelaps.setAction(form);
+		_network_timelapse.setAction(form);
 	}
 	else{
-		_network_timelaps.stopAction();
+		_network_timelapse.stopAction();
 	}
 }
 
@@ -667,6 +668,12 @@ function rebootDeviceEvent(form){
 	}
 }
 
-setInterval(refreshSelect,2000);
-setInterval(refreshCanvas, 100);
-setInterval(refreshScreen, 1000);
+$(document).ready(function() {
+    var refreshSelectTimer = setInterval(refreshSelect,2000);
+    var refreshCanvasTimer = setInterval(refreshCanvas, 100);
+    var refreshScreenTimer = setInterval(refreshScreen, 1000);
+
+    $("#imagePreview").error(function() {
+        clearInterval(refreshCanvasTimer);
+    });
+});
