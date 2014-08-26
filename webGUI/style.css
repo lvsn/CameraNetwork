@@ -163,14 +163,14 @@ input[type='number']:focus,input[type='text']:focus,input[type='password']:focus
   border: 1px solid rgba(81, 81, 81, 1);
 }
 
-.status-table dt {
+dt {
     display: inline-block;
     width: 4em;
     float: left;
     clear: both;
 }
 
-.status-table dd {
+dd {
     display: inline;
     float: left;
 }
