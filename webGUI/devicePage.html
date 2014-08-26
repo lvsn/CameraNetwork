@@ -105,22 +105,23 @@
 				<label>Frequency (s) : </label>
 				<input id="device_timelapse_frequency" type="number" value="0" name="device_timelapse_frequency" >
 				<label>Quantity (&lt;0 = infinite) : </label>
-				<input id="device_timelapse_qty" type="number" value="0" name="device_timelapse_qty" >
+				<input id="device_timelapse_qty" type="number" value="1" name="device_timelapse_qty" >
 				<input type="checkbox" id="device_hdr" value="HDR">HDR<br>
-				<dl class="status-table">
+				<dl>
 					<dt>Status:</dt>
-						<dd id="device_timelapse_status">Awaiting</dd>
+						<dd id="device_timelapse_status"></dd>
 					<dt>Feedback:</dt>
 						<dd id="device_timelapse_feedback"></dd>
 					<dt>Termination:</dt>
 						<dd id="device_timelapse_result"></dd>
 				</dl>
-                      <div class="floatleft">
-				<input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form,true)" value="Set">
-                      </div>
-                      <div class="floatright">
-                        <input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form,false)" value="Stop">
-                      </div>
+                <div style="clear: both;"></div>
+                <div class="floatleft">
+				    <input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form, true)" value="Launch acquisition">
+                </div>
+                <div class="floatright">
+                    <input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form, false)" value="Stop">
+                </div>
 			</form>
 
 		</div> 
@@ -130,7 +131,7 @@
                       Frames:<input id="device_stream_frames" type="number" value="10" name="device_stream_frames" >
 				<button type="button" class="styleButton" onclick = "streamVideoEvent()">(beta)Stream</button>
 			</form>
-			<img id="imagePreview" src="http://localhost:8181/stream?topic=/preview?width=640?height=480" alt="preview window">
+			<img id="imagePreview" alt="preview window">
                 <br>
 			<button type="button" class="floatleft" onclick = "drawPreviewEvent()">Preview</button>
                 <button type="button" class="floatright" onclick = "calibrateVideoEvent()">(beta)Calibrate Video</button>

@@ -38,7 +38,7 @@ function network_timelapse(){
       	actionName : 'camera_network_msgs/CameraControlAction'
     }); 
     
-    this.setAction = function(form){
+    this.setAction = function(form) {
 		var goal = new ROSLIB.Goal({
 			actionClient : _network_timelapse.action,
 			goalMessage : {
@@ -194,7 +194,7 @@ function device(){
 	var name;
 	var ip;
 
-	this.createRosAttribute = function(pName,pIP){
+	this.createRosAttribute = function(pName, pIP){
 		name = pName;
 		ip = pIP;
 		param = new ROSLIB.Param({
@@ -390,11 +390,11 @@ function device(){
 		});
 	}
 
-	this.refresh = function(){
+	this.refresh = function() {
 		$("#device_name").text(name);
     	$("#device_ip").text(ip);
-		param.get(function(value){
-	    	if(value != null && value["camera_model"] != null){
+		param.get(function(value) {
+	    	if (value != null && value["camera_model"] != null && value != undefined) {
 	    		$("#device_camera").text(value["camera_model"]);
 	    		$("#device_camera").css("color","black");
 	    		$("#device_iso").text(value["camera_setting"]["iso"]);
@@ -405,17 +405,16 @@ function device(){
 	    		var sequenceSize = value["camera_setting"]["captureSequence"].length;
 	            var sequence = value["camera_setting"]["captureSequence"];
 				var parameterString = '';
-				for(var i = 0; i < sequenceSize; i++){
+				for (var i = 0; i < sequenceSize; i++) {
 					parameterString += "Picture " + i + " :</br>";
-				    for (var prop in sequence[i]){
+				    for (var prop in sequence[i]) {
 				    	parameterString += prop + ": " + sequence[i][prop] + "</br>";
 				   	}
 				   	parameterString += "</br>";
 				 }
 				 $("#device_parameters").html(parameterString);
 				 
-	    	}
-	    	else{
+	    	} else {
 	          	$("#device_camera").text("No Camera");
 	          	$("#device_camera").css("color","red");
 	        }
@@ -469,8 +468,8 @@ function device(){
 var _network_timelapse = new network_timelapse();
 var _network_download = new network_download();
 var _current_device;
-var img = new Image;
-img.src = "http://" + ROS_MASTER + ":8181/stream?topic=/preview?width=640?height=480";
+//var img = new Image;
+//img.src = "http://" + ROS_MASTER + ":8181/stream?topic=/preview?width=640?height=480";
 
 //   ---   GUI Functions   ----
 
@@ -613,11 +612,10 @@ function saveSequenceEvent(form){
 	}
 }
 
-function deviceTimelapsEvent(form,isStart){
-	if(isStart){
+function deviceTimelapsEvent(form, isStart){
+	if (isStart) {
 		_current_device.setAction(form);
-	}
-	else{
+	} else{
 		_current_device.stopAction();
 	}
 }
@@ -664,7 +662,7 @@ function rebootDeviceEvent(form){
 		    _current_device.rebootDevice();
 		    _current_device.clean();
 			_current_device = undefined;
-		}		
+		}
 	}
 }
 
@@ -675,5 +673,6 @@ $(document).ready(function() {
 
     $("#imagePreview").error(function() {
         clearInterval(refreshCanvasTimer);
+        console.log("An error trigged the cancellation of the preview image.");
     });
 });
