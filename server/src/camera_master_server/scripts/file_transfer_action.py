@@ -8,35 +8,36 @@ Created on Fri May 23 14:27:55 2014
 
 
 """
-#import sys
-#sys.path.append("/opt/ros/indigo/lib/python2.7/dist-packages")
-
 import os
 import time
 import math
-import actionlib
+import traceback
 from xml.dom import minidom
 
+import actionlib
 import roslib
 roslib.load_manifest('camera_controler')
 import rospy
 import rospkg
-from camera_network_msgs.msg import *
-from camera_network_msgs.srv import *
 import std_srvs.srv
 import paramiko
 
+from camera_network_msgs.msg import *
+from camera_network_msgs.srv import *
 
-# TODO: path joining with os.path.join
+
+join = os.path.join
 
 
 class sftp_action:
 
+    """Implements the picture fetching functionality with ROS."""
+
     def __init__(self, imagePath):
-        self.imagePath = imagePath + '/'
+        self.imagePath = imagePath
         self.dateFolder = ''
-        self.localImagePath = self.imagePath + 'master/' + self.dateFolder
-        self.localLogPath = self.imagePath + 'log/'
+        self.localImagePath = join(self.imagePath, 'master', self.dateFolder)
+        self.localLogPath = join(self.imagePath, 'log')
         self.fileQty = 0
 
         rospy.loginfo('Writing files to ' + self.localImagePath)
@@ -76,13 +77,16 @@ class sftp_action:
             self.refresh_ip()
             self.refresh_date()
 
-            pictureQty = self.download_all_images_from_network()
+            try:
+                pictureQty = self.download_all_images_from_network()
+            except (AttributeError, ):
+                # Could not iterate over self.ipDict
+                pictureQty = 0
             totalCount += pictureQty
             r.sleep()
             if self.action.is_preempt_requested() or not self.action.is_active(
             ) or goal.dowload_frequency_s == 0:
                 break
-        rospy.loginfo("Here2")
         succes_msg = CameraDownloadActionResult
         succes_msg.total_downloaded = 'Downloaded ' + \
             str(totalCount) + ' pictures from ' + str(len(self.ipDict)) + ' devices.'
@@ -115,11 +119,11 @@ class sftp_action:
 
     def refresh_ip(self):
         self.ipDict = rospy.get_param('/IP', {})
-        rospy.loginfo("refreshing ip dic" + str(self.ipDict))
+        rospy.loginfo("Refreshing ip dic: " + str(self.ipDict))
 
     def refresh_date(self):
-        self.dateFolder = time.strftime("%B") + '/'
-        self.localImagePath = self.imagePath + 'master/' + self.dateFolder
+        self.dateFolder = time.strftime("%B")
+        self.localImagePath = join(self.imagePath, 'master', self.dateFolder)
 
     def download_all_images_from_network(self):
         """
@@ -138,12 +142,8 @@ class sftp_action:
                     imageQty += self._downloadImageFolder(sftp, name)
                     t.close()
                     rospy.loginfo('Session with ' + ip + ' closed')
-
-            except ZeroDivisionError as e:
-            #except Exception as e:
-                rospy.logwarn(
-                    '*** Caught exception: %s: %s' %
-                    (e.__class__, e))
+            except Exception as e:
+                rospy.logerr(traceback.format_exc())
                 try:
                     t.close()
                 except:
@@ -166,7 +166,8 @@ class sftp_action:
 
     def _downloadImageFolder(self, sftp, deviceName=''):
         feedback_msg = CameraDownloadActionFeedback
-        remote_dir = "/home/pi/Images"
+        username, passw = self._get_user_and_passw(deviceName)
+        remote_dir = "/home/{username}/Pictures".format(**locals())
 
         filelist = sftp.listdir(os.path.join(remote_dir, self.dateFolder))
         rospy.loginfo('found {0} files'.format(len(filelist)))
@@ -183,9 +184,8 @@ class sftp_action:
                 try:
                     sftp.get(remoteFile, localFile)
                     sftp.remove(remoteFile)
-                except ZeroDivisionError:
-                    rospy.logwarn(
-                        "Raised Exception when accessing remote file.")
+                except:
+                    rospy.logwarn(traceback.format_exc())
                 feedback_msg.picture_downloaded = "{0:.2f}".format(
                     float(
                         count / len(filelist) * 100)) + '% of Device ' + deviceName
@@ -257,10 +257,8 @@ class sftp_action:
             passw_content = xmldoc.createTextNode(password)
             passw.appendChild(passw_content)
             device.appendChild(passw)
-        rospy.logwarn("Here open")
         with open(rospkg.RosPack().get_path('camera_master_server') + '/' + filename, 'w') as f:
             f.write(xmldoc.toprettyxml(indent="    ", encoding="utf-8"))
-        rospy.logwarn("Here open closed")
 
     def _get_user_and_passw(self, name):
         if name in self.userDict:
