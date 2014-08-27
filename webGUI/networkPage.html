@@ -29,14 +29,17 @@
 
 	<!-- Network interface -->
 	<div class="mainStyle">
+        <h2>IMAGE</h2>
 		<form name="network" action="javascript:void(0)" method="get">
             <label>
-                <span>Frequency (s 0 = single Shot) :</span>
+                <span>Frequency :</span>
                 <input id="network_frequency" type="number" value="0" name="network_timelapse_frequency" >
+                <span>seconds (0 for single shot)</span>
             </label>
             <label>
-                <span>Quantity (&lt;0 = infinite) :</span>
+                <span>Quantity :</span>
                 <input id="network_quantity" type="number" value="0" name="network_timelapse_qty" >
+                <span>(-1 = perpetual capture)</span>
             </label>
             <label>
                 <input type="checkbox" id="network_hdr" value="HDR">HDR<br>
@@ -61,6 +64,7 @@
 
    <!-- Video interface -->
      <div class="mainStyle">
+        <h2>VIDEO</h2>
 		<form name="video" action="javascript:void(0)" method="get">
             <label>Video capture Time (s) : </label>
             <input id="video_time" type="number" value="0" name="video_time" ><br>
@@ -70,7 +74,8 @@
 
   <!-- Download interface -->
 	<div class="mainStyle">
-        <div class="parameterStyle right">
+        <h2>FETCH</h2>
+        <div class="parameterStyle right" style="clear: both;">
 			<form name="timelapse" action="javascript:void(0)" method="get">
 				<label>
                     <span>Device Name :</span>
@@ -93,8 +98,9 @@
 
 		<form  name="download" action="javascript:void(0)" method="get">
 			<label>
-                <span>Download frequency (s) (0 = one time) :</span>
+                <span>Frequency :</span>
                 <input id="input_frequency" type="number" value="0" name="network_download_frequency" >
+                <span>seconds (0 for single shot)</span>
             </label>
             <label>
                 <span>Start at :</span>

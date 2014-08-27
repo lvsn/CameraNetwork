@@ -50,23 +50,22 @@
 				</select> 
 				<dl>
 					<dt>Device:</dt>
-						<dd id="device_name"></dd>
+                    <dd id="device_name"></dd>
 					<dt>IP:</dt>
-						<dd id="device_ip"></dd>
-					<dt>Camera Type:</dt>
-						<dd id="device_camera"></dd>
+                    <dd id="device_ip"></dd>
+					<dt>Type:</dt>
+                    <dd id="device_camera"></dd>
 				</dl> 
-			  
 			  	<dl>
 					<dt>ISO:</dt>
-						<dd id="device_iso"></dd>
+                    <dd id="device_iso"></dd>
 					<dt>Aperture:</dt>
-						<dd id="device_aperture"></dd>
-					<dt>Shutter speed:</dt>
-						<dd id="device_shutterspeed"></dd>
-					<dt>Image format :</dt>
-						<dd id ="device_imageformat"></dd>
-					</dl>
+                    <dd id="device_aperture"></dd>
+					<dt>Shutter:</dt>
+                    <dd id="device_shutterspeed"></dd><dd>sec<sup>-1</sup></dd>
+					<dt>Format :</dt>
+                    <dd id ="device_imageformat"></dd>
+                </dl>
 			</div>
 
 			<button type="button" class="floatleft" onclick = "getInformationEvent(this.form)">Help</button>
@@ -97,10 +96,16 @@
 	<!-- Timelaps interface -->
 		<div class="mainStyle">
 			<form name="timelapse" action="javascript:void(0)" method="get">
-				<label>Frequency (s) : </label>
-				<input id="device_timelapse_frequency" type="number" value="0" name="device_timelapse_frequency" >
-				<label>Quantity (&lt;0 = infinite) : </label>
-				<input id="device_timelapse_qty" type="number" value="1" name="device_timelapse_qty" >
+				<label>
+                    <span>Frequency :</span>
+                    <input id="device_timelapse_frequency" type="number" value="0" name="device_timelapse_frequency" >
+                    <span>seconds</span>
+                </label>
+				<label>
+                    <span>Quantity :</span>
+                    <input id="device_timelapse_qty" type="number" value="1" name="device_timelapse_qty" >
+                    <span>(&lt;0 = infinite)</span>
+                </label>
 				<input type="checkbox" id="device_hdr" value="HDR">HDR<br>
 				<dl>
 					<dt>Status:</dt>

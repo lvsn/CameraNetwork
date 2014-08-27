@@ -96,6 +96,7 @@ function network_download(){
 	
     this.setAction = function sendGoal(form){
         var ts = $("#download_start_at").timepicker('getTime', [new Date()]);
+        // If ts not defined or not a D:DD or DD:DD entry, where D is a digit
         if (ts == null || ts == undefined || $("#download_start_at").val().match(/\d+:\d\d/) == null) {
             ts = new Date();
             $("#download_start_at").timepicker('setTime', ts);
@@ -668,7 +669,8 @@ function rebootDeviceEvent(form){
 
 $(document).ready(function() {
     var refreshSelectTimer = setInterval(refreshSelect,2000);
-    var refreshCanvasTimer = setInterval(refreshCanvas, 100);
+    /* refreshCanvas overloads the server */
+    //var refreshCanvasTimer = setInterval(refreshCanvas, 100);
     var refreshScreenTimer = setInterval(refreshScreen, 1000);
 
     $("#imagePreview").error(function() {
