@@ -7,6 +7,8 @@
     <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
     <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="./js/jquery.timepicker.min.js"></script>
+    <script type="text/javascript" src="./js/jquery.blockUI.js"></script>
     <script type="text/javascript" src="rosclient.js"></script>
     <script type="text/javascript" src="dynamicPage.js"></script>
 
@@ -26,38 +28,42 @@
     <!-- Device interface -->
         <div class="mainStyle">
         <div class="parameterStyle right">
+            <span id="param_status"></span>
             <form name="timelapse" action="javascript:void(0)" method="get">
                 <label>ISO
-                    <select id="device_parameter_iso" onload="getDeviceInformation();" value='' name="device_parameter_iso" >
+                    <select id="device_parameter_iso" value='' name="device_parameter_iso" >
                     </select>
                 </label>
-                <label>Aperture :</label>
-                <input id="device_parameter_aperture" type="text"  value='' name="device_parameter_aperture" >
-                <br>
-                <label>Shutter Speed :</label>
-                <input id="device_parameter_shutterspeed" type="text" value='' name="device_parameter_shutterspeed">
-                <br>
-                <label>Format : </label>
-                <input id="device_parameter_imageformat" type="text"  value='' name="device_parameter_imageformat" >
-                <br>
+                <label>Aperture :
+                    <select id="device_parameter_aperture" value='' name="device_parameter_aperture" >
+                    </select>
+                </label>
+                <label>Shutter Speed :
+                    <select id="device_parameter_shutterspeed" value='' name="device_parameter_shutterspeed" >
+                    </select>
+                </label>
+                <label>Format :
+                    <select id="device_parameter_imageformat" value='' name="device_parameter_imageformat" >
+                    </select>
+                </label>
                 <input type="submit" class="styleButton" onclick="setParametersEvent(this.form)" value="Set">
             </form>
             <button type="button" class="styleButton" onclick="calibratePictureEvent(this.form)">Auto</button>
         </div>
 
         <div style="float:left;">
-            <select class = "styleSelect" onchange="selectEvent(this);" id ="deviceList">
-                    <option value="index0">Online Devices</option>
+            <select class="styleSelect" onchange="selectEvent(this);" id="deviceList" disabled="disabled">
+                    <option value="index0">Loading Devices...</option>
             </select> 
-                        <dl>
-                                <dt>Device:</dt>
-            <dd id="device_name"></dd>
-                                <dt>IP:</dt>
-            <dd id="device_ip"></dd>
-                                <dt>Type:</dt>
-            <dd id="device_camera"></dd>
-                        </dl> 
-                        <dl>
+            <dl>
+                <dt>Device:</dt>
+                <dd id="device_name"></dd>
+                                    <dt>IP:</dt>
+                <dd id="device_ip"></dd>
+                                    <dt>Type:</dt>
+                <dd id="device_camera"></dd>
+            </dl> 
+            <dl>
                                 <dt>ISO:</dt>
             <dd id="device_iso"></dd>
                                 <dt>Aperture:</dt>

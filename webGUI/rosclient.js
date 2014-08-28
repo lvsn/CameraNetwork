@@ -11,6 +11,21 @@ var ros = new ROSLIB.Ros({
     url : 'ws://' + ROS_MASTER + ':9090'
 });
 
+var ros_conn_state = 'NOT CONNECTED';
+
+ros.on('connection', function() {
+    $.unblockUI();
+    ros_conn_state = 'CONNECTED';
+});
+
+ros.on('close', function() {
+    ros_conn_state = 'NOT CONNECTED';
+});
+
+ros.on('error', function() {
+    ros_conn_state = 'NOT CONNECTED';
+});
+
 
 //   ---- Class ---- 
  
@@ -185,7 +200,39 @@ function network_download(){
 	}); 
 };
 
-function device(){
+function setSelectOptions(selector, values, current_value, set_value_as_key) {
+    for (var i = 0; i < values.length; i++) {
+        var val;
+        if (set_value_as_key != undefined && set_value_as_key == true) {
+            val = values[i][0];
+        } else {
+            val = values[i][1];
+        }
+        $(selector)
+            .append($("<option></option>")
+                .attr("value", val)
+                .text(values[i][1])
+                .prop('selected', current_value == val ? true : false));
+    }
+}
+
+function getConfiguration(str) {
+    /* Return value: First element is the current value, Second is the list */
+    elements = str.split("\n");
+    var choices = [];
+    var current = 0;
+    for (var i = 0; i < elements.length; i++) {
+        if (elements[i].slice(0, 7) == "Current") {
+            current = elements[i].split(":")[1].trim();
+        } else if (elements[i].slice(0, 6) == "Choice") {
+            data = elements[i].split(" ");
+            choices[choices.length] = [data[1].trim(), data.slice(2, data.length).join().trim()];
+        }
+    }
+    return [current, choices];
+}
+
+function device() {
 
 	var param;
 	var status;
@@ -382,12 +429,15 @@ function device(){
 		});
 		var request = new ROSLIB.ServiceRequest({getAllInformation:true});
 		save.callService(request, function(result) {
-			string = '';
-			string += result['iso'] + '\n';
-			string += result['aperture'] + '\n';
-			string += result['shutterspeed'] + '\n';
-			string += result['imageformat'] + '\n';
-			alert(string);
+            var config = getConfiguration(result['iso']);
+            setSelectOptions("#device_parameter_iso", config[1], config[0]);
+            config = getConfiguration(result['aperture']);
+            setSelectOptions("#device_parameter_aperture", config[1], config[0]);
+            config = getConfiguration(result['shutterspeed']);
+            setSelectOptions("#device_parameter_shutterspeed", config[1], config[0]);
+            config = getConfiguration(result['imageformat']);
+            setSelectOptions("#device_parameter_imageformat", config[1], config[0], true);
+            $("#param_status").html('');
 		});
 	}
 
@@ -487,6 +537,11 @@ function cleanDevicePage(){
     $("#device_timelapse_status").css("color", "red");
 	$("#device_timelapse_result").text("");
 	$("#device_timelapse_feedback").text("");
+    /* Parameters */
+    $("#device_parameter_iso option").remove()
+    $("#device_parameter_aperture option").remove()
+    $("#device_parameter_shutterspeed option").remove()
+    $("#device_parameter_imageformat option").remove()
 }
 
 function refreshScreen(){
@@ -509,18 +564,30 @@ function refreshSelect(){
 		ros : ros,
 		name : '/IP'
 	});
-	IpList.get(function(value) {
-        if($("#deviceList").length){
-		$("#deviceList").empty(); 
-		var select = document.getElementById("deviceList");
-		select.options[0] = new Option("Online Devices", "index0");
-		$.each( value, function( key, value ) {
-			select.options[select.options.length] = new Option(key, value);
+	IpList.get(function(result) {
+		var select = $("#deviceList");
+        var old_value = select.val();
+        $("#deviceList option").remove();
+        select.prop("disabled", false);
+
+		$.each( result, function( key, value ) {
+            select.append($("<option></option>")
+                    .attr("value", value)
+                    .text(key));
 		});
-		if(_current_device != undefined){
+
+        /* Set currently selected device to previously selected one */
+		if (_current_device != undefined) {
 			$("#deviceList").val(_current_device.getIp());	
 		}
+
+        /* Trigger onChange event */
+        if (select.val() != old_value) {
+            select.change();
         }
+
+        /* Only start the timer after a request is received */
+        setTimeout(refreshSelect, 2000);
 	});
 }
 
@@ -537,16 +604,11 @@ function noDeviceAlert(){
 // ---- events ----
 
 function selectEvent(select){
-	if(select.selectedIndex != 0){
-		currentDevice = select.options[select.selectedIndex].text;
-		_current_device = new device();
-		_current_device.createRosAttribute(currentDevice,select.value);
-		_current_device.refresh();
-	}
-	else{
-		_current_device.clean();
-		_current_device = undefined;
-	}
+    currentDevice = select.options[select.selectedIndex].text;
+    _current_device = new device();
+    _current_device.createRosAttribute(currentDevice,select.value);
+    _current_device.refresh();
+    getDeviceInformation();
 }
 
 function networkTimelapsEvent(form,isStart){
@@ -657,20 +719,34 @@ function shutdownDeviceEvent(form){
 }
 
 function rebootDeviceEvent(form){
+    if(!noDeviceAlert()){
+        var r = confirm("Are you sure you want to reboot device?");
+        if (r == true) {
+            _current_device.rebootDevice();
+            _current_device.clean();
+            _current_device = undefined;
+        }
+    }
+}
+
+function getDeviceInformation() {
 	if(!noDeviceAlert()){
-		var r = confirm("Are you sure you want to reboot device?");
-		if (r == true) {
-		    _current_device.rebootDevice();
-		    _current_device.clean();
-			_current_device = undefined;
-		}
+        $("#param_status").html('<img src="./media/loading.gif" /> Loading configuration...');
+		_current_device.getInformation();		
 	}
 }
 
 $(document).ready(function() {
-    var refreshSelectTimer = setInterval(refreshSelect,2000);
+    if (ros_conn_state != 'CONNECTED') {
+        $.blockUI({ message: '<img src="./media/loading.gif /> Connecting to ROS...' });
+    }
+    if ($("#deviceList").length != 0) {
+        refreshSelect();
+    }
+
     /* refreshCanvas overloads the server */
     //var refreshCanvasTimer = setInterval(refreshCanvas, 100);
+
     var refreshScreenTimer = setInterval(refreshScreen, 1000);
 
     $("#imagePreview").error(function() {
