@@ -8,22 +8,22 @@ Created on Wed May 14 14:58:49 2014
 
 Function to call gphoto2 and return answer
 """
-
 import subprocess
+
 
 # if the executable is installed properly no direct path needed
 gphoto2Executable = 'gphoto2'
 
-def run(cmd) :
-    
+
+def run(cmd):
     cmd = gphoto2Executable + cmd
 
-    p = subprocess.Popen(cmd, shell=True,executable="/bin/bash",
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
-                       )
-      
-    (stdout, stderr) = p.communicate()
+    p = subprocess.Popen(cmd, shell=True, executable="/bin/bash",
+       stdout=subprocess.PIPE,
+       stderr=subprocess.PIPE,
+    )
+
+    stdout, stderr = p.communicate()
     ret = p.returncode
       
     if ret == 1:
