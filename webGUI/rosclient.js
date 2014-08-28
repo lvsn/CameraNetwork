@@ -212,7 +212,7 @@ function setSelectOptions(selector, values, current_value, set_value_as_key) {
             .append($("<option></option>")
                 .attr("value", val)
                 .text(values[i][1])
-                .prop('selected', current_value == val ? true : false));
+                .prop('selected', current_value == values[i][1] ? true : false));
     }
 }
 
@@ -603,7 +603,10 @@ function noDeviceAlert(){
 
 // ---- events ----
 
-function selectEvent(select){
+function selectEvent(select) {
+    if ($(select).val() == null || $(select).val() == undefined) {
+        return;
+    }
     currentDevice = select.options[select.selectedIndex].text;
     _current_device = new device();
     _current_device.createRosAttribute(currentDevice,select.value);
