@@ -1,6 +1,6 @@
 # Dependencies #
 
-## Master Server Setup ##
+## Server Setup ##
 This installation process is compatible with ubuntu distros.
 The application is tested with hydro and indigo versions of ROS
 
@@ -55,19 +55,16 @@ $ ln -s ../../../src/camera_master_server/launch/* ./
 $ roslaunch camera_master_server.launch
 ```
 
-## Raspberry Pi Installation ##
-This one is a bit harder:
+## Client Installation ##
+Here are the installation instructions for the Client. These instructions were aimed for the Raspberry Pi platform.
 
 ### Installing Debian ###
 -Install Raspbian (ex : NOOBS : http://www.raspberrypi.org/help/noobs-setup/)
 
-### ROS ###
-Install ros hydro : http://wiki.ros.org/ROSberryPi/Setting%20up%20Hydro%20on%20RaspberryPi
+### ROS and packages ###
+Install ROS Hydro using the following instructions: http://wiki.ros.org/ROSberryPi/Setting%20up%20Hydro%20on%20RaspberryPi
 
-### Ros packages ###
-This part takes a lot of time!
-
-
+Then, install the following packages (This may take a lot of time!):
 ```
 $ cd ~/ros_catkin_ws/src
 $ roslocate info common_msgs | rosws merge -
@@ -81,23 +78,18 @@ $ rosws update
 $ cd ..
 $ rosdep install  --from-paths src --ignore-src --rosdistro hydro -y --os=debian:wheezy
 $ ./src/catkin/bin/catkin_make_isolated --install
-```
-
-
-```
 $ sudo apt-get install python-picamera daemontools
 $ echo ‘source /opt/ros/hydro/setup.bash ’ >> ~/.bashrc
 ```
 
-
-# Install Camera Network #
+# Camera Network Installation #
 
 will generate camera-network folder:
 
 ### setup ROS workspace ###
 ```
-$ git clone https://MathieuGaron@bitbucket.org/MathieuGaron/camera-network.git
-$ cd camera-network/src
+$ git clone https://github.com/lvsn/CameraNetwork.git
+$ cd camera-network/<client-or-server>
 $ catkin_init_workspace
 $ cd ..
 $ catkin_make
@@ -119,18 +111,8 @@ $ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.l
 ```
 You will then be able to start and enable the service.
 
-To configure the camera, add these lines at the beginning of /etc/init/camera.conf:
-```
- setuid pi  
- setgid plugdev   //for Gphoto
- setgid video      //for Picam
-```
 
-** you can't add the two setgid! **
-
-
-add this line in /usr/sbin/camera-start:
-
+Add this line around the beginning of /usr/sbin/camera-start:
 ```
 export CAMERA_NAME=<Unique name>
 ```
