@@ -5,27 +5,29 @@ Created on Thu June 05 09:17:30 2014
 
 @author: Mathieu Garon
 """
+import os
+import time
+import io
+from datetime import datetime
+
 import roslib
 roslib.load_manifest('camera_drivers')
 import rospy
-from camera_network_msgs.srv import *
 from sensor_msgs.msg import Image
-from cv_bridge import CvBridge, CvBridgeError
 import std_srvs.srv
-
 import cv2
+from cv_bridge import CvBridge, CvBridgeError
 import picamera
 import wiringpi2 as gpio
-import os
-import time
-import picamParameterHandler as pph
-import io
 import numpy as np
 import camera_driver as cd
 
+import picamParameterHandler as pph
+from camera_network_msgs.srv import *
+
 
 class picam_server(cd.camera_driver):
-
+    """Handles the requests by ROS to the picam."""
     def __init__(self):
         try:
             self.picam = picamera.PiCamera()
@@ -176,10 +178,12 @@ class picam_server(cd.camera_driver):
         self.id_gen = self._id_generator()
 
         # to make sure it create the right path
-        loadPath = self.homePath + "/" + \
-            self._filename_format(req.path, 0, 'dummy')
+        loadPath = os.path.join(
+            self.homePath,
+            self._filename_format(req.path, 0, 'dummy'),
+        )
         if loadPath.find('..') != -1:
-            rospy.logwarn("use of .. is prohibed")
+            rospy.logwarn("Use of .. is prohibited")
             return "error"
         directory = os.path.dirname(loadPath)
         rospy.loginfo("Loading Picture to folder " + directory)
@@ -189,15 +193,13 @@ class picam_server(cd.camera_driver):
         for pictureFile in os.listdir(self.tmpPath):
             fileFormat = pictureFile.split('.')[-1]
             os.rename(
-                self.tmpPath +
-                "/" +
-                pictureFile,
-                self.homePath +
-                "/" +
-                self._filename_format(
+                os.path.join(self.tmpPath, pictureFile),
+                os.path.join(self.homePath, self._filename_format(
                     req.path,
                     count,
-                    fileFormat))
+                    fileFormat)
+                )
+            )
             count += 1
         return "Transfered " + str(count) + " files."
 
@@ -237,10 +239,14 @@ class picam_server(cd.camera_driver):
             'aperture': aperture,
             'shutterspeed': shutterspeed}
 
-    def _filename_format(self, string, pictureId=0, pictureFormat='jpeg'):
-        string = string.replace('%C', pictureFormat)
-        string = string.replace('%n', str(pictureId))
-        return time.strftime(string)
+    def _filename_format(self, string_, pictureId=0, pictureFormat='jpeg'):
+        """
+        Produces the name of the image. string_ comes from
+        camera_controller's camera_handler.py:_generatePictureName
+        """
+        string_ = string_.replace('%C', pictureFormat)
+        string_ = string_.replace('%n', str(pictureId))
+        return datetime.now().strftime(string_)
 
     def _id_generator(self):
         for i in range(10000000):

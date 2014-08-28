@@ -70,8 +70,14 @@ class Server:
             rospy.delete_param('camera_setting')
         except KeyError:
             pass
-        rospy.delete_param('file')
-        rospy.delete_param('/IP/' + os.environ['CAMERA_NAME'])
+        try:
+            rospy.delete_param('file')
+        except KeyError:
+            pass
+        try:
+            rospy.delete_param('/IP/' + os.environ['CAMERA_NAME'])
+        except KeyError:
+            pass
 
     def save_settings_cb(self, req):
         rospack = rospkg.RosPack()
