@@ -15,7 +15,6 @@ from camera_network_msgs.srv import *
 
 
 class CameraHandler:
-
     def __init__(self):
         rospy.loginfo("Setting up camera Handler")
         rospy.wait_for_service('get_camera')
