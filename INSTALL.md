@@ -44,8 +44,9 @@ TODO: Improve this.
 
 ```
 $ cd <this-repo>
-$ cd server
+$ cd server/src
 $ catkin_init_workspace
+$ cd ..
 $ catkin_make
 $ catkin_make install
 $ source ./install/setup.bash
