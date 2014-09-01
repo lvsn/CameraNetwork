@@ -17,8 +17,8 @@ $ sudo apt-get install ros-<rosversion>-mjpeg-server
 ```
 ### Setting up network ###
 ```
-$ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')' >> ~/.bashrc  
-$ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc   
+$  echo 'export ROS_IP=$(ip addr | grep '"'"'state UP'"'"' -A2 | tail -n1 | awk '"'"'{print $2}'"'"' | cut -f1  -d'"'"'/'"'"')' >> ~/.bashrc
+$ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc
 ```
 
 ### Python and dependencies ###
