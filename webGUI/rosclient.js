@@ -29,7 +29,8 @@ ros.on('error', function() {
 
 //   ---- Class ---- 
  
-function network_timelapse(){
+function network_timelapse()
+{
 	this.status = new ROSLIB.Topic({
 		ros : ros,
 		name : '/master/network_timelaps/status',
@@ -216,7 +217,8 @@ function setSelectOptions(selector, values, current_value, set_value_as_key) {
     }
 }
 
-function getConfiguration(str) {
+function getConfiguration(str)
+{
     /* Return value: First element is the current value, Second is the list */
     elements = str.split("\n");
     var choices = [];
@@ -232,8 +234,8 @@ function getConfiguration(str) {
     return [current, choices];
 }
 
-function device() {
-
+function device()
+{
 	var param;
 	var status;
 	var feedback;
@@ -516,11 +518,12 @@ function device() {
 	}
 }
 
-//   ----  Instantces   -----
+//   ----  Instances   -----
 
 var _network_timelapse = new network_timelapse();
 var _network_download = new network_download();
 var _current_device;
+var _device_list;
 //var img = new Image;
 //img.src = "http://" + ROS_MASTER + ":8181/stream?topic=/preview?width=640?height=480";
 
@@ -563,39 +566,60 @@ function refreshCanvas(){
     }
 };
 
-function refreshSelect(){
+function refreshDevices()
+{
 	IpList = new ROSLIB.Param({
 		ros : ros,
 		name : '/IP'
 	});
 	IpList.get(function(result) {
-		var select = $("#deviceList");
-        var old_value = select.val();
-        $("#deviceList option").remove();
-        select.prop("disabled", false);
+        _device_list = result;
 
-		$.each( result, function( key, value ) {
-            select.append($("<option></option>")
-                    .attr("value", value)
-                    .text(key));
-		});
+        /* Update the list of devices */
+        var device_list_text = 'Devices: ';
+        $.each( _device_list, function( key, value ) {
+            device_list_text += key + ", ";
+        });
 
-        /* Set currently selected device to previously selected one */
-		if (_current_device != undefined) {
-			$("#deviceList").val(_current_device.getIp());	
-		}
+        $("#device_list").text(device_list_text.slice(0, -2));
 
-        /* Trigger onChange event */
-        if (select.val() != old_value) {
-            select.change();
+        /* Update device select if we're in the device page */
+        if ($("#deviceList").length != 0) {
+            refreshSelect();
         }
 
         /* Only start the timer after a request is received */
-        setTimeout(refreshSelect, 2000);
+        setTimeout(refreshDevices, 2000);
 	});
 }
 
-function noDeviceAlert(){
+/* Refreshes the device select in the device page. */
+function refreshSelect()
+{
+    var select = $("#deviceList");
+    var old_value = select.val();
+    $("#deviceList option").remove();
+    select.prop("disabled", false);
+
+    $.each( _device_list, function( key, value ) {
+        select.append($("<option></option>")
+                .attr("value", value)
+                .text(key));
+    });
+
+    /* Set currently selected device to previously selected one */
+    if (_current_device != undefined) {
+        $("#deviceList").val(_current_device.getIp());	
+    }
+
+    /* Trigger onChange event */
+    if (select.val() != old_value) {
+        select.change();
+    }
+}
+
+function noDeviceAlert()
+{
 	if(_current_device == undefined){
 		alert("No device selected");
 		return true;
@@ -747,9 +771,7 @@ $(document).ready(function() {
     if (ros_conn_state != 'CONNECTED') {
         $.blockUI({ message: '<img src="./media/loading.gif" /> Connecting to ROS...' });
     }
-    if ($("#deviceList").length != 0) {
-        refreshSelect();
-    }
+    refreshDevices();
 
     /* refreshCanvas overloads the server */
     //var refreshCanvasTimer = setInterval(refreshCanvas, 100);
