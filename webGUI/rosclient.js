@@ -226,7 +226,7 @@ function getConfiguration(str) {
             current = elements[i].split(":")[1].trim();
         } else if (elements[i].slice(0, 6) == "Choice") {
             data = elements[i].split(" ");
-            choices[choices.length] = [data[1].trim(), data.slice(2, data.length).join().trim()];
+            choices[choices.length] = [data[1].trim(), data.slice(2, data.length).join(" ").trim()];
         }
     }
     return [current, choices];
@@ -433,8 +433,10 @@ function device() {
             setSelectOptions("#device_parameter_iso", config[1], config[0]);
             config = getConfiguration(result['aperture']);
             setSelectOptions("#device_parameter_aperture", config[1], config[0]);
+            setSelectOptions("#device_sequence_aperture", config[1], config[0]);
             config = getConfiguration(result['shutterspeed']);
             setSelectOptions("#device_parameter_shutterspeed", config[1], config[0]);
+            setSelectOptions("#device_sequence_shutterspeed", config[1], config[0]);
             config = getConfiguration(result['imageformat']);
             setSelectOptions("#device_parameter_imageformat", config[1], config[0], true);
             $("#param_status").html('');
@@ -541,7 +543,9 @@ function cleanDevicePage(){
     $("#device_parameter_iso option").remove()
     $("#device_parameter_aperture option").remove()
     $("#device_parameter_shutterspeed option").remove()
-    $("#device_parameter_imageformat option").remove()
+    $("#device_sequence_aperture option").remove()
+    $("#device_sequence_shutterspeed option").remove()
+    $("#device_sequence_imageformat option").remove()
 }
 
 function refreshScreen(){

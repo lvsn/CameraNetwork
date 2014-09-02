@@ -171,7 +171,7 @@ class sftp_action:
 
         filelist = sftp.listdir(os.path.join(remote_dir, self.dateFolder))
         rospy.loginfo('found {0} files'.format(len(filelist)))
-        self.create_dir(self.localImagePath + deviceName)
+        self.create_dir(join(self.localImagePath, deviceName))
         count = 1.0
         if len(filelist) == 0:
             rospy.loginfo("No file to download")
