@@ -7,3 +7,4 @@
 - Give prefix name to picture (name)_(date).jpg: ex distance3m_(date).jpg
 - Change streaming system
 - Remove clients from ROOS and web interface when they crashed.
+- Make "set" in device tab really set the camera configuration (so it works in network right away).

@@ -745,7 +745,7 @@ function getDeviceInformation() {
 
 $(document).ready(function() {
     if (ros_conn_state != 'CONNECTED') {
-        $.blockUI({ message: '<img src="./media/loading.gif /> Connecting to ROS...' });
+        $.blockUI({ message: '<img src="./media/loading.gif" /> Connecting to ROS...' });
     }
     if ($("#deviceList").length != 0) {
         refreshSelect();

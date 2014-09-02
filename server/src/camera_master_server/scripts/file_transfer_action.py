@@ -15,8 +15,6 @@ import traceback
 from xml.dom import minidom
 
 import actionlib
-import roslib
-roslib.load_manifest('camera_controler')
 import rospy
 import rospkg
 import std_srvs.srv
