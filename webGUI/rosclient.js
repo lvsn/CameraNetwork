@@ -769,7 +769,7 @@ function getDeviceInformation() {
 
 $(document).ready(function() {
     if (ros_conn_state != 'CONNECTED') {
-        $.blockUI({ message: '<img src="./media/loading.gif" /> Connecting to ROS...' });
+        $.blockUI({ message: '<img src="./media/loading.gif" style="vertical-align: middle; margin: 1em;" /> Connecting to ROS...' });
     }
     refreshDevices();
 
