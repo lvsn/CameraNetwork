@@ -126,7 +126,7 @@ pkgpath=`echo ${positionals[0]} | cut -d/ -f2-`
 ##############################################################################
 
 job=${job-`echo "$pkg" | cut -d_ -f1`}
-interface=${interface-"eth0"}
+interface=${interface-"wlan0"}
 master=${master-"http://\$ROS_IP:11311"}
 
 ##############################################################################
