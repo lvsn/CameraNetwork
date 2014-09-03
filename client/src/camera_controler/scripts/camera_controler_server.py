@@ -96,7 +96,10 @@ class Server:
 
     def preview_image_cb(self, req):
         self.cam_handler.takePreview()
-        directory = "/home/" + os.getlogin() + "/Images/preview/"
+        try:
+            directory = os.environ["CAMNET_OUTPUT_DIR"]
+        except KeyError:
+            directory = os.path.expanduser("~/Pictures/preview/")
         for filename in os.listdir(directory):
             f, extention = os.path.splitext(filename)
             if extention not in [".jpg", ".jpeg", ".JPG", ".JPEG"]:
