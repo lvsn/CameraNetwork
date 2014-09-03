@@ -17,8 +17,8 @@ $ sudo apt-get install ros-<rosversion>-mjpeg-server
 ```
 ### Setting up network ###
 ```
-$ echo 'export ROS_IP=$(ifconfig eth0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')' >> ~/.bashrc  
-$ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc   
+$  echo 'export ROS_IP=$(ip addr | grep '"'"'state UP'"'"' -A2 | tail -n1 | awk '"'"'{print $2}'"'"' | cut -f1  -d'"'"'/'"'"')' >> ~/.bashrc
+$ echo export ROS_MASTER_URI=http://<MASTER'S URL>:11311 >> ~/.bashrc
 ```
 
 ### Python and dependencies ###
@@ -44,8 +44,9 @@ TODO: Improve this.
 
 ```
 $ cd <this-repo>
-$ cd server
+$ cd server/src
 $ catkin_init_workspace
+$ cd ..
 $ catkin_make
 $ catkin_make install
 $ source ./install/setup.bash
@@ -56,10 +57,9 @@ $ roslaunch camera_master_server.launch
 ```
 
 ## Client Installation ##
-Here are the installation instructions for the Client. These instructions were aimed for the Raspberry Pi platform.
+The client holds the camera drivers and publishing nodes. It must be install on every system connected to a camera.
 
-### Installing Debian ###
--Install Raspbian (ex : NOOBS : http://www.raspberrypi.org/help/noobs-setup/)
+This setup takes for granted that you have already installed a Linux distribution on your system.
 
 ### ROS and packages ###
 Install ROS Hydro using the following instructions: http://wiki.ros.org/ROSberryPi/Setting%20up%20Hydro%20on%20RaspberryPi
@@ -109,13 +109,11 @@ To create a new upstart service for the device, execute:
 ```
 $ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.launch --interface wlan0 --master http://<MASTER'S URL>:11311 --setup /home/pi/ros_catkin_ws/install_isolated/setup.bash 
 ```
-You will then be able to start and enable the service.
-
-
 Add this line around the beginning of /usr/sbin/camera-start:
 ```
 export CAMERA_NAME=<Unique name>
 ```
+You will then be able to start and enable the ``camera`` service.
 
 Configure camera_control.launch as you need:
 (the param file can be changed)

@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
   char *username = getlogin();
   std::string UserName = username;
-  std::string homePath = "/home/"+UserName+"/Images";
+  std::string homePath = "/home/"+UserName+"/Pictures";
   const std::string streamImagePath = homePath + "/preview/send.jpeg";
   ROS_INFO_STREAM("Setting jpeg Streaming path to " << streamImagePath);
 

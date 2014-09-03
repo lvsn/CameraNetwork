@@ -5,26 +5,27 @@ html, body, .container {
 }
 
 nav {
-    /*width:500px;margin:0 auto;*//*Uncomment this line to make the menu center-aligned.*/
-    text-align:center;
-    background-image: url(bg1.jpg);
-    border:1px solid black;
-    font-size:0;
+    text-align: center;
+    background: linear-gradient(#333, #777);
+    border: 1px solid black;
 }
 
 nav a {
     display: inline-block;
     padding: 0 20px;
     background-image: url(bg.jpg);
-    color:White;
-    text-decoration:none;
+    border: 1px solid #C73E3E;
+    border-bottom: 0;
+    border-top: 0;
+    background: linear-gradient(#555, #888);
+    color: White;
+    text-decoration: none;
     font: bold 12px Arial;
     line-height: 32px;
 }
 
-nav a:hover, nav a.current
-{
-    background-position:0 -60px;
+nav a.current, nav a:hover {
+    background: linear-gradient(#555, #111);
 }
 
 nav a.dummy
@@ -39,10 +40,10 @@ h1 {
     text-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
-.title{
-color: gray;
-text-align: center;
-font-size:140%;	
+.title {
+    color: gray;
+    text-align: center;
+    font-size:140%;
 }
 
 .mainStyle {
