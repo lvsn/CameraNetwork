@@ -19,6 +19,7 @@
 
 <body>
     <nav>
+        <span id="device_list">Loading device list...</span>
         <a href="./networkPage.html">Network</a>
         <a href="./devicePage.html">Device</a>
     </nav>
@@ -86,12 +87,14 @@
                 </div>
                 <div class="parameterStyle right">
                         <form  name="timelapse" action="javascript:void(0)" method="get">
-                                <label>Aperture : </label>	
-                                <input id="device_sequence_aperture" type="text" value='' name="device_sequence_aperture" >
-                                <br>
-                                <label>Shutter Speed : </label>
-                                <input id="device_sequence_shutterspeed" type="text" value='' name="device_sequence_shutterspeed" >
-                                <br>
+                                <label>Aperture :
+                                    <select id="device_sequence_aperture" value='' name="device_sequence_aperture" >
+                                    </select>
+                                </label>
+                                <label>Shutter Speed :
+                                    <select id="device_sequence_shutterspeed" value='' name="device_sequence_shutterspeed" >
+                                    </select>
+                                </label>
                                 <input type="submit" class="styleButton" onclick="addSequenceEvent(this.form)" value="Add">
                         </form>
                         <button type="button" class="styleButton" onclick = "saveSequenceEvent()">Save</button>
