@@ -60,6 +60,10 @@ class Server:
             'calibrate_device',
             std_srvs.srv.Empty(),
             self.calibrate_device_cb)
+        rospy.Service(
+            'update_camera',
+            InCameraData,
+            self.update_camera_cb)
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
 
@@ -110,6 +114,15 @@ class Server:
                 rospy.loginfo("file " + f + ".jpeg is ready")
                 self._rename_file(filename, directory, f)
         return []
+
+    def update_camera_cb(self,req):
+        settings = {
+            'iso': req.iso,
+            'imageformat': req.imageformat,
+            'shutterspeed': req.shutterspeed,
+            'aperture': req.aperture}
+        self.cam_handler.updateCameraSetting(settings)
+        return ''
 
     def capture_listen_cb(self, req):
         # Simply print out values in our custom message.
