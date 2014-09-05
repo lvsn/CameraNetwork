@@ -20,7 +20,6 @@ import picamera
 import wiringpi2 as gpio
 import numpy as np
 import camera_driver as cd
-
 from camera_network_msgs.srv import *
 
 
@@ -41,10 +40,6 @@ class picam_server(cd.camera_driver):
         # ROS functions
         super(picam_server, self).__init__()
         rospy.Service('stream_video', Uint32, self.stream_video_cb)
-        rospy.Service(
-            'calibrate_video',
-            std_srvs.srv.Empty,
-            self.calibrate_video_cb)
         self.image_publisher = rospy.Publisher("/preview", Image)
         self.bridge = CvBridge()
         self.id_gen = self._id_generator()
@@ -171,9 +166,11 @@ class picam_server(cd.camera_driver):
             imageformat = "current Image format : " + imageformat + \
                 "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra\n"
             shutterspeed = "current Shutterspeed : " + shutterspeed + \
-                "\nChoice : 0(auto)\nChoice : (int)usec\n"
+                "\nChoice : 0\nChoice : (int)usec\n"
             aperture = "current aperture : " + \
-                aperture + "\nChoice : 0 - 100\n"
+            aperture + "\nChoice : 0\nChoice : 10\nChoice : 20\n \
+                        Choice : 30\nChoice : 40\nChoice : 50\nChoice : 60\n \
+                        Choice : 70\nChoice : 80\nChoice : 90\nChoice : 100\n"
 
         return {
             'iso': iso,
