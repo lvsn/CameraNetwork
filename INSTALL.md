@@ -89,7 +89,7 @@ will generate camera-network folder:
 ### setup ROS workspace ###
 ```
 $ git clone https://github.com/lvsn/CameraNetwork.git
-$ cd camera-network/<client-or-server>
+$ cd camera-network/<client-or-server>/src
 $ catkin_init_workspace
 $ cd ..
 $ catkin_make
