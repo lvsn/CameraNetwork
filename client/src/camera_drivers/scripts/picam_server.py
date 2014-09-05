@@ -34,10 +34,6 @@ class picam_server(cd.camera_driver):
         except:
             rospy.logfatal("Check if the Picam is free or installed")
 
-        self.bridge = CvBridge()
-        self.id_gen = self._id_generator()
-        self.tmpPath = os.path.join(self.homePath, 'tmp')
-
         # Initialisation
         self._init_picamera()
         self._init_picamera_led()
@@ -50,8 +46,10 @@ class picam_server(cd.camera_driver):
             std_srvs.srv.Empty,
             self.calibrate_video_cb)
         self.image_publisher = rospy.Publisher("/preview", Image)
-
-        rospy.loginfo("Camera Ready")
+        self.bridge = CvBridge()
+        self.id_gen = self._id_generator()
+        self.tmpPath = os.path.join(self.homePath, 'tmp')
+        
         self._flash_led(nflash=4)
         rospy.spin()
 

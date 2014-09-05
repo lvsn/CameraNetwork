@@ -384,40 +384,18 @@ function device() {
 	}
 
 	this.setParameters = function(form){
-		var settingIso = new ROSLIB.Param({
+		var update_srv = new ROSLIB.Service({
 			ros : ros,
-			name : name + '/camera_setting/iso'
+			name : '/' + name + '/update_camera',
+			serviceType : 'camera_network_msgs/InCameraData'
 		});
-		var settingAperture = new ROSLIB.Param({
-			ros : ros,
-			name : name + '/camera_setting/aperture'
+		var request = new ROSLIB.ServiceRequest({
+			iso : form.device_parameter_iso.value,
+                aperture : form.device_parameter_aperture.value,
+                shutterspeed : form.device_parameter_shutterspeed.value,
+                imageformat : form.device_parameter_imageformat.value
 		});
-		var settingShutterspeed = new ROSLIB.Param({
-			ros : ros,
-			name : name + '/camera_setting/shutterspeed'
-		});
-		var settingImageformat = new ROSLIB.Param({
-			ros : ros,
-			name : name + '/camera_setting/imageformat'
-		});
-		
-		iso = form.device_parameter_iso.value;
-		aperture = form.device_parameter_aperture.value;
-		shutterspeed = form.device_parameter_shutterspeed.value;
-		imageformat = form.device_parameter_imageformat.value;
-		config = {};
-		if(iso != ""){
-			settingIso.set(iso);
-		}
-		if(aperture != ""){
-			settingAperture.set(aperture);
-		} 
-		if(shutterspeed != ""){
-			settingShutterspeed.set(shutterspeed);
-		}
-		if(imageformat != ""){
-			settingImageformat.set(imageformat);
-		}
+		update_srv.callService(request,function(result){});
 
 	}
 
@@ -443,7 +421,7 @@ function device() {
 
 	this.refresh = function() {
 		$("#device_name").text(name);
-    	$("#device_ip").text(ip);
+        	$("#device_ip").text(ip);
 		param.get(function(value) {
 	    	if (value != null && value["camera_model"] != null && value != undefined) {
 	    		$("#device_camera").text(value["camera_model"]);
