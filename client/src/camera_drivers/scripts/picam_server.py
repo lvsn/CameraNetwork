@@ -26,7 +26,9 @@ from camera_network_msgs.srv import *
 
 
 class picam_server(cd.camera_driver):
+
     """Handles the requests by ROS to the picam."""
+
     def __init__(self):
         try:
             self.picam = picamera.PiCamera()
@@ -313,12 +315,20 @@ class picam_server(cd.camera_driver):
         self.picam.stop_recording()
         gpio.digitalWrite(self.led, False)
 
-    def _set_format(self,formatString):
-        if formatString in ['jpeg','png','gif','bmp','yuv','rgb','rgba','bgr','bgra']:
+    def _set_format(self, formatString):
+        if formatString in [
+                'jpeg',
+                'png',
+                'gif',
+                'bmp',
+                'yuv',
+                'rgb',
+                'rgba',
+                'bgr',
+                'bgra']:
             self.pictureFormat = formatString
         else:
             rospy.logwarn("Format " + formatString + " not supported by Picam")
-
 
 
 if __name__ == "__main__":
