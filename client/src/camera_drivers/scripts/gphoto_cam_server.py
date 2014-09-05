@@ -38,7 +38,6 @@ class GPhotoServer(cd.camera_driver):
 
         super(GPhotoServer, self).__init__()
 
-        rospy.loginfo("Camera Ready")
         rospy.spin()
 
     def capture_image_cb(self, req):
@@ -53,11 +52,7 @@ class GPhotoServer(cd.camera_driver):
 
     def load_camera_cb(self, req):
         rospy.sleep(3)
-        try:
-            rootPath = os.environ["CAMNET_OUTPUT_DIR"]
-        except KeyError:
-            rootPath = os.path.expanduser("~/Pictures")
-        filename = " --filename " + join(rootPath, req.path)
+        filename = " --filename " + join(self.homePath, req.path)
         if filename.find('..') != -1:
             rospy.logwarn("use of .. is prohibed")
             return "error"
@@ -67,22 +62,12 @@ class GPhotoServer(cd.camera_driver):
 
         rospy.loginfo("Deleting camera's pictures")
         self._run_gphoto(" -D --recurse")
-        #self._make_tarfile(time.strftime('/home/CameraNetwork/%B.tar.gz'), rootPath)
-        # self._delete_directory(rootPath)
         return msg
 
-    def _delete_directory(self, directory):
-        try:
-            for f in os.listdir(directory):
-                os.remove(directory + f)
-        except:
-            rospy.logerr("Problem while deleting " + directory)
-
-    def _make_tarfile(self, output_filename, source_dir):
-        with tarfile.open(output_filename, "w:gz") as tar:
-            tar.add(source_dir, arcname=os.path.basename(source_dir))
-
     def set_camera_cb(self, req):
+        """
+        set camera's information. Will set data only if it contain something
+        """
         rospy.loginfo("Setting camera's Configuration : " + str(req))
         backMessage = ''
         commandCall = ''
@@ -107,6 +92,11 @@ class GPhotoServer(cd.camera_driver):
         return backMessage
 
     def get_camera_cb(self, req):
+        """
+        get camera's information. req contain a flag named getAllInformation.
+        If true, it will return the whole gphoto's string
+        If false, it will return only the value from the string
+        """
         rospy.loginfo("Getting camera's Configuration")
 
         iso = self._run_gphoto(" --get-config " + self.camParam.isoConfig)
@@ -132,8 +122,8 @@ class GPhotoServer(cd.camera_driver):
             'aperture': aperture,
             'shutterspeed': shutterspeed}
 
-    def calibrate_video_cb(self, req):
-        rospy.logwarn("Not supported with gphoto driver!")
+    def calibrate_picture_cb(self, req):
+        rospy.logwarn("Calibrate Picture is not supported with gphoto driver!")
 
     def _parse_current_value(self, string):
         lineList = string.split('\n')
@@ -144,9 +134,8 @@ class GPhotoServer(cd.camera_driver):
 
     def _find_camera(self):
         rospy.loginfo("...Looking for camera...")
-
+        camera = ''
         r = rospy.Rate(0.25)  # retry connection every 4 seconds
-
         while camera == '':
             cameralist = self._run_gphoto(" --auto-detect")
             camera = self._parse_gphoto_camera_list(cameralist)
@@ -161,6 +150,7 @@ class GPhotoServer(cd.camera_driver):
         if self.cameraModel == 'Nikon DSC D3100 (PTP mode)':
             self.imageformatConfig = "/main/capturesettings/imagequality"
             self.apertureConfig = "/main/other/5007"
+        # TODO add more model here, or load xml  MathGaron
 
     def _parse_gphoto_camera_list(self, string):
         lineList = string.split('\n')
@@ -193,5 +183,5 @@ class GPhotoServer(cd.camera_driver):
 
 
 if __name__ == "__main__":
-    rospy.init_node('gphoto_cam')
+    rospy.init_node('gphoto_driver')
     server = GPhotoServer()

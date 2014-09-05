@@ -488,17 +488,6 @@ function device() {
 	  
 	}
 
-    this.calibrateVideo = function(form){
-		var cal = new ROSLIB.Service({
-			ros : ros,
-			name : '/' + name + '/calibrate_video',
-			serviceType : 'std_srvs/Empty'
-		});
-		var request = new ROSLIB.ServiceRequest({});
-	  cal.callService(request);
-	  
-	}
-
     this.calibratePicture = function(form){
 		var cal = new ROSLIB.Service({
 			ros : ros,
@@ -690,12 +679,6 @@ function streamVideoEvent(form){
 function drawPreviewEvent(form){
 	if(!noDeviceAlert()){
 		_current_device.drawPreview();	
-	}
-}
-
-function calibrateVideoEvent(form){
-	if(!noDeviceAlert()){
-		_current_device.calibrateVideo();		
 	}
 }
 

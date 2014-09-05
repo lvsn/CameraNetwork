@@ -5,13 +5,12 @@
 #@author: mathieu
 #"""
 
-mkdir /home/CameraNetwork
-mkdir /home/CameraNetwork/preview
-mkdir /home/CameraNetwork/log
-mkdir /home/CameraNetwork/master
-mkdir /home/CameraNetwork/data
 
-chmod -R 777 /home/CameraNetwork
+mkdir ~/Pictures/preview
+mkdir ~/Pictures/log
+mkdir ~/Pictures/master
+mkdir ~/Pictures/data
+
 
 if [[ $1 = 'netrst' ]];
     then

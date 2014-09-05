@@ -21,7 +21,6 @@ import wiringpi2 as gpio
 import numpy as np
 import camera_driver as cd
 
-import picamParameterHandler as pph
 from camera_network_msgs.srv import *
 
 
@@ -37,12 +36,7 @@ class picam_server(cd.camera_driver):
 
         self.bridge = CvBridge()
         self.id_gen = self._id_generator()
-        self.camParam = pph.PicameraParameterHandler()
-        try:
-            self.homePath = os.environ["CAMNET_OUTPUT_DIR"]
-        except KeyError:
-            self.homePath = os.path.expanduser("~/Pictures")
-        self.tmpPath = self.homePath + '/tmp'
+        self.tmpPath = os.path.join(self.homePath, 'tmp')
 
         # Initialisation
         self._init_picamera()
@@ -68,8 +62,7 @@ class picam_server(cd.camera_driver):
     def capture_image_cb(self, req):
         rospy.loginfo("Taking Picture")
 
-        if not os.path.exists(self.tmpPath):
-            os.makedirs(self.tmpPath)
+        self._mkdir(self.tmpPath)
 
         pictureFileName = "{0}/unloaded_{1}.{2}".format(
             self.tmpPath,
@@ -106,8 +99,9 @@ class picam_server(cd.camera_driver):
     def capture_video_cb(self, req):
         rospy.loginfo("Capturing Video")
         self._mkdir(self.tmpPath)
-        videoFileName = self.tmpPath + '/unloaded_' + \
-            self.id_gen.next() + '.h264'
+        videoFileName = os.path.join(
+            self.tmpPath,
+            'unloaded_{0}.h264'.format(self.id_gen.next()))
         self._record_video(videoFileName, req.integer)
         return {}
 
@@ -124,56 +118,6 @@ class picam_server(cd.camera_driver):
         self._flash_led(nflash=6)
         return {}
 
-    def calibrate_video_cb(self, req):
-        rospy.loginfo("Video Calibration")
-        self._mkdir(self.tmpPath)
-        videoFileName = self.tmpPath + '/Calibration.h264'
-        saturationFlag = False
-        while(True):
-            self._record_video(videoFileName, 0.2)
-            video = cv2.VideoCapture(videoFileName)
-            pixelVal = self._get_center_pixel_value(video)
-            if(pixelVal > 254):
-                self.picam.brightness = self.picam.brightness - 2
-                saturationFlag = True
-            else:
-                # this condition mean that we are at the edge of saturation
-                if(saturationFlag):
-                    break
-                self.picam.brightness = self.picam.brightness + 2
-                saturationFlag = False
-
-        try:
-            os.remove(videoFileName)
-        except:
-            rospy.logwarn("error deleting calibration file")
-        self._flash_led(nflash=6)
-        return {}
-
-    def _get_center_pixel_value(self, video):
-        pixelMean = 0
-        pixels = 0
-        while (video.isOpened()):
-            ret, frame = video.read()
-            if not ret:
-                break
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            height, width = gray.shape
-            pixels += 5
-            pixelMean += gray[height / 2, width / 2]
-            pixelMean += gray[(height / 2) + 1, width / 2]
-            pixelMean += gray[(height / 2) - 1, width / 2]
-            pixelMean += gray[height / 2, (width / 2) + 1]
-            pixelMean += gray[height / 2, (width / 2) - 1]
-        pixelMean = pixelMean / pixels
-        rospy.loginfo(
-            "Mean value : " +
-            str(pixelMean) +
-            " pixels : " +
-            str(pixels))
-        video.release()
-        return pixelMean
-
     def load_camera_cb(self, req):
         # reset generator
         self.id_gen = self._id_generator()
@@ -188,8 +132,7 @@ class picam_server(cd.camera_driver):
             return "error"
         directory = os.path.dirname(loadPath)
         rospy.loginfo("Loading Picture to folder " + directory)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        self._mkdir(directory)
         count = 0
         for pictureFile in os.listdir(self.tmpPath):
             fileFormat = pictureFile.split('.')[-1]
@@ -209,7 +152,7 @@ class picam_server(cd.camera_driver):
         if(req.iso != ""):
             self.picam.ISO = int(float(req.iso))
         if(req.imageformat != ""):
-            self.set_format(req.imageformat)
+            self._set_format(req.imageformat)
         if(req.aperture != ""):
             self.picam.brightness = int(float(req.aperture))
         if(req.shutterspeed != ""):
@@ -240,22 +183,9 @@ class picam_server(cd.camera_driver):
             'aperture': aperture,
             'shutterspeed': shutterspeed}
 
-    def _filename_format(self, string_, pictureId=0, pictureFormat='jpeg'):
-        """
-        Produces the name of the image. string_ comes from
-        camera_controller's camera_handler.py:_generatePictureName
-        """
-        string_ = string_.replace('%C', pictureFormat)
-        string_ = string_.replace('%n', str(pictureId))
-        return datetime.now().strftime(string_)
-
     def _id_generator(self):
         for i in range(10000000):
             yield str(i)
-
-    def _mkdir(self, dirPath):
-        if not os.path.exists(dirPath):
-            os.makedirs(dirPath)
 
     def _init_picamera(self):
         self.picam.exposure_mode = 'fixedfps'
@@ -332,5 +262,5 @@ class picam_server(cd.camera_driver):
 
 
 if __name__ == "__main__":
-    rospy.init_node('picam')
+    rospy.init_node('picam_driver')
     server = picam_server()
