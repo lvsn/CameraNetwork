@@ -548,16 +548,11 @@ function refreshScreen(){
 	if (_current_device == undefined){
 		cleanDevicePage();
 	}
-	else{
-		_current_device.refresh();
+     else{
+          _current_device.refresh();
 	}
 }
 
-function refreshCanvas(){
-    if ($('#imagePreview').length){
-        document.getElementById('imagePreview').src = "http://" + ROS_MASTER + ":8181/stream?topic=/preview?width=640?height=480";
-    }
-};
 
 function refreshSelect(){
 	IpList = new ROSLIB.Param({
@@ -694,7 +689,7 @@ function streamVideoEvent(form){
 
 function drawPreviewEvent(form){
 	if(!noDeviceAlert()){
-		_current_device.drawPreview();		
+		_current_device.drawPreview();	
 	}
 }
 
@@ -739,6 +734,15 @@ function getDeviceInformation() {
 	}
 }
 
+
+function initPreview(){
+    mjpegSrc = ["http://",
+                ROS_MASTER,
+                ":8181/stream?topic=/preview?width=640?height=480"
+                ].join('');
+    $("#preview_image").attr("src",mjpegSrc);
+};
+
 $(document).ready(function() {
     if (ros_conn_state != 'CONNECTED') {
         $.blockUI({ message: '<img src="./media/loading.gif" /> Connecting to ROS...' });
@@ -746,14 +750,12 @@ $(document).ready(function() {
     if ($("#deviceList").length != 0) {
         refreshSelect();
     }
-
+    if($("#preview_image").length != 0){
+        initPreview();
+    }
     /* refreshCanvas overloads the server */
     //var refreshCanvasTimer = setInterval(refreshCanvas, 100);
 
     var refreshScreenTimer = setInterval(refreshScreen, 1000);
 
-    $("#imagePreview").error(function() {
-        clearInterval(refreshCanvasTimer);
-        console.log("An error trigged the cancellation of the preview image.");
-    });
 });
