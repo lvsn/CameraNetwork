@@ -13,25 +13,28 @@ with it.
 import roslib
 roslib.load_manifest('camera_drivers')
 import rospy
-import std_srvs.srv
 from camera_network_msgs.srv import *
-from CameraParameterHandler import *
 import tarfile
 import os
-import time
 import camera_driver as cd
+import subprocess
 
-import gphoto2_cli_caller as gphoto
 
 
 join = os.path.join
-
+gphoto2Executable = 'gphoto2'
 
 class GPhotoServer(cd.camera_driver):
 
     def __init__(self):
-        self.camParam = CameraParameterHandler()
-        self.camParam.set_camera_parameters()
+        # Camera's configuration name
+        self.isoConfig = "iso"
+        self.apertureConfig = "aperture"
+        self.shutterspeedConfig = "shutterspeed"
+        self.imageformatConfig = "imageformat"
+        
+        self._find_camera()
+        self._update_camera_parameters()
 
         super(GPhotoServer, self).__init__()
 
@@ -41,7 +44,7 @@ class GPhotoServer(cd.camera_driver):
     def capture_image_cb(self, req):
         rospy.loginfo("Taking Picture")
         rospy.sleep(req.timer)
-        msg = gphoto.run(" --capture-image --wait-event=1s")
+        msg = self._run_gphoto(" --capture-image --wait-event=1s")
         return msg
 
     def capture_video_cb(self, req):
@@ -60,10 +63,10 @@ class GPhotoServer(cd.camera_driver):
             return "error"
         rospy.loginfo("Loading picture to : " + filename)
 
-        msg = gphoto.run(filename + " -P")
+        msg = self._run_gphoto(filename + " -P")
 
         rospy.loginfo("Deleting camera's pictures")
-        gphoto.run(" -D --recurse")
+        self._run_gphoto(" -D --recurse")
         #self._make_tarfile(time.strftime('/home/CameraNetwork/%B.tar.gz'), rootPath)
         # self._delete_directory(rootPath)
         return msg
@@ -99,19 +102,19 @@ class GPhotoServer(cd.camera_driver):
             commandCall += " --set-config " + \
                 self.camParam.shutterspeedConfig + "=" + req.shutterspeed
 
-        backMessage = gphoto.run(commandCall)
+        backMessage = self._run_gphoto(commandCall)
 
         return backMessage
 
     def get_camera_cb(self, req):
         rospy.loginfo("Getting camera's Configuration")
 
-        iso = gphoto.run(" --get-config " + self.camParam.isoConfig)
-        imageformat = gphoto.run(
+        iso = self._run_gphoto(" --get-config " + self.camParam.isoConfig)
+        imageformat = self._run_gphoto(
             " --get-config " +
             self.camParam.imageformatConfig)
-        aperture = gphoto.run(" --get-config " + self.camParam.apertureConfig)
-        shutterspeed = gphoto.run(
+        aperture = self._run_gphoto(" --get-config " + self.camParam.apertureConfig)
+        shutterspeed = self._run_gphoto(
             " --get-config " +
             self.camParam.shutterspeedConfig)
 
@@ -131,12 +134,61 @@ class GPhotoServer(cd.camera_driver):
         rospy.logwarn("Not supported with gphoto driver!")
 
     def _parse_current_value(self, string):
-
         lineList = string.split('\n')
         for n in lineList:
             if n.find('Current') == 0:
                 return n[8:]  # remove Current: from the string
         return ''
+
+    def _find_camera(self):
+        rospy.loginfo("...Looking for camera...")
+        
+        r = rospy.Rate(0.25) #retry connection every 4 seconds
+        
+        while camera == '':
+            cameralist = self._run_gphoto(" --auto-detect")
+            camera = self._parse_gphoto_camera_list(cameralist)
+            if camera == '':
+                rospy.logwarn("No Camera Found")
+            r.sleep()
+        
+        self._set_camera_model(camera)
+
+    def _update_camera_parameters(self):
+        #Load specific parameter
+        if self.cameraModel == 'Nikon DSC D3100 (PTP mode)':
+            self.imageformatConfig = "/main/capturesettings/imagequality"
+            self.apertureConfig = "/main/other/5007"
+
+    def _parse_gphoto_camera_list(self,string):  
+        lineList = string.split('\n')
+        #first two lines are non important information
+        if len(lineList) > 3:
+            # The string contain the usb number wich is not important, and we remove all spaces at the end of
+            # the camera's name.
+            return lineList[2].split(' usb')[0].rstrip() 
+        else:
+            return ''
+
+    def _run_gphoto(self,cmd):
+        cmd = gphoto2Executable + cmd
+    
+        p = subprocess.Popen(cmd, shell=True, executable="/bin/bash",
+           stdout=subprocess.PIPE,
+           stderr=subprocess.PIPE,
+        )
+    
+        stdout, stderr = p.communicate()
+        ret = p.returncode
+          
+        if ret == 1:
+            if 'No camera found' in stderr:
+                rospy.logerror('Error talking to the camera: ' + stderr)
+          
+            return stdout
+      
+        return stdout
+
 
 
 if __name__ == "__main__":

@@ -6,7 +6,6 @@ Created on Thu June 05 09:17:30 2014
 @author: Mathieu Garon
 """
 import os
-import time
 import io
 from datetime import datetime
 
@@ -73,10 +72,10 @@ class picam_server(cd.camera_driver):
         pictureFileName = "{0}/unloaded_{1}.{2}".format(
             self.tmpPath,
             self.id_gen.next(),
-            self.camParam.get_format(),
+            self.pictureFormat,
         )
         self._set_timer(req.timer)
-        self.picam.capture(pictureFileName, format=self.camParam.get_format())
+        self.picam.capture(pictureFileName, format=self.pictureFormat)
         self._flash_led(nflash=2)
         return 'Image saved as ' + pictureFileName
 
@@ -208,7 +207,7 @@ class picam_server(cd.camera_driver):
         if(req.iso != ""):
             self.picam.ISO = int(float(req.iso))
         if(req.imageformat != ""):
-            self.camParam.set_format(req.imageformat)
+            self.set_format(req.imageformat)
         if(req.aperture != ""):
             self.picam.brightness = int(float(req.aperture))
         if(req.shutterspeed != ""):
@@ -219,7 +218,7 @@ class picam_server(cd.camera_driver):
     def get_camera_cb(self, req):
         rospy.loginfo("Getting camera's Configuration")
         iso = str(self.picam.ISO)
-        imageformat = str(self.camParam.get_format())
+        imageformat = str(self.pictureFormat)
         aperture = str(self.picam.brightness)
         shutterspeed = str(self.picam.shutter_speed)
 
@@ -262,7 +261,8 @@ class picam_server(cd.camera_driver):
         self.picam.awb_gains = 1.4
         self.picam.resolution = (1296, 972)
         self.picam.framerate = 40
-        self.camParam.set_camera_parameters()
+        self.pictureFormat = 'jpeg'
+        self._set_camera_model('Picam')
 
     def _init_picamera_led(self):
         self.led = 5
@@ -312,6 +312,13 @@ class picam_server(cd.camera_driver):
         rospy.sleep(delay)
         self.picam.stop_recording()
         gpio.digitalWrite(self.led, False)
+
+    def _set_format(self,formatString):
+        if formatString in ['jpeg','png','gif','bmp','yuv','rgb','rgba','bgr','bgra']:
+            self.pictureFormat = formatString
+        else:
+            rospy.logwarn("Format " + formatString + " not supported by Picam")
+
 
 
 if __name__ == "__main__":
