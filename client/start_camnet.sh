@@ -1,0 +1,1 @@
+/home/pi/start_camnet.sh

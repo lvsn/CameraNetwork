@@ -28,7 +28,6 @@ join = os.path.join
 
 
 class GPhotoServer(cd.camera_driver):
-
     def __init__(self):
         self.camParam = CameraParameterHandler()
         self.camParam.set_camera_parameters()
