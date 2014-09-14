@@ -393,8 +393,9 @@ function device() {
 			iso : form.device_parameter_iso.value,
                 aperture : form.device_parameter_aperture.value,
                 shutterspeed : form.device_parameter_shutterspeed.value,
-                imageformat : form.device_parameter_imageformat.value
+                imageformat : 'jpeg' //form.device_parameter_imageformat.value
 		});
+            console.log(form.device_parameter_imageformat.value)
 		update_srv.callService(request,function(result){});
 
 	}

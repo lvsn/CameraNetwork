@@ -51,8 +51,38 @@ class camera_driver(object):
     def capture_video_cb(self, req):
         pass
 
-    @abstractmethod
     def load_camera_cb(self, req):
+        '''
+        Template method : 
+        1- create standard directory path
+        2- transfert picture from device(ex camera) to directory
+        3- delete picture from device
+        '''
+        if (self._create_picture_standard_directory(req.path) == -1):
+            return 'Error'
+        msg = self._copy_picture_from_device_to_standard_directory(req.path)
+        self._delete_picture_from_device()
+        return msg
+
+    def _create_picture_standard_directory(self, directory):
+        loadPath = os.path.join(
+            self.homePath,
+            self._filename_format(directory),
+        )
+        if loadPath.find('..') != -1:
+            rospy.logwarn("Use of '..' is prohibited")
+            return -1
+        directory = os.path.dirname(loadPath)
+        rospy.loginfo("Loading Picture to folder " + directory)
+        self._mkdir(directory)
+        return 1
+
+    @abstractmethod
+    def _copy_picture_from_device_to_standard_directory(self, filename):
+        pass
+
+    @abstractmethod
+    def _delete_picture_from_device(self):
         pass
 
     @abstractmethod
@@ -79,6 +109,10 @@ class camera_driver(object):
         """
         Produces the name of the image. string_ comes from
         camera_controller's camera_handler.py:_generatePictureName
+        
+        Will format in standard strftime
+        %n is any __str__ object for unique ID
+        %C is picture format
         """
         string_ = string_.replace('%C', pictureFormat)
         string_ = string_.replace('%n', str(pictureId))

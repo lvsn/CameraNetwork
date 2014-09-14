@@ -116,34 +116,25 @@ class picam_server(cd.camera_driver):
         self._flash_led(nflash=6)
         return {}
 
-    def load_camera_cb(self, req):
-        # reset generator
-        self.id_gen = self._id_generator()
 
-        # to make sure it create the right path
-        loadPath = os.path.join(
-            self.homePath,
-            self._filename_format(req.path, 0, 'dummy'),
-        )
-        if loadPath.find('..') != -1:
-            rospy.logwarn("Use of .. is prohibited")
-            return "error"
-        directory = os.path.dirname(loadPath)
-        rospy.loginfo("Loading Picture to folder " + directory)
-        self._mkdir(directory)
+    def _copy_picture_from_device_to_standard_directory(self, filename):
+        self.id_gen = self._id_generator()
         count = 0
         for pictureFile in os.listdir(self.tmpPath):
             fileFormat = pictureFile.split('.')[-1]
             os.rename(
                 os.path.join(self.tmpPath, pictureFile),
                 os.path.join(self.homePath, self._filename_format(
-                    req.path,
+                    filename,
                     count,
                     fileFormat)
                 )
             )
             count += 1
         return "Transfered " + str(count) + " files."
+
+    def _delete_picture_from_device(self):
+        pass  #todo check if files are deleted
 
     def set_camera_cb(self, req):
         rospy.loginfo("Setting camera's Configuration to " + str(req))
@@ -167,7 +158,7 @@ class picam_server(cd.camera_driver):
 
         if req.getAllInformation:
             iso = "current ISO : " + iso + \
-                "\n Choice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800\n"
+                "\nChoice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800\n"
             imageformat = "current Image format : " + imageformat + \
                 "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra\n"
             shutterspeed = "current Shutterspeed : " + shutterspeed + \
