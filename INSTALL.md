@@ -102,6 +102,24 @@ $ sudo ./gphoto2-updater.sh
 $ sudo apt-get install upstart  
 ```
 
+### Install Bluetooth support ###
+```
+$ sudo apt-get install python-gobject bluez bluez-tools bluez-firmware python-bluez python-dev python-pip
+$ sudo pip install evdev 
+```
+In  /etc/bluetooth/main.conf, change the following line
+```
+#DisablePlugins = network,input
+```
+to :
+```
+DisablePlugins = network,input,audio,pnat,sap,serial
+```
+Restart Daemon.
+```
+$ sudo /etc/init.d/bluetooth restart
+```
+
 ### Setup Upstart Job ###
 This section launches the camera controller upon interface connection. It is based on robot_upstart (turtlebot). Detail about this system can be found here: http://wiki.ros.org/robot_upstart .
 
