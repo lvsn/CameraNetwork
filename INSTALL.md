@@ -104,8 +104,7 @@ $ sudo apt-get install upstart
 
 ### Install Bluetooth support ###
 ```
-$ sudo apt-get install python-gobject bluez bluez-tools bluez-firmware python-bluez python-dev python-pip
-$ sudo pip install evdev 
+$ sudo apt-get install python-gobject bluez bluez-tools python-bluez python-dev
 ```
 In  /etc/bluetooth/main.conf, change the following line
 ```
