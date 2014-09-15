@@ -54,7 +54,7 @@ class camera_driver(object):
 
     def load_camera_cb(self, req):
         '''
-        Template method : 
+        Template method :
         1- create standard directory path
         2- transfert picture from device(ex camera) to directory
         3- delete picture from device
@@ -93,7 +93,7 @@ class camera_driver(object):
     @abstractmethod
     def get_camera_cb(self, req):
         pass
-    
+
     def _add_Choice(self, choicesString, newChoice):
         return choicesString + '\nChoice : ' + str(newChoice)
 
@@ -113,7 +113,7 @@ class camera_driver(object):
         """
         Produces the name of the image. string_ comes from
         camera_controller's camera_handler.py:_generatePictureName
-        
+
         Will format in standard strftime
         %n is any __str__ object for unique ID
         %C is picture format

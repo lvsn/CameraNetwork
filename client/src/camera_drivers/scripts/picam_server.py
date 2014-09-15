@@ -44,7 +44,7 @@ class picam_server(cd.camera_driver):
         self.bridge = CvBridge()
         self.id_gen = self._id_generator()
         self.tmpPath = os.path.join(self.homePath, 'tmp')
-        
+
         self._flash_led(nflash=4)
         rospy.spin()
 
@@ -111,7 +111,6 @@ class picam_server(cd.camera_driver):
         self._flash_led(nflash=6)
         return {}
 
-
     def _copy_picture_from_device_to_standard_directory(self, filename):
         self.id_gen = self._id_generator()
         count = 0
@@ -129,7 +128,7 @@ class picam_server(cd.camera_driver):
         return "Transfered " + str(count) + " files."
 
     def _delete_picture_from_device(self):
-        pass  #todo check if files are deleted
+        pass  # todo check if files are deleted
 
     def set_camera_cb(self, req):
         rospy.loginfo("Setting camera's Configuration to " + str(req))
@@ -153,29 +152,29 @@ class picam_server(cd.camera_driver):
 
         if req.getAllInformation:
             iso = "current ISO : " + iso
-            iso = self._add_Choice(iso,100)
-            iso = self._add_Choice(iso,200)
-            iso = self._add_Choice(iso,320)
-            iso = self._add_Choice(iso,400)
-            iso = self._add_Choice(iso,500)
-            iso = self._add_Choice(iso,640)
-            iso = self._add_Choice(iso,800)
-            imageformat = "current Image format : " + imageformat 
-            imageformat = self._add_Choice(imageformat,'jpeg')
-            imageformat = self._add_Choice(imageformat,'png')
-            imageformat = self._add_Choice(imageformat,'gif')
-            imageformat = self._add_Choice(imageformat,'bmp')
-            imageformat = self._add_Choice(imageformat,'yuv')
-            imageformat = self._add_Choice(imageformat,'rgb')
-            imageformat = self._add_Choice(imageformat,'rgba')
-            imageformat = self._add_Choice(imageformat,'bgr')
-            imageformat = self._add_Choice(imageformat,'bgra')
+            iso = self._add_Choice(iso, 100)
+            iso = self._add_Choice(iso, 200)
+            iso = self._add_Choice(iso, 320)
+            iso = self._add_Choice(iso, 400)
+            iso = self._add_Choice(iso, 500)
+            iso = self._add_Choice(iso, 640)
+            iso = self._add_Choice(iso, 800)
+            imageformat = "current Image format : " + imageformat
+            imageformat = self._add_Choice(imageformat, 'jpeg')
+            imageformat = self._add_Choice(imageformat, 'png')
+            imageformat = self._add_Choice(imageformat, 'gif')
+            imageformat = self._add_Choice(imageformat, 'bmp')
+            imageformat = self._add_Choice(imageformat, 'yuv')
+            imageformat = self._add_Choice(imageformat, 'rgb')
+            imageformat = self._add_Choice(imageformat, 'rgba')
+            imageformat = self._add_Choice(imageformat, 'bgr')
+            imageformat = self._add_Choice(imageformat, 'bgra')
             shutterspeed = "current Shutterspeed : " + shutterspeed
-            for i in range(0,33000,1500):
-                shutterspeed = self._add_Choice(shutterspeed,i)
+            for i in range(0, 33000, 1500):
+                shutterspeed = self._add_Choice(shutterspeed, i)
             aperture = "current aperture : "
-            for i in range(0,100,10):
-                aperture = self._add_Choice(aperture,i)
+            for i in range(0, 100, 10):
+                aperture = self._add_Choice(aperture, i)
 
         return {
             'iso': iso,

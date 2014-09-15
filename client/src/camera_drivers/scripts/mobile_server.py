@@ -13,7 +13,6 @@ import rospy
 import camera_driver as cd
 
 
-
 class mobile_server(cd.camera_driver):
 
     """Handles the requests by ROS to the mobile phone."""

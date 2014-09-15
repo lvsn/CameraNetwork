@@ -49,7 +49,7 @@ class GPhotoServer(cd.camera_driver):
     def capture_video_cb(self, req):
         rospy.logwarn("Gphoto2 does not support video capture at this moment!")
         return []
-        
+
     def _copy_picture_from_device_to_standard_directory(self, filename):
         filename = " --filename " + join(self.homePath, filename)
         msg = self._run_gphoto(filename + " -P")
@@ -87,12 +87,12 @@ class GPhotoServer(cd.camera_driver):
         backMessage = self._run_gphoto(commandCall)
 
         return backMessage
-        
-    def _commandLine_format(self,string):
-        string = string.replace('(','\(')
-        string = string.replace(')','\)')
+
+    def _commandLine_format(self, string):
+        string = string.replace('(', '\(')
+        string = string.replace(')', '\)')
         string = string.replace(' ', '\ ')
-        return string.replace(',','\ ')
+        return string.replace(',', '\ ')
 
     def get_camera_cb(self, req):
         """
