@@ -74,7 +74,7 @@ class camera_driver(object):
             rospy.logwarn("Use of '..' is prohibited")
             return -1
         directory = os.path.dirname(loadPath)
-        rospy.loginfo("Loading Picture to folder " + directory)
+        rospy.loginfo("Creating and loading Picture to folder " + directory)
         self._mkdir(directory)
         return 1
 
@@ -93,6 +93,9 @@ class camera_driver(object):
     @abstractmethod
     def get_camera_cb(self, req):
         pass
+    
+    def _add_Choice(self, choicesString, newChoice):
+        return choicesString + '\nChoice : ' + str(newChoice)
 
     @abstractmethod
     def calibrate_picture_cb(self, req):

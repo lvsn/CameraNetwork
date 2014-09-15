@@ -152,16 +152,30 @@ class picam_server(cd.camera_driver):
         shutterspeed = str(self.picam.shutter_speed)
 
         if req.getAllInformation:
-            iso = "current ISO : " + iso + \
-                "\nChoice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800\n"
-            imageformat = "current Image format : " + imageformat + \
-                "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra\n"
-            shutterspeed = "current Shutterspeed : " + shutterspeed + \
-                "\nChoice : 0\nChoice : (int)usec\n"
-            aperture = "current aperture : " + \
-            aperture + "\nChoice : 0\nChoice : 10\nChoice : 20\n \
-                        Choice : 30\nChoice : 40\nChoice : 50\nChoice : 60\n \
-                        Choice : 70\nChoice : 80\nChoice : 90\nChoice : 100\n"
+            iso = "current ISO : " + iso
+            iso = self._add_Choice(iso,100)
+            iso = self._add_Choice(iso,200)
+            iso = self._add_Choice(iso,320)
+            iso = self._add_Choice(iso,400)
+            iso = self._add_Choice(iso,500)
+            iso = self._add_Choice(iso,640)
+            iso = self._add_Choice(iso,800)
+            imageformat = "current Image format : " + imageformat 
+            imageformat = self._add_Choice(imageformat,'jpeg')
+            imageformat = self._add_Choice(imageformat,'png')
+            imageformat = self._add_Choice(imageformat,'gif')
+            imageformat = self._add_Choice(imageformat,'bmp')
+            imageformat = self._add_Choice(imageformat,'yuv')
+            imageformat = self._add_Choice(imageformat,'rgb')
+            imageformat = self._add_Choice(imageformat,'rgba')
+            imageformat = self._add_Choice(imageformat,'bgr')
+            imageformat = self._add_Choice(imageformat,'bgra')
+            shutterspeed = "current Shutterspeed : " + shutterspeed
+            for i in range(0,33000,1500):
+                shutterspeed = self._add_Choice(shutterspeed,i)
+            aperture = "current aperture : "
+            for i in range(0,100,10):
+                aperture = self._add_Choice(aperture,i)
 
         return {
             'iso': iso,

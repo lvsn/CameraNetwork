@@ -52,7 +52,7 @@ class GPhotoServer(cd.camera_driver):
         
     def _copy_picture_from_device_to_standard_directory(self, filename):
         filename = " --filename " + join(self.homePath, filename)
-        msg = self._run_gphoto(filename + "-P")
+        msg = self._run_gphoto(filename + " -P")
         return msg
 
     def _delete_picture_from_device(self):
