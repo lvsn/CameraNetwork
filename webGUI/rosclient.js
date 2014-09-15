@@ -200,14 +200,10 @@ function network_download(){
 	}); 
 };
 
-function setSelectOptions(selector, values, current_value, set_value_as_key) {
+function setSelectOptions(selector, values, current_value) {
     for (var i = 0; i < values.length; i++) {
         var val;
-        if (set_value_as_key != undefined && set_value_as_key == true) {
-            val = values[i][0];
-        } else {
-            val = values[i][1];
-        }
+        val = values[i][1];
         $(selector)
             .append($("<option></option>")
                 .attr("value", val)
@@ -393,9 +389,8 @@ function device() {
 			iso : form.device_parameter_iso.value,
                 aperture : form.device_parameter_aperture.value,
                 shutterspeed : form.device_parameter_shutterspeed.value,
-                imageformat : 'jpeg' //form.device_parameter_imageformat.value
+                imageformat : form.device_parameter_imageformat.value
 		});
-            console.log(form.device_parameter_imageformat.value)
 		update_srv.callService(request,function(result){});
 
 	}
@@ -415,7 +410,7 @@ function device() {
             config = getConfiguration(result['shutterspeed']);
             setSelectOptions("#device_parameter_shutterspeed", config[1], config[0]);
             config = getConfiguration(result['imageformat']);
-            setSelectOptions("#device_parameter_imageformat", config[1], config[0], true);
+            setSelectOptions("#device_parameter_imageformat", config[1], config[0]);
             $("#param_status").html('');
 		});
 	}

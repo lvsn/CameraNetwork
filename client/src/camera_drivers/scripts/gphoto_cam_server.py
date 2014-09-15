@@ -67,23 +67,32 @@ class GPhotoServer(cd.camera_driver):
         commandCall = ''
         if(req.iso != ""):
             commandCall += " --set-config " + \
-                self.camParam.isoConfig + "=" + req.iso
+                self.isoConfig + "=" + self._commandLine_format(req.iso)
 
         if(req.imageformat != ""):
             commandCall += " --set-config " + \
-                self.camParam.imageformatConfig + "=" + req.imageformat
+                self.imageformatConfig + "=" + \
+                self._commandLine_format(req.imageformat)
 
         if(req.aperture != ""):
             commandCall += " --set-config " + \
-                self.camParam.apertureConfig + "=" + req.aperture
+                self.apertureConfig + "=" + \
+                self._commandLine_format(req.aperture)
 
         if(req.shutterspeed != ""):
             commandCall += " --set-config " + \
-                self.camParam.shutterspeedConfig + "=" + req.shutterspeed
+                self.shutterspeedConfig + "=" +\
+                self._commandLine_format(req.shutterspeed)
 
         backMessage = self._run_gphoto(commandCall)
 
         return backMessage
+        
+    def _commandLine_format(self,string):
+        string = string.replace('(','\(')
+        string = string.replace(')','\)')
+        string = string.replace(' ', '\ ')
+        return string.replace(',','\ ')
 
     def get_camera_cb(self, req):
         """
@@ -93,16 +102,16 @@ class GPhotoServer(cd.camera_driver):
         """
         rospy.loginfo("Getting camera's Configuration")
 
-        iso = self._run_gphoto(" --get-config " + self.camParam.isoConfig)
+        iso = self._run_gphoto(" --get-config " + self.isoConfig)
         imageformat = self._run_gphoto(
             " --get-config " +
-            self.camParam.imageformatConfig)
+            self.imageformatConfig)
         aperture = self._run_gphoto(
             " --get-config " +
-            self.camParam.apertureConfig)
+            self.apertureConfig)
         shutterspeed = self._run_gphoto(
             " --get-config " +
-            self.camParam.shutterspeedConfig)
+            self.shutterspeedConfig)
 
         if not req.getAllInformation:
             iso = self._parse_current_value(iso)
