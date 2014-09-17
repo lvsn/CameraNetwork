@@ -28,11 +28,10 @@ join = os.path.join
 
 
 class GPhotoServer(cd.camera_driver):
-
     def __init__(self):
         self.camParam = CameraParameterHandler()
         self.camParam.set_camera_parameters()
-
+        
         super(GPhotoServer, self).__init__()
 
         rospy.loginfo("Camera Ready")
@@ -41,7 +40,8 @@ class GPhotoServer(cd.camera_driver):
     def capture_image_cb(self, req):
         rospy.loginfo("Taking Picture")
         rospy.sleep(req.timer)
-        msg = gphoto.run(" --capture-image --wait-event=1s")
+        # TODO: Faster than 1s sleep...
+        msg = gphoto.run(" --capture-image --wait-event=1s --keep")
         return msg
 
     def capture_video_cb(self, req):
@@ -54,13 +54,11 @@ class GPhotoServer(cd.camera_driver):
             rootPath = os.environ["CAMNET_OUTPUT_DIR"]
         except KeyError:
             rootPath = os.path.expanduser("~/Pictures")
-        filename = " --filename " + join(rootPath, req.path)
-        if filename.find('..') != -1:
-            rospy.logwarn("use of .. is prohibed")
-            return "error"
-        rospy.loginfo("Loading picture to : " + filename)
+        rospy.loginfo("Loading picture.")
 
-        msg = gphoto.run(filename + " -P")
+        msg = gphoto.run("--get-all-files")
+
+        # TODO: If previous call fails, don't delete everything!
 
         rospy.loginfo("Deleting camera's pictures")
         gphoto.run(" -D --recurse")
@@ -107,13 +105,9 @@ class GPhotoServer(cd.camera_driver):
         rospy.loginfo("Getting camera's Configuration")
 
         iso = gphoto.run(" --get-config " + self.camParam.isoConfig)
-        imageformat = gphoto.run(
-            " --get-config " +
-            self.camParam.imageformatConfig)
+        imageformat = gphoto.run(" --get-config " + self.camParam.imageformatConfig)
         aperture = gphoto.run(" --get-config " + self.camParam.apertureConfig)
-        shutterspeed = gphoto.run(
-            " --get-config " +
-            self.camParam.shutterspeedConfig)
+        shutterspeed = gphoto.run(" --get-config " + self.camParam.shutterspeedConfig)
 
         if not req.getAllInformation:
             iso = self._parse_current_value(iso)
@@ -125,7 +119,8 @@ class GPhotoServer(cd.camera_driver):
             'iso': iso,
             'imageformat': imageformat,
             'aperture': aperture,
-            'shutterspeed': shutterspeed}
+            'shutterspeed': shutterspeed,
+        }
 
     def calibrate_video_cb(self, req):
         rospy.logwarn("Not supported with gphoto driver!")
