@@ -71,6 +71,7 @@ function network_timelapse()
 	this.feedback.subscribe(function(msg){
 		$("#network_timelapse_feedback").text(msg.feedback.picture_taken);
 	});
+
 	this.status.subscribe(function(message) {
 		statusList = message.status_list;
 		if(statusList.length > 0){
@@ -295,12 +296,14 @@ function device()
 	
 	}
 
-	this.setAction = function sendGoal(form){
+	this.setAction = function sendGoal(form) {
+        var picture_qty = form == undefined ? 0 : form.device_timelapse_qty.value;
+        var inter_picture_delay_s = form == undefined ? 0 : form.device_timelapse_frequency.value;
 		var goal = new ROSLIB.Goal({
 			actionClient : action,
 			goalMessage : {
-				picture_qty : parseFloat(form.device_timelapse_qty.value),
-				inter_picture_delay_s : parseFloat(form.device_timelapse_frequency.value),
+				picture_qty : parseFloat(picture_qty),
+				inter_picture_delay_s : parseFloat(inter_picture_delay_s),
 				is_hdr : $('#device_hdr').is(':checked')
 			}
 		});
@@ -408,18 +411,23 @@ function device()
 		shutterspeed = form.device_parameter_shutterspeed.value;
 		imageformat = form.device_parameter_imageformat.value;
 		config = {};
-		if(iso != ""){
+		if (iso != "") {
 			settingIso.set(iso);
 		}
-		if(aperture != ""){
+		if (aperture != "") {
 			settingAperture.set(aperture);
 		} 
-		if(shutterspeed != ""){
+		if (shutterspeed != "") {
 			settingShutterspeed.set(shutterspeed);
 		}
-		if(imageformat != ""){
+		if (imageformat != "") {
 			settingImageformat.set(imageformat);
 		}
+
+        /* Apply the configuration to the camera */
+		//_current_device.setAction();
+
+        this.setConfig();
 
 	}
 
@@ -500,7 +508,16 @@ function device()
 		});
 		var request = new ROSLIB.ServiceRequest({});
 	  cal.callService(request);
-	  
+	}
+
+    this.setConfig = function(){
+		var cal = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name + '/set_device_settings',
+			serviceType : 'std_srvs/Empty'
+		});
+		var request = new ROSLIB.ServiceRequest({});
+	  cal.callService(request);
 	}
 
     this.calibratePicture = function(form){
@@ -602,9 +619,13 @@ function refreshSelect()
     select.prop("disabled", false);
 
     $.each( _device_list, function( key, value ) {
-        select.append($("<option></option>")
-                .attr("value", value)
-                .text(key));
+        if ($("#deviceList option[value='" + value + "']").length == 0) {
+            select.append($("<option></option>")
+                    .attr("value", value)
+                    .text(key));
+        } else {
+            console.log("Found duplicate IP addresses for devices!");
+        }
     });
 
     /* Set currently selected device to previously selected one */
@@ -666,7 +687,7 @@ function networkVideoEvent(form){
 
 }
 
-function networkDownloadEvent(form,isStart){
+function networkDownloadEvent(form, isStart){
 	if(isStart){
 		_network_download.setAction(form);
 	}
@@ -674,7 +695,6 @@ function networkDownloadEvent(form,isStart){
 		_network_download.stopAction();
 	}
 }
-
 
 function setParametersEvent(form){
 	if(!noDeviceAlert()){
