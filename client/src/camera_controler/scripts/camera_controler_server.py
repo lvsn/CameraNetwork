@@ -118,7 +118,7 @@ class Server:
 
     def set_device_settings_cb(self, req):
         """Set camera configuration"""
-        self.cam_handler.setConfig(req)
+        self.cam_handler.updateCameraSetting()
 
     def capture_listen_cb(self, req):
         # Simply print out values in our custom message.
