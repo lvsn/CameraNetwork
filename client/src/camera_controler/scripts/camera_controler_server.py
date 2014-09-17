@@ -60,6 +60,10 @@ class Server:
             'calibrate_device',
             std_srvs.srv.Empty(),
             self.calibrate_device_cb)
+        rospy.Service(
+            'set_device_settings',
+            std_srvs.srv.Empty(),
+            self.set_device_settings_cb)
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
 
@@ -112,6 +116,10 @@ class Server:
                 self._rename_file(filename, directory, f)
         return []
 
+    def set_device_settings_cb(self, req):
+        """Set camera configuration"""
+        self.cam_handler.setConfig(req)
+
     def capture_listen_cb(self, req):
         # Simply print out values in our custom message.
         if req.isHdr:
@@ -125,6 +133,7 @@ class Server:
         self.cam_handler.takeVideo(req.data)
 
     def calibrate_device_cb(self, req):
+        """Calibration is the Auto feature."""
         self.cam_handler.calibrate()
         return []
 

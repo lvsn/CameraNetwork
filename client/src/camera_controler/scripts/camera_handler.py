@@ -75,7 +75,7 @@ class CameraHandler:
         except rospy.ServiceException as e:
             rospy.logwarn("Service call failed: %s", e)
 
-    def takeSinglePicture(self, pictureId, setCamera=True, loadCamera=True):
+    def takeSinglePicture(self, pictureId, setCamera=True, loadCamera=False):
         pictureName = str(pictureId)
         # picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on
         # camera's picture qty)
@@ -86,7 +86,7 @@ class CameraHandler:
         if loadCamera:
             self.load_camera_service(picturePath)
 
-    def takeHDRPicture(self, pictureId, setCamera=True, loadCamera=True):
+    def takeHDRPicture(self, pictureId, setCamera=True, loadCamera=False):
         settingList = rospy.get_param('camera_setting/captureSequence')
         pictureName = str(pictureId)
         picturePath = self._generatePictureName(pictureName)
