@@ -14,7 +14,6 @@ import roslib
 roslib.load_manifest('camera_drivers')
 import rospy
 from camera_network_msgs.srv import *
-import tarfile
 import os
 import camera_driver as cd
 import subprocess
@@ -39,6 +38,7 @@ class GPhotoServer(cd.camera_driver):
         super(GPhotoServer, self).__init__()
 
         rospy.spin()
+
 
     def capture_image_cb(self, req):
         rospy.loginfo("Taking Picture")
