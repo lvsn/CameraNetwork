@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Sun Sep 14 10:45:40 2014
@@ -194,7 +195,6 @@ class BluetoothKeyBoard():
         os.system("hciconfig hci0 class 0x002540")  # Keyboard class
         os.system("hciconfig hci0 name CameraNetwork")
         os.system("hciconfig hci0 piscan")  # discovery mode
-
         self.socket_ctrl = bt.BluetoothSocket(bt.L2CAP)
         self.socket_intr = bt.BluetoothSocket(bt.L2CAP)
 
@@ -242,7 +242,6 @@ class BluetoothKeyBoard():
     def _listen_thread(self):
         while(not BluetoothKeyBoard.TERMINATED):
             if len(BluetoothKeyBoard.INTERUPT_POOL) < self.maxConnection:
-                print "Waiting for a connection"
                 _ccontrol, self.cinfo = self.socket_ctrl.accept()
                 _cinterrupt, self.cinfo = self.socket_intr.accept()
                 rospy.loginfo(
@@ -305,11 +304,11 @@ class BluetoothKeyBoard():
 
 if __name__ == "__main__":
     # We can only run as root
-    if not os.geteuid() == 0:
-        sys.exit("Only root can run this script")
+    rospy.init_node('test')
+    #if not os.geteuid() == 0:
+    #    sys.exit("Only root can run this script")
     dentbleu = BluetoothKeyBoard()
     dentbleu.listen()
     while(1):
         time.sleep(4)
-        dentbleu.update(keytable['KEY_VOLUMEUP'])
-        dentbleu.update(0)
+        dentbleu.raise_volume()
