@@ -6,7 +6,6 @@ Created on Thu June 05 09:17:30 2014
 @author: Mathieu Garon
 """
 import os
-import time
 import io
 from datetime import datetime
 
@@ -21,27 +20,18 @@ import picamera
 import wiringpi2 as gpio
 import numpy as np
 import camera_driver as cd
-
-import picamParameterHandler as pph
 from camera_network_msgs.srv import *
 
 
 class picam_server(cd.camera_driver):
+
     """Handles the requests by ROS to the picam."""
+
     def __init__(self):
         try:
             self.picam = picamera.PiCamera()
         except:
             rospy.logfatal("Check if the Picam is free or installed")
-
-        self.bridge = CvBridge()
-        self.id_gen = self._id_generator()
-        self.camParam = pph.PicameraParameterHandler()
-        try:
-            self.homePath = os.environ["CAMNET_OUTPUT_DIR"]
-        except KeyError:
-            self.homePath = os.path.expanduser("~/Pictures")
-        self.tmpPath = self.homePath + '/tmp'
 
         # Initialisation
         self._init_picamera()
@@ -50,13 +40,11 @@ class picam_server(cd.camera_driver):
         # ROS functions
         super(picam_server, self).__init__()
         rospy.Service('stream_video', Uint32, self.stream_video_cb)
-        rospy.Service(
-            'calibrate_video',
-            std_srvs.srv.Empty,
-            self.calibrate_video_cb)
         self.image_publisher = rospy.Publisher("/preview", Image)
+        self.bridge = CvBridge()
+        self.id_gen = self._id_generator()
+        self.tmpPath = os.path.join(self.homePath, 'tmp')
 
-        rospy.loginfo("Camera Ready")
         self._flash_led(nflash=4)
         rospy.spin()
 
@@ -67,16 +55,15 @@ class picam_server(cd.camera_driver):
     def capture_image_cb(self, req):
         rospy.loginfo("Taking Picture")
 
-        if not os.path.exists(self.tmpPath):
-            os.makedirs(self.tmpPath)
+        self._mkdir(self.tmpPath)
 
         pictureFileName = "{0}/unloaded_{1}.{2}".format(
             self.tmpPath,
             self.id_gen.next(),
-            self.camParam.get_format(),
+            self.pictureFormat,
         )
         self._set_timer(req.timer)
-        self.picam.capture(pictureFileName, format=self.camParam.get_format())
+        self.picam.capture(pictureFileName, format=self.pictureFormat)
         self._flash_led(nflash=2)
         return 'Image saved as ' + pictureFileName
 
@@ -105,8 +92,9 @@ class picam_server(cd.camera_driver):
     def capture_video_cb(self, req):
         rospy.loginfo("Capturing Video")
         self._mkdir(self.tmpPath)
-        videoFileName = self.tmpPath + '/unloaded_' + \
-            self.id_gen.next() + '.h264'
+        videoFileName = os.path.join(
+            self.tmpPath,
+            'unloaded_{0}.h264'.format(self.id_gen.next()))
         self._record_video(videoFileName, req.integer)
         return {}
 
@@ -123,79 +111,15 @@ class picam_server(cd.camera_driver):
         self._flash_led(nflash=6)
         return {}
 
-    def calibrate_video_cb(self, req):
-        rospy.loginfo("Video Calibration")
-        self._mkdir(self.tmpPath)
-        videoFileName = self.tmpPath + '/Calibration.h264'
-        saturationFlag = False
-        while(True):
-            self._record_video(videoFileName, 0.2)
-            video = cv2.VideoCapture(videoFileName)
-            pixelVal = self._get_center_pixel_value(video)
-            if(pixelVal > 254):
-                self.picam.brightness = self.picam.brightness - 2
-                saturationFlag = True
-            else:
-                # this condition mean that we are at the edge of saturation
-                if(saturationFlag):
-                    break
-                self.picam.brightness = self.picam.brightness + 2
-                saturationFlag = False
-
-        try:
-            os.remove(videoFileName)
-        except:
-            rospy.logwarn("error deleting calibration file")
-        self._flash_led(nflash=6)
-        return {}
-
-    def _get_center_pixel_value(self, video):
-        pixelMean = 0
-        pixels = 0
-        while (video.isOpened()):
-            ret, frame = video.read()
-            if not ret:
-                break
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            height, width = gray.shape
-            pixels += 5
-            pixelMean += gray[height / 2, width / 2]
-            pixelMean += gray[(height / 2) + 1, width / 2]
-            pixelMean += gray[(height / 2) - 1, width / 2]
-            pixelMean += gray[height / 2, (width / 2) + 1]
-            pixelMean += gray[height / 2, (width / 2) - 1]
-        pixelMean = pixelMean / pixels
-        rospy.loginfo(
-            "Mean value : " +
-            str(pixelMean) +
-            " pixels : " +
-            str(pixels))
-        video.release()
-        return pixelMean
-
-    def load_camera_cb(self, req):
-        # reset generator
+    def _copy_picture_from_device_to_standard_directory(self, filename):
         self.id_gen = self._id_generator()
-
-        # to make sure it create the right path
-        loadPath = os.path.join(
-            self.homePath,
-            self._filename_format(req.path, 0, 'dummy'),
-        )
-        if loadPath.find('..') != -1:
-            rospy.logwarn("Use of .. is prohibited")
-            return "error"
-        directory = os.path.dirname(loadPath)
-        rospy.loginfo("Loading Picture to folder " + directory)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
         count = 0
         for pictureFile in os.listdir(self.tmpPath):
             fileFormat = pictureFile.split('.')[-1]
             os.rename(
                 os.path.join(self.tmpPath, pictureFile),
                 os.path.join(self.homePath, self._filename_format(
-                    req.path,
+                    filename,
                     count,
                     fileFormat)
                 )
@@ -203,12 +127,15 @@ class picam_server(cd.camera_driver):
             count += 1
         return "Transfered " + str(count) + " files."
 
+    def _delete_picture_from_device(self):
+        pass  # todo check if files are deleted
+
     def set_camera_cb(self, req):
         rospy.loginfo("Setting camera's Configuration to " + str(req))
         if(req.iso != ""):
             self.picam.ISO = int(float(req.iso))
         if(req.imageformat != ""):
-            self.camParam.set_format(req.imageformat)
+            self._set_format(req.imageformat)
         if(req.aperture != ""):
             self.picam.brightness = int(float(req.aperture))
         if(req.shutterspeed != ""):
@@ -219,19 +146,35 @@ class picam_server(cd.camera_driver):
     def get_camera_cb(self, req):
         rospy.loginfo("Getting camera's Configuration")
         iso = str(self.picam.ISO)
-        imageformat = str(self.camParam.get_format())
+        imageformat = str(self.pictureFormat)
         aperture = str(self.picam.brightness)
         shutterspeed = str(self.picam.shutter_speed)
 
         if req.getAllInformation:
-            iso = "current ISO : " + iso + \
-                "\n Choice : 100\nChoice : 200\nChoice : 320\nChoice : 400\nChoice : 500\nChoice : 640\nChoice : 800\n"
-            imageformat = "current Image format : " + imageformat + \
-                "\nChoice : jpeg\nChoice : png\nChoice : gif\nChoice : bmp\nChoice : yuv\nChoice : rgb\nChoice : rgba\nChoice : bgr\nChoice : bgra\n"
-            shutterspeed = "current Shutterspeed : " + shutterspeed + \
-                "\nChoice : 0(auto)\nChoice : (int)usec\n"
-            aperture = "current aperture : " + \
-                aperture + "\nChoice : 0 - 100\n"
+            iso = "current ISO : " + iso
+            iso = self._add_Choice(iso, 100)
+            iso = self._add_Choice(iso, 200)
+            iso = self._add_Choice(iso, 320)
+            iso = self._add_Choice(iso, 400)
+            iso = self._add_Choice(iso, 500)
+            iso = self._add_Choice(iso, 640)
+            iso = self._add_Choice(iso, 800)
+            imageformat = "current Image format : " + imageformat
+            imageformat = self._add_Choice(imageformat, 'jpeg')
+            imageformat = self._add_Choice(imageformat, 'png')
+            imageformat = self._add_Choice(imageformat, 'gif')
+            imageformat = self._add_Choice(imageformat, 'bmp')
+            imageformat = self._add_Choice(imageformat, 'yuv')
+            imageformat = self._add_Choice(imageformat, 'rgb')
+            imageformat = self._add_Choice(imageformat, 'rgba')
+            imageformat = self._add_Choice(imageformat, 'bgr')
+            imageformat = self._add_Choice(imageformat, 'bgra')
+            shutterspeed = "current Shutterspeed : " + shutterspeed
+            for i in range(0, 33000, 1500):
+                shutterspeed = self._add_Choice(shutterspeed, i)
+            aperture = "current aperture : "
+            for i in range(0, 100, 10):
+                aperture = self._add_Choice(aperture, i)
 
         return {
             'iso': iso,
@@ -239,22 +182,9 @@ class picam_server(cd.camera_driver):
             'aperture': aperture,
             'shutterspeed': shutterspeed}
 
-    def _filename_format(self, string_, pictureId=0, pictureFormat='jpeg'):
-        """
-        Produces the name of the image. string_ comes from
-        camera_controller's camera_handler.py:_generatePictureName
-        """
-        string_ = string_.replace('%C', pictureFormat)
-        string_ = string_.replace('%n', str(pictureId))
-        return datetime.now().strftime(string_)
-
     def _id_generator(self):
         for i in range(10000000):
             yield str(i)
-
-    def _mkdir(self, dirPath):
-        if not os.path.exists(dirPath):
-            os.makedirs(dirPath)
 
     def _init_picamera(self):
         self.picam.exposure_mode = 'fixedfps'
@@ -262,7 +192,8 @@ class picam_server(cd.camera_driver):
         self.picam.awb_gains = 1.4
         self.picam.resolution = (1296, 972)
         self.picam.framerate = 40
-        self.camParam.set_camera_parameters()
+        self.pictureFormat = 'jpeg'
+        self._set_camera_model('Picam')
 
     def _init_picamera_led(self):
         self.led = 5
@@ -313,7 +244,22 @@ class picam_server(cd.camera_driver):
         self.picam.stop_recording()
         gpio.digitalWrite(self.led, False)
 
+    def _set_format(self, formatString):
+        if formatString in [
+                'jpeg',
+                'png',
+                'gif',
+                'bmp',
+                'yuv',
+                'rgb',
+                'rgba',
+                'bgr',
+                'bgra']:
+            self.pictureFormat = formatString
+        else:
+            rospy.logwarn("Format " + formatString + " not supported by Picam")
+
 
 if __name__ == "__main__":
-    rospy.init_node('picam')
+    rospy.init_node('picam_driver')
     server = picam_server()

@@ -202,14 +202,10 @@ function network_download(){
 	}); 
 };
 
-function setSelectOptions(selector, values, current_value, set_value_as_key) {
+function setSelectOptions(selector, values, current_value) {
     for (var i = 0; i < values.length; i++) {
         var val;
-        if (set_value_as_key != undefined && set_value_as_key == true) {
-            val = values[i][0];
-        } else {
-            val = values[i][1];
-        }
+        val = values[i][1];
         $(selector)
             .append($("<option></option>")
                 .attr("value", val)
@@ -389,40 +385,18 @@ function device()
 	}
 
 	this.setParameters = function(form){
-		var settingIso = new ROSLIB.Param({
+		var update_srv = new ROSLIB.Service({
 			ros : ros,
-			name : name + '/camera_setting/iso'
+			name : '/' + name + '/update_camera',
+			serviceType : 'camera_network_msgs/InCameraData'
 		});
-		var settingAperture = new ROSLIB.Param({
-			ros : ros,
-			name : name + '/camera_setting/aperture'
+		var request = new ROSLIB.ServiceRequest({
+			iso : form.device_parameter_iso.value,
+                aperture : form.device_parameter_aperture.value,
+                shutterspeed : form.device_parameter_shutterspeed.value,
+                imageformat : form.device_parameter_imageformat.value
 		});
-		var settingShutterspeed = new ROSLIB.Param({
-			ros : ros,
-			name : name + '/camera_setting/shutterspeed'
-		});
-		var settingImageformat = new ROSLIB.Param({
-			ros : ros,
-			name : name + '/camera_setting/imageformat'
-		});
-		
-		iso = form.device_parameter_iso.value;
-		aperture = form.device_parameter_aperture.value;
-		shutterspeed = form.device_parameter_shutterspeed.value;
-		imageformat = form.device_parameter_imageformat.value;
-		config = {};
-		if (iso != "") {
-			settingIso.set(iso);
-		}
-		if (aperture != "") {
-			settingAperture.set(aperture);
-		} 
-		if (shutterspeed != "") {
-			settingShutterspeed.set(shutterspeed);
-		}
-		if (imageformat != "") {
-			settingImageformat.set(imageformat);
-		}
+		update_srv.callService(request,function(result){});
 
         /* Apply the configuration to the camera */
 		//_current_device.setAction();
@@ -448,14 +422,14 @@ function device()
             setSelectOptions("#device_parameter_shutterspeed", config[1], config[0]);
             setSelectOptions("#device_sequence_shutterspeed", config[1], config[0]);
             config = getConfiguration(result['imageformat']);
-            setSelectOptions("#device_parameter_imageformat", config[1], config[0], true);
+            setSelectOptions("#device_parameter_imageformat", config[1], config[0]);
             $("#param_status").html('');
 		});
 	}
 
 	this.refresh = function() {
 		$("#device_name").text(name);
-    	$("#device_ip").text(ip);
+        	$("#device_ip").text(ip);
 		param.get(function(value) {
 	    	if (value != null && value["camera_model"] != null && value != undefined) {
 	    		$("#device_camera").text(value["camera_model"]);
@@ -500,16 +474,7 @@ function device()
 	  
 	}
 
-    this.calibrateVideo = function(form){
-		var cal = new ROSLIB.Service({
-			ros : ros,
-			name : '/' + name + '/calibrate_video',
-			serviceType : 'std_srvs/Empty'
-		});
-		var request = new ROSLIB.ServiceRequest({});
-	  cal.callService(request);
 	}
-
     this.setConfig = function(){
 		var cal = new ROSLIB.Service({
 			ros : ros,
@@ -518,8 +483,6 @@ function device()
 		});
 		var request = new ROSLIB.ServiceRequest({});
 	  cal.callService(request);
-	}
-
     this.calibratePicture = function(form){
 		var cal = new ROSLIB.Service({
 			ros : ros,
@@ -738,12 +701,6 @@ function streamVideoEvent(form){
 function drawPreviewEvent(form){
 	if(!noDeviceAlert()){
 		_current_device.drawPreview();	
-	}
-}
-
-function calibrateVideoEvent(form){
-	if(!noDeviceAlert()){
-		_current_device.calibrateVideo();		
 	}
 }
 
