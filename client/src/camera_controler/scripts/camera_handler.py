@@ -15,6 +15,10 @@ from camera_network_msgs.srv import *
 
 
 class CameraHandler:
+    """
+    CameraHandler manipulate low level driver service.
+    It give a set of high level function for the user.
+    """
     def __init__(self):
         rospy.loginfo("Setting up camera Handler")
         rospy.wait_for_service('get_camera')

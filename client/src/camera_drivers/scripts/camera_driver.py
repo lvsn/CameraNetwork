@@ -10,43 +10,114 @@ Abstract class of camera_driver
 """
 from abc import ABCMeta, abstractmethod
 
+import os
+from datetime import datetime
 import rospy
 import std_srvs.srv
-from CameraParameterHandler import *
 from camera_network_msgs.srv import *
 
 
 class camera_driver(object):
     __metaclass__ = ABCMeta
-    
+
     def __init__(self):
+        self.cameraModel = None
+        try:
+            self.homePath = os.environ["CAMNET_OUTPUT_DIR"]
+        except KeyError:
+            self.homePath = os.path.expanduser("~/Pictures")
         rospy.Service('capture_camera', CaptureService, self.capture_image_cb)
         rospy.Service('get_camera', OutCameraData, self.get_camera_cb)
         rospy.Service('set_camera', InCameraData, self.set_camera_cb)
-        rospy.Service('load_camera',Load,self.load_camera_cb)
-        rospy.Service('capture_video',Uint32,self.capture_video_cb)
-        rospy.Service('calibrate_picture',std_srvs.srv.Empty,self.calibrate_video_cb)
+        rospy.Service('load_camera', Load, self.load_camera_cb)
+        rospy.Service('capture_video', Uint32, self.capture_video_cb)
+        rospy.Service(
+            'calibrate_picture',
+            std_srvs.srv.Empty,
+            self.calibrate_picture_cb)
+        rospy.loginfo("Camera Service Ready")
+
+    def __del__(self):
+        if self.cameraModel:
+            try:
+                rospy.delete_param("camera_model")
+            except KeyError:
+                rospy.logerr("Unable to delete parameter (not set)")
 
     @abstractmethod
-    def capture_image_cb(self,req):
+    def capture_image_cb(self, req):
         pass
-        
+
     @abstractmethod
-    def capture_video_cb(self,req):
+    def capture_video_cb(self, req):
         pass
-        
+
+    def load_camera_cb(self, req):
+        '''
+        Template method :
+        1- create standard directory path
+        2- transfert picture from device(ex camera) to directory
+        3- delete picture from device
+        '''
+        if (self._create_picture_standard_directory(req.path) == -1):
+            return 'Error'
+        msg = self._copy_picture_from_device_to_standard_directory(req.path)
+        self._delete_picture_from_device()
+        return msg
+
+    def _create_picture_standard_directory(self, directory):
+        loadPath = os.path.join(
+            self.homePath,
+            self._filename_format(directory),
+        )
+        if loadPath.find('..') != -1:
+            rospy.logwarn("Use of '..' is prohibited")
+            return -1
+        directory = os.path.dirname(loadPath)
+        rospy.loginfo("Creating and loading Picture to folder " + directory)
+        self._mkdir(directory)
+        return 1
+
     @abstractmethod
-    def load_camera_cb(self,req):
+    def _copy_picture_from_device_to_standard_directory(self, filename):
         pass
-        
+
     @abstractmethod
-    def set_camera_cb(self,req):
+    def _delete_picture_from_device(self):
         pass
-        
+
     @abstractmethod
-    def get_camera_cb(self,req):
+    def set_camera_cb(self, req):
         pass
-        
+
     @abstractmethod
-    def calibrate_video_cb(self,req):
+    def get_camera_cb(self, req):
         pass
+
+    def _add_Choice(self, choicesString, newChoice):
+        return choicesString + '\nChoice : ' + str(newChoice)
+
+    @abstractmethod
+    def calibrate_picture_cb(self, req):
+        pass
+
+    def _set_camera_model(self, camera):
+        self.cameraModel = camera
+        rospy.set_param("camera_model", self.cameraModel)
+
+    def _mkdir(self, dirPath):
+        if not os.path.exists(dirPath):
+            os.makedirs(dirPath)
+
+    def _filename_format(self, string_, pictureId=0, pictureFormat='jpeg'):
+        """
+        Produces the name of the image. string_ comes from
+        camera_controller's camera_handler.py:_generatePictureName
+
+        Will format in standard strftime
+        %n is any __str__ object for unique ID
+        %C is picture format
+        """
+        string_ = string_.replace('%C', pictureFormat)
+        string_ = string_.replace('%n', str(pictureId))
+        return datetime.now().strftime(string_)

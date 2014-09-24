@@ -1,0 +1,3 @@
+<launch>
+  <node name="mobile_cam" pkg="camera_drivers" type="mobile_server.py"/>
+</launch>
