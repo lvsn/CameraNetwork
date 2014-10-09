@@ -193,8 +193,9 @@ class BluetoothKeyBoard():
     def __init__(self, maxConnection=1, sdpRecordFile="sdp_record.xml"):
         self.maxConnection = maxConnection
         os.system("hciconfig hci0 class 0x002540")  # Keyboard class
-        os.system("hciconfig hci0 name CameraNetwork")
+        #os.system("hciconfig hci0 name CameraNetwork")
         os.system("hciconfig hci0 piscan")  # discovery mode
+        #os.system("hciconfig hci0 leadv")
         self.socket_ctrl = bt.BluetoothSocket(bt.L2CAP)
         self.socket_intr = bt.BluetoothSocket(bt.L2CAP)
 
@@ -206,6 +207,8 @@ class BluetoothKeyBoard():
 
     def __del__(self):
         BluetoothKeyBoard.TERMINATED = True
+        self.socket_ctrl.close()
+        self.socket_intr.close()
 
     def _init_dbus(self):
         self.bus = dbus.SystemBus()
@@ -234,9 +237,16 @@ class BluetoothKeyBoard():
         fh.close()
 
     def listen(self):
-        self.service_handle = self. service.AddRecord(self.service_record)
+        self.service_handle = self.service.AddRecord(self.service_record)
         self.socket_ctrl.listen(self.maxConnection)
         self.socket_intr.listen(self.maxConnection)
+        #bt.advertise_service(self.socket_ctrl, "test ctrl", 
+        #                     service_classes = [bt.HID_CLASS],
+        #                     profiles = [bt.HID_PROFILE])
+
+        #bt.advertise_service(self.socket_intr, "test intr", 
+        #                     service_classes = [bt.HID_CLASS],
+        #                     profiles = [bt.HID_PROFILE])
         thread.start_new_thread(self._listen_thread, ())
 
     def _listen_thread(self):
