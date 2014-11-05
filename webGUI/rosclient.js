@@ -280,7 +280,6 @@ function device()
 	    status.subscribe(function(message) {
 			statusList = message.status_list;
 			if(statusList.length > 0){
-				//console.log(message.status_list[0].status);
 				$("#device_timelapse_status").text("Busy");
 				$("#device_timelapse_status").css("color", "orange");
 			}
@@ -474,7 +473,6 @@ function device()
 	  
 	}
 
-	}
     this.setConfig = function(){
 		var cal = new ROSLIB.Service({
 			ros : ros,
@@ -483,6 +481,8 @@ function device()
 		});
 		var request = new ROSLIB.ServiceRequest({});
 	  cal.callService(request);
+    }
+
     this.calibratePicture = function(form){
 		var cal = new ROSLIB.Service({
 			ros : ros,
@@ -509,6 +509,16 @@ var _device_list;
 
 //   ---   GUI Functions   ----
 
+function cleanParametersWidgets() {
+    $("#device_parameter_iso option").remove()
+    $("#device_parameter_aperture option").remove()
+    $("#device_parameter_shutterspeed option").remove()
+    $("#device_sequence_aperture option").remove()
+    $("#device_sequence_shutterspeed option").remove()
+    $("#device_sequence_imageformat option").remove()
+}
+
+
 function cleanDevicePage(){
 	$("#device_name").text("");
 	$("#device_ip").text("");
@@ -522,14 +532,9 @@ function cleanDevicePage(){
     $("#device_timelapse_status").css("color", "red");
 	$("#device_timelapse_result").text("");
 	$("#device_timelapse_feedback").text("");
-    /* Parameters */
-    $("#device_parameter_iso option").remove()
-    $("#device_parameter_aperture option").remove()
-    $("#device_parameter_shutterspeed option").remove()
-    $("#device_sequence_aperture option").remove()
-    $("#device_sequence_shutterspeed option").remove()
-    $("#device_sequence_imageformat option").remove()
+    cleanParametersWidgets();
 }
+
 
 function refreshScreen(){
 	if (_current_device == undefined){
@@ -588,7 +593,7 @@ function refreshSelect()
 
     /* Set currently selected device to previously selected one */
     if (_current_device != undefined) {
-        $("#deviceList").val(_current_device.getIp());	
+        $("#deviceList").val(_current_device.ip);
     }
 
     /* Trigger onChange event */
@@ -735,6 +740,7 @@ function rebootDeviceEvent(form){
 function getDeviceInformation() {
 	if(!noDeviceAlert()){
         $("#param_status").html('<img src="./media/loading.gif" /> Loading configuration...');
+        cleanParametersWidgets();
 		_current_device.getInformation();		
 	}
 }
