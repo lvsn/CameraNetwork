@@ -43,7 +43,7 @@ class GPhotoServer(cd.camera_driver):
         rospy.loginfo("Taking Picture")
         rospy.sleep(req.timer)
         # TODO: Faster than 1s sleep...
-        msg = self._run_gphoto.run(" --capture-image --wait-event=1s --keep")
+        msg = self._run_gphoto(" --capture-image --wait-event=1s --keep")
         return msg
 
     def capture_video_cb(self, req):
