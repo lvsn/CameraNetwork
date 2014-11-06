@@ -513,6 +513,7 @@ function cleanParametersWidgets() {
     $("#device_parameter_iso option").remove()
     $("#device_parameter_aperture option").remove()
     $("#device_parameter_shutterspeed option").remove()
+    $("#device_parameter_imageformat option").remove()
     $("#device_sequence_aperture option").remove()
     $("#device_sequence_shutterspeed option").remove()
     $("#device_sequence_imageformat option").remove()
