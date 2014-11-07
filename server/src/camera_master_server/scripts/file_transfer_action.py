@@ -81,7 +81,7 @@ class sftp_action:
                 # Could not iterate over self.ipDict
                 pictureQty = 0
             totalCount += pictureQty
-            r.sleep()
+            r.sleep()  #todo sleep until?
             if self.action.is_preempt_requested() or not self.action.is_active(
             ) or goal.dowload_frequency_s == 0:
                 break
@@ -91,6 +91,17 @@ class sftp_action:
 
         self.rospack = rospkg.RosPack()
         self.action.set_succeeded(succes_msg)
+
+    def _sleep_until(self, timestamp):
+        delta = timestamp - rospy.get_time()
+        if delta > 0:
+            rospy.loginfo("Wainting for " + str(delta) + " seconds")
+            while timestamp > rospy.get_time():
+                rospy.sleep(5)
+                if self.action.is_preempt_requested(
+                ) or not self.action.is_active():
+                    rospy.loginfo("Download timer interupted")
+                    break
 
     def add_user(self, req):
         self.userDict[req.name] = (req.username, req.password)
@@ -204,17 +215,6 @@ class sftp_action:
             rospy.logwarn(
                 "Can not set 0 as frequency... setting frequency to 1 hz")
         return hz
-
-    def _sleep_until(self, timestamp):
-        delta = timestamp - rospy.get_time()
-        if delta > 0:
-            rospy.loginfo("Wainting for " + str(delta) + " seconds")
-            while timestamp > rospy.get_time():
-                rospy.sleep(5)
-                if self.action.is_preempt_requested(
-                ) or not self.action.is_active():
-                    rospy.loginfo("Download timer interupted")
-                    break
 
     def _parse_userXML(self, filename='users.xml'):
         try:

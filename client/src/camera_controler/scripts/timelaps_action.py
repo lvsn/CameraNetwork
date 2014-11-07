@@ -33,24 +33,37 @@ class TimelapsAction:
         self.cam_handler = cam_handler
 
     def execute(self, goal):
-
-        hz = self._sec_to_hz(goal.inter_picture_delay_s)
+        periode = abs(goal.inter_picture_delay_s)
+        hz = self._sec_to_hz(periode)
         picture_goal = self._get_frame_qty(goal.picture_qty)
         self.picture_count = 0
-        r = rospy.Rate(hz)
 
         while self.picture_count < picture_goal:
+            timestamp = rospy.get_time() + periode
             self.picture_count += 1
             self._take_picture(goal.is_hdr, self.picture_count)
             self._send_feedback(self.picture_count, picture_goal, hz)
-            r.sleep()
-            if self.action.is_preempt_requested(
-            ) or not self.action.is_active() or hz <= 0:
+            interupt = self._sleep(timestamp)
+            if(interupt):
                 break
 
         succes_msg = CameraControlActionResult
         succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.action.set_succeeded(succes_msg)
+
+    def _sleep(self, timestamp):
+        """
+        Sleep until the timestamp (in seconds) if there is an interuption to the action, it return True.
+        it give a resolution of 2 sec.
+        :param timestamp:
+        :return bool:
+        """
+        while timestamp > rospy.get_time():
+                rospy.sleep(2)
+                if self.action.is_preempt_requested(
+                ) or not self.action.is_active():
+                    return True
+        return False
 
     def _sec_to_hz(self, Tsec):
         try:

@@ -31,24 +31,37 @@ class network_capture_action:
         
     def execute(self,goal):
         self.msg.isHdr = goal.is_hdr
-        hz = self._sec_to_hz(goal.inter_picture_delay_s)
+        period = goal.inter_picture_delay_s
+        hz = self._sec_to_hz(period)
         picture_goal = self._get_frame_qty(goal.picture_qty)
         self.picture_count = 0
-        
-        r = rospy.Rate(hz)
+
         while self.picture_count < picture_goal:
+            timestamp = rospy.get_time() + period
             self.picture_count += 1
             self.publisher.publish(self.msg)
             self._send_feedback(self.picture_count,picture_goal,hz)
-            r.sleep()
-            if self.action.is_preempt_requested() or not self.action.is_active() or hz <= 0:
+            interupt = self._sleep(timestamp)
+            if(interupt):
                 break
-        
-
         succes_msg = CameraControlActionResult
         succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.action.set_succeeded(succes_msg)
-        
+
+    def _sleep(self, timestamp):
+        """
+        Sleep until the timestamp (in seconds) if there is an interuption to the action, it return True.
+        it give a resolution of 2 sec.
+        :param timestamp:
+        :return bool:
+        """
+        while timestamp > rospy.get_time():
+                rospy.sleep(2)
+                if self.action.is_preempt_requested(
+                ) or not self.action.is_active():
+                    return True
+        return False
+
     def _sec_to_hz(self,Tsec):
         try:
             hz = math.fabs(1/Tsec)
