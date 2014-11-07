@@ -11,6 +11,7 @@ with it.
 """
 
 import roslib
+
 roslib.load_manifest('camera_drivers')
 import rospy
 from camera_network_msgs.srv import *
@@ -33,7 +34,7 @@ class GPhotoServer(cd.camera_driver):
 
         self._find_camera()
         self._update_camera_parameters()
-        
+
         super(GPhotoServer, self).__init__()
 
         rospy.spin()
@@ -70,24 +71,24 @@ class GPhotoServer(cd.camera_driver):
         rospy.loginfo("Setting camera's Configuration : " + str(req))
         backMessage = ''
         commandCall = ''
-        if(req.iso != ""):
+        if (req.iso != ""):
             commandCall += " --set-config " + \
-                self.isoConfig + "=" + self._commandLine_format(req.iso)
+                           self.isoConfig + "=" + self._commandLine_format(req.iso)
 
-        if(req.imageformat != ""):
+        if (req.imageformat != ""):
             commandCall += " --set-config " + \
-                self.imageformatConfig + "=" + \
-                self._commandLine_format(req.imageformat)
+                           self.imageformatConfig + "=" + \
+                           self._commandLine_format(req.imageformat)
 
-        if(req.aperture != ""):
+        if (req.aperture != ""):
             commandCall += " --set-config " + \
-                self.apertureConfig + "=" + \
-                self._commandLine_format(req.aperture)
+                           self.apertureConfig + "=" + \
+                           self._commandLine_format(req.aperture)
 
-        if(req.shutterspeed != ""):
+        if (req.shutterspeed != ""):
             commandCall += " --set-config " + \
-                self.shutterspeedConfig + "=" +\
-                self._commandLine_format(req.shutterspeed)
+                           self.shutterspeedConfig + "=" + \
+                           self._commandLine_format(req.shutterspeed)
 
         backMessage = self._run_gphoto(commandCall)
 
@@ -118,17 +119,24 @@ class GPhotoServer(cd.camera_driver):
             " --get-config " +
             self.shutterspeedConfig)
 
+        memorydata = self._run_gphoto(" --storage-info")
+        totalspace,freespace,freeimages = self._parse_device_space(memorydata)
+
         if not req.getAllInformation:
             iso = self._parse_current_value(iso)
             imageformat = self._parse_current_value(imageformat)
             aperture = self._parse_current_value(aperture)
             shutterspeed = self._parse_current_value(shutterspeed)
 
+
         return {
             'iso': iso,
             'imageformat': imageformat,
             'aperture': aperture,
             'shutterspeed': shutterspeed,
+            'totalSpace': totalspace,
+            'freeSpace': freespace,
+            'freeImages': freeimages,
         }
 
     def calibrate_picture_cb(self, req):
@@ -136,10 +144,35 @@ class GPhotoServer(cd.camera_driver):
 
     def _parse_current_value(self, string):
         lineList = string.split('\n')
+        keyword = 'Current:'
         for n in lineList:
-            if n.find('Current') == 0:
-                return n[8:]  # remove Current: from the string
+            if n.find(keyword) == 0:
+                return n[len(keyword):]
         return ''
+
+    def _parse_device_space(self, string):
+        """
+        Parse a gphoto2 string (gphoto2 --storage-info) to extract important information : total memory capacity
+        memory left and quantity of picture that can be still taken.
+        :param string:
+        :return totalspace, freespace, freeimages:
+        """
+        lineList = string.split('\n')
+        totalspace = ''
+        freespace = ''
+        freeimages = ''
+        totalspacekeyword = 'totalcapacity='
+        freespacekeyword = 'free='
+        freeimageskeyword = 'freeimages='
+
+        for n in lineList:
+            if n.find(totalspacekeyword) == 0:
+                totalspace = n[len(totalspacekeyword):]
+            if n.find(freespacekeyword) == 0:
+                freespace = n[len(freespacekeyword):]
+            if n.find(freeimageskeyword) == 0:
+                freeimages = n[len(freeimageskeyword):]
+        return totalspace, freespace, freeimages
 
     def _find_camera(self):
         rospy.loginfo("...Looking for camera...")
@@ -159,7 +192,7 @@ class GPhotoServer(cd.camera_driver):
         if self.cameraModel == 'Nikon DSC D3100 (PTP mode)':
             self.imageformatConfig = "/main/capturesettings/imagequality"
             self.apertureConfig = "/main/other/5007"
-        # TODO add more model here, or load xml  MathGaron
+            # TODO add more model here, or load xml  MathGaron
 
     def _parse_gphoto_camera_list(self, string):
         lineList = string.split('\n')
@@ -177,7 +210,7 @@ class GPhotoServer(cd.camera_driver):
         p = subprocess.Popen(cmd, shell=True, executable="/bin/bash",
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
-                             )
+        )
 
         stdout, stderr = p.communicate()
         ret = p.returncode

@@ -180,7 +180,11 @@ class picam_server(cd.camera_driver):
             'iso': iso,
             'imageformat': imageformat,
             'aperture': aperture,
-            'shutterspeed': shutterspeed}
+            'shutterspeed': shutterspeed,
+            'totalSpace': 'undefined',
+            'freeSpace': 'undefined',
+            'freeImages': 'undefined',
+        }
 
     def _id_generator(self):
         for i in range(10000000):

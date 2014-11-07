@@ -410,8 +410,9 @@ function device()
 			name : '/' + name +'/get_camera',
 			serviceType : 'camera_network_msgs/OutCameraData'
 		});
-		var request = new ROSLIB.ServiceRequest({getAllInformation:true});
-		save.callService(request, function(result) {
+
+		var allrequest = new ROSLIB.ServiceRequest({getAllInformation:true});
+		save.callService(allrequest, function(result) {
             var config = getConfiguration(result['iso']);
             setSelectOptions("#device_parameter_iso", config[1], config[0]);
             config = getConfiguration(result['aperture']);
@@ -423,6 +424,9 @@ function device()
             config = getConfiguration(result['imageformat']);
             setSelectOptions("#device_parameter_imageformat", config[1], config[0]);
             $("#param_status").html('');
+            $("#device_totalspace").text(result['totalSpace']);
+            $("#device_freespace").text(result['freeSpace']);
+            $("#device_freeimages").text(result['freeImages']);
 		});
 	}
 
@@ -430,6 +434,7 @@ function device()
 		$("#device_name").text(name);
         	$("#device_ip").text(ip);
 		param.get(function(value) {
+
 	    	if (value != null && value["camera_model"] != null && value != undefined) {
 	    		$("#device_camera").text(value["camera_model"]);
 	    		$("#device_camera").css("color","black");
@@ -437,7 +442,7 @@ function device()
 	    		$("#device_aperture").text(value["camera_setting"]["aperture"]);
 	    		$("#device_shutterspeed").text(value["camera_setting"]["shutterspeed"]);
 	    		$("#device_imageformat").text(value["camera_setting"]["imageformat"]);
-	    		
+
 	    		var sequenceSize = value["camera_setting"]["captureSequence"].length;
 	            var sequence = value["camera_setting"]["captureSequence"];
 				var parameterString = '';
