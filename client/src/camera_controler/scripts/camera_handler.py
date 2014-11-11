@@ -27,6 +27,7 @@ class CameraHandler:
         rospy.wait_for_service('load_camera')
         rospy.wait_for_service('capture_video')
         rospy.wait_for_service('calibrate_picture')
+        rospy.wait_for_service('configure_parameter_queue')
 
         self.get_camera_service = rospy.ServiceProxy(
             'get_camera',
@@ -44,6 +45,9 @@ class CameraHandler:
         self.calibrate_picture_service = rospy.ServiceProxy(
             'calibrate_picture',
             std_srvs.srv.Empty)
+        self.configure_parameter_queue_service = rospy.ServiceProxy(
+            'configure_parameter_queue',
+            ParameterQueue)
         self.updateCameraSetting()
 
     def updateCameraSetting(self, configDict={}):
@@ -79,6 +83,26 @@ class CameraHandler:
         except rospy.ServiceException as e:
             rospy.logwarn("Service call failed: %s", e)
 
+    def updateParameterQueue(self, configDict, flush=False):
+        if 'iso' not in configDict:
+            configDict['iso'] = ''
+        if 'imageformat' not in configDict:
+            configDict['imageformat'] = ''
+        if 'aperture' not in configDict:
+            configDict['aperture'] = ''
+        if 'shutterspeed' not in configDict:
+            configDict['shutterspeed'] = ''
+        try:
+            self.configure_parameter_queue_service(
+                configDict['iso'],
+                configDict['imageformat'],
+                configDict['aperture'],
+                configDict['shutterspeed'],
+                flush)
+        except rospy.ServiceException as e:
+            rospy.logwarn("Service call failed: %s", e)
+
+
     def takeSinglePicture(self, pictureId, setCamera=True, loadCamera=False):
         pictureName = str(pictureId)
         # picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on
@@ -90,14 +114,13 @@ class CameraHandler:
         if loadCamera:
             self.load_camera_service(picturePath)
 
-    def takeHDRPicture(self, pictureId, setCamera=True, loadCamera=False):
+    def takeHDRPicture(self, pictureId, loadCamera=False):
         settingList = rospy.get_param('camera_setting/captureSequence')
         pictureName = str(pictureId)
         picturePath = self._generatePictureName(pictureName)
         for setting in settingList:
-            if setCamera:
-                self.updateCameraSetting(setting)
-            self.capture_camera_service(0)
+            self.updateParameterQueue(setting)
+        self.capture_camera_service(0)
         if loadCamera:
             self.load_camera_service(picturePath)
 

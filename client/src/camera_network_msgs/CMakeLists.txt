@@ -61,6 +61,7 @@ find_package(catkin REQUIRED COMPONENTS
    CommandOption.srv
    User.srv
    BackMessage.srv
+   ParameterQueue.srv
  )
 
 ## Generate actions in the 'action' folder

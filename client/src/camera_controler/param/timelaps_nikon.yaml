@@ -1,8 +1,8 @@
 aperture: '16'
 captureSequence:
-- {aperture: '10', shutterspeed: '30'}
-- {shutterspeed: '33'}
-- {aperture: '16', shutterspeed: '35'}
+- {aperture: '710', shutterspeed: 0.0040s}
+- {aperture: '1000', shutterspeed: 0.0769s}
+- {aperture: '1000', shutterspeed: 0.4000s}
 imageformat: '3'
 iso: '100'
 shutterspeed: '30'

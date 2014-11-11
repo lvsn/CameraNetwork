@@ -26,6 +26,7 @@ class camera_driver(object):
             self.homePath = os.environ["CAMNET_OUTPUT_DIR"]
         except KeyError:
             self.homePath = os.path.expanduser("~/Pictures")
+        self.parameterQueue = []
         rospy.Service('capture_camera', CaptureService, self.capture_image_cb)
         rospy.Service('get_camera', OutCameraData, self.get_camera_cb)
         rospy.Service('set_camera', InCameraData, self.set_camera_cb)
@@ -35,6 +36,10 @@ class camera_driver(object):
             'calibrate_picture',
             std_srvs.srv.Empty,
             self.calibrate_picture_cb)
+        rospy.Service(
+            'configure_parameter_queue',
+            ParameterQueue,
+            self.set_parameter_queue_cb)
         rospy.loginfo("Camera Service Ready")
 
     def __del__(self):
@@ -100,6 +105,24 @@ class camera_driver(object):
     @abstractmethod
     def calibrate_picture_cb(self, req):
         pass
+
+    def set_parameter_queue_cb(self, req):
+        """
+        add a dictionnary of parameter to parameterQueue.
+        If flush is set to True, it reset the parameterQueue
+        :param req:
+        """
+        parameterSet = {}
+        parameterSet['iso'] = req.iso
+        parameterSet['shutterspeed'] = req.shutterspeed
+        parameterSet['aperture'] = req.aperture
+        parameterSet['imageformat'] = req.imageformat
+
+        self.parameterQueue.append(parameterSet)
+        if(req.flush):
+            self.parameterQueue = []
+        rospy.loginfo("ParameterQueue is now :" + str(self.parameterQueue))
+        return []
 
     def _set_camera_model(self, camera):
         self.cameraModel = camera

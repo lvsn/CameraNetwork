@@ -43,9 +43,35 @@ class GPhotoServer(cd.camera_driver):
     def capture_image_cb(self, req):
         rospy.loginfo("Taking Picture")
         rospy.sleep(req.timer)
-        # TODO: Faster than 1s sleep...
-        msg = self._run_gphoto(" --capture-image --wait-event=1s --keep")
+        gphotoCommand = ""
+        if self.parameterQueue:
+            #gphotoCommand = " --capture-image --wait-event=1s --keep"
+            gphotoCommand = self._build_sequence_command(self.parameterQueue)
+            rospy.loginfo(gphotoCommand)
+            self.parameterQueue = []
+        else:
+            gphotoCommand = " --capture-image --wait-event=1s --keep"
+        msg = self._run_gphoto(gphotoCommand)
         return msg
+
+    def _build_sequence_command(self, data):
+        """
+        Build a Gphoto2 script (string) to call a sequence of gphoto commands.
+        data is a list of dictionnary
+        dictionnary : iso,aperture,shutterspeed,imageformat
+        :param data:
+        :return commandcall:
+        """
+        commandcall = " --shell <<EOF"
+        for param in data:
+            commandcall += self._create_set_command(self.isoConfig, param['iso'], prefix="\n")
+            commandcall += self._create_set_command(self.imageformatConfig, param['imageformat'], prefix="\n")
+            commandcall += self._create_set_command(self.apertureConfig, param['aperture'], prefix="\n")
+            commandcall += self._create_set_command(self.shutterspeedConfig, param['shutterspeed'], prefix="\n")
+            commandcall += "\ncapture-image --keep"
+            commandcall += "\nwait-event 1s"
+        commandcall += "\nEOF"
+        return commandcall
 
     def capture_video_cb(self, req):
         rospy.logwarn("Gphoto2 does not support video capture at this moment!")
@@ -69,36 +95,26 @@ class GPhotoServer(cd.camera_driver):
         set camera's information. Will set data only if it contain something
         """
         rospy.loginfo("Setting camera's Configuration : " + str(req))
-        backMessage = ''
-        commandCall = ''
-        if (req.iso != ""):
-            commandCall += " --set-config " + \
-                           self.isoConfig + "=" + self._commandLine_format(req.iso)
+        commandCall = ""
+        commandCall += self._create_set_command(self.isoConfig, req.iso)
+        commandCall += self._create_set_command(self.imageformatConfig, req.imageformat)
+        commandCall += self._create_set_command(self.apertureConfig, req.aperture)
+        commandCall += self._create_set_command(self.shutterspeedConfig, req.shutterspeed)
+        return self._run_gphoto(commandCall)
 
-        if (req.imageformat != ""):
-            commandCall += " --set-config " + \
-                           self.imageformatConfig + "=" + \
-                           self._commandLine_format(req.imageformat)
-
-        if (req.aperture != ""):
-            commandCall += " --set-config " + \
-                           self.apertureConfig + "=" + \
-                           self._commandLine_format(req.aperture)
-
-        if (req.shutterspeed != ""):
-            commandCall += " --set-config " + \
-                           self.shutterspeedConfig + "=" + \
-                           self._commandLine_format(req.shutterspeed)
-
-        backMessage = self._run_gphoto(commandCall)
-
-        return backMessage
+    def _create_set_command(self, config, string, prefix=" --"):
+        command = ""
+        if string != "":
+            command = prefix + "set-config " + \
+                      config + "=" + \
+                      self._commandLine_format(string)
+        return command
 
     def _commandLine_format(self, string):
-        string = string.replace('(', '\(')
-        string = string.replace(')', '\)')
-        string = string.replace(' ', '\ ')
-        return string.replace(',', '\ ')
+        string = string.replace("(", "\(")
+        string = string.replace(")", "\)")
+        string = string.replace(" ", "\ ")
+        return string.replace(",", "\ ")
 
     def get_camera_cb(self, req):
         """
@@ -120,14 +136,13 @@ class GPhotoServer(cd.camera_driver):
             self.shutterspeedConfig)
 
         memorydata = self._run_gphoto(" --storage-info")
-        totalspace,freespace,freeimages = self._parse_device_space(memorydata)
+        totalspace, freespace, freeimages = self._parse_device_space(memorydata)
 
         if not req.getAllInformation:
             iso = self._parse_current_value(iso)
             imageformat = self._parse_current_value(imageformat)
             aperture = self._parse_current_value(aperture)
             shutterspeed = self._parse_current_value(shutterspeed)
-
 
         return {
             'iso': iso,

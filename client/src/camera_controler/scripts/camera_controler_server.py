@@ -116,7 +116,7 @@ class Server:
                 self._rename_file(filename, directory, f)
         return []
 
-    def update_camera_cb(self,req):
+    def update_camera_cb(self, req):
         settings = {
             'iso': req.iso,
             'imageformat': req.imageformat,
@@ -129,7 +129,7 @@ class Server:
         # Simply print out values in our custom message.
         if req.isHdr:
             rospy.loginfo("Taking hdr picture")
-            self.cam_handler.takeHDRPicture(0, setCamera=False)
+            self.cam_handler.takeHDRPicture(0)
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)
