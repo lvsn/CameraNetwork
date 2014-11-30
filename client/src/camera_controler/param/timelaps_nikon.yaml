@@ -1,8 +1,8 @@
-aperture: '16'
+aperture: '2200'
 captureSequence:
 - {aperture: '710', shutterspeed: 0.0040s}
 - {aperture: '1000', shutterspeed: 0.0769s}
 - {aperture: '1000', shutterspeed: 0.4000s}
-imageformat: '3'
+imageformat: 'NEF (Raw)'
 iso: '100'
-shutterspeed: '30'
+shutterspeed: '0.2500s'

@@ -64,10 +64,12 @@ class camera_driver(object):
         2- transfert picture from device(ex camera) to directory
         3- delete picture from device
         '''
-        if (self._create_picture_standard_directory(req.path) == -1):
-            return 'Error'
-        msg = self._copy_picture_from_device_to_standard_directory(req.path)
-        self._delete_picture_from_device()
+        if (self._create_picture_standard_directory(req.path) == 1):
+            msg = self._copy_picture_from_device_to_standard_directory(req.path)
+            if not "error" in msg:
+                self._delete_picture_from_device()
+        else:
+            msg = 'error loading camera\'s picture'
         return msg
 
     def _create_picture_standard_directory(self, directory):

@@ -78,17 +78,25 @@ class GPhotoServer(cd.camera_driver):
         return []
 
     def _copy_picture_from_device_to_standard_directory(self, filename):
-        filename = " --filename " + join(self.homePath, filename)
-        msg = self._run_gphoto(filename + " -P")
-        filename = " --filename " + join(rootPath, req.path)
-        rospy.loginfo("Loading picture.")
-        msg = gphoto.run(filename + " -P")
-
-        # TODO: If previous call fails, don't delete everything!
+        if self._get_picture_qty() > 10:
+            filename = " --filename " + join(self.homePath, filename)
+            msg = self._run_gphoto(filename + " -P")
+        else:
+            msg = "error"
         return msg
 
     def _delete_picture_from_device(self):
-        self._run_gphoto(" -D --recurse")
+        self._run_gphoto(" -DR")
+
+    def _get_picture_qty(self):
+        string = self._run_gphoto(' -L')
+        rospy.loginfo(string)
+        try:
+            value = int(string.split('\n')[-2].split()[0][1:])
+        except ValueError:
+            value = 0
+        rospy.loginfo('Found ' + str(value) + ' pictures')
+        return value
 
     def set_camera_cb(self, req):
         """
@@ -233,8 +241,7 @@ class GPhotoServer(cd.camera_driver):
         if ret == 1:
             if 'No camera found' in stderr:
                 rospy.logerror('Error talking to the camera: ' + stderr)
-
-            return stdout
+            return 'error'
 
         return stdout
 

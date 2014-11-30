@@ -71,8 +71,6 @@ class TimelapsAction:
             rospy.loginfo("Frequency set to " + str(hz) + " hz.")
         except ZeroDivisionError:
             hz = -1
-            rospy.logwarn(
-                "Can not set 0 as frequency... setting frequency to 1 hz")
         return hz
 
     def _get_frame_qty(self, Qty):
@@ -84,9 +82,9 @@ class TimelapsAction:
 
     def _take_picture(self, isHdr, pictureId):
         if(isHdr):
-            self.cam_handler.takeHDRPicture(pictureId)
+            self.cam_handler.takeHDRPicture(pictureId, loadCamera=True)
         else:
-            self.cam_handler.takeSinglePicture(pictureId)
+            self.cam_handler.takeSinglePicture(pictureId, loadCamera=True)
 
     def _send_feedback(self, count, goal, frequency):
         feedback_msg = CameraControlActionFeedback
