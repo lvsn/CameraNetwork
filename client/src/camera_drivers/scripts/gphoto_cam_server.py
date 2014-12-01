@@ -90,7 +90,6 @@ class GPhotoServer(cd.camera_driver):
 
     def _get_picture_qty(self):
         string = self._run_gphoto(' -L')
-        rospy.loginfo(string)
         try:
             value = int(string.split('\n')[-2].split()[0][1:])
         except ValueError:
