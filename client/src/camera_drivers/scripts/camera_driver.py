@@ -30,7 +30,8 @@ class camera_driver(object):
         try:
             self.serverPath = os.environ["CAMNET_SERVER_DATA_DIR"]
         except KeyError:
-            self.serverPath = os.path.expanduser("/home/mathieu/Pictures/server")
+            user = rospy.get_param("Username/server")
+            self.serverPath = os.path.expanduser("/home/" + user + "/Pictures/server")
         #should look on param server for serverusername?
         self.parameterQueue = []
         rospy.Service('capture_camera', CaptureService, self.capture_image_cb)
@@ -79,12 +80,23 @@ class camera_driver(object):
         return msg
 
     def upload_data_to_server(self):
-        rsyncCommand = "-azP " + self.homePath + '/' + " user@address:" + self.serverPath
+        """
+        This method use rsync process to upload all the data from client homepath
+         to user@address (ros server)'s serverPath.
+
+        """
+        user = rospy.get_param("Username/server")
+        address = rospy.get_param("IP/server")
+        rsyncCommand = "-azP " + self.homePath + "/ " + user + "@" + address + ":" + self.serverPath
         rospy.loginfo("launch rsync " + rsyncCommand)
-        msg = self._run_rsync(rsyncCommand)
-        rospy.loginfo("rsync message = " + msg)
+        self._run_rsync(rsyncCommand)
 
     def _create_picture_standard_directory(self, directory):
+        """
+        Create the directory from homePath. The method make sure .. is not used
+        :param directory:
+        :return:
+        """
         loadPath = os.path.join(
             self.homePath,
             self._filename_format(directory),
