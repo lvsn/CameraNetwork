@@ -15,6 +15,7 @@ from datetime import datetime
 import rospy
 import std_srvs.srv
 from camera_network_msgs.srv import *
+import subprocess
 
 
 class camera_driver(object):
@@ -26,6 +27,11 @@ class camera_driver(object):
             self.homePath = os.environ["CAMNET_OUTPUT_DIR"]
         except KeyError:
             self.homePath = os.path.expanduser("~/Pictures")
+        try:
+            self.serverPath = os.environ["CAMNET_SERVER_DATA_DIR"]
+        except KeyError:
+            self.serverPath = os.path.expanduser("/home/mathieu/Pictures/server")
+        #should look on param server for serverusername?
         self.parameterQueue = []
         rospy.Service('capture_camera', CaptureService, self.capture_image_cb)
         rospy.Service('get_camera', OutCameraData, self.get_camera_cb)
@@ -72,6 +78,12 @@ class camera_driver(object):
             msg = 'error loading camera\'s picture'
         return msg
 
+    def upload_data_to_server(self):
+        rsyncCommand = "-azP " + self.homePath + '/' + " user@address:" + self.serverPath
+        rospy.loginfo("launch rsync " + rsyncCommand)
+        msg = self._run_rsync(rsyncCommand)
+        rospy.loginfo("rsync message = " + msg)
+
     def _create_picture_standard_directory(self, directory):
         loadPath = os.path.join(
             self.homePath,
@@ -81,7 +93,6 @@ class camera_driver(object):
             rospy.logwarn("Use of '..' is prohibited")
             return -1
         directory = os.path.dirname(loadPath)
-        rospy.loginfo("Creating and loading Picture to folder " + directory)
         self._mkdir(directory)
         return 1
 
@@ -146,3 +157,23 @@ class camera_driver(object):
         string_ = string_.replace('%C', pictureFormat)
         string_ = string_.replace('%n', str(pictureId))
         return datetime.now().strftime(string_)
+
+    def _run_rsync(self, cmd):
+        """
+        Launch a rsync process
+        :param cmd: command string ex: '--remove-source-files -azP /home/user/test/ server@192.0.0.2:/home/user/test'
+        :return string:  return execution feedback string
+        """
+        cmd = 'rsync ' + cmd
+
+        p = subprocess.Popen(cmd, shell=True, executable="/bin/bash",
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+        )
+
+        stdout, stderr = p.communicate()
+        ret = p.returncode
+        if ret != 0:
+            print stderr
+
+        return stdout

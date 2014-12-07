@@ -81,6 +81,8 @@ class GPhotoServer(cd.camera_driver):
         if self._get_picture_qty() > 10:
             filename = " --filename " + join(self.homePath, filename)
             msg = self._run_gphoto(filename + " -P")
+            rospy.loginfo("Picture downloaded to " + filename)
+            self.upload_data_to_server()
         else:
             msg = "error"
         return msg
@@ -94,7 +96,7 @@ class GPhotoServer(cd.camera_driver):
             value = int(string.split('\n')[-2].split()[0][1:])
         except ValueError:
             value = 0
-        rospy.loginfo('Found ' + str(value) + ' pictures')
+        rospy.loginfo('Found ' + str(value) + ' picture(s)')
         return value
 
     def set_camera_cb(self, req):

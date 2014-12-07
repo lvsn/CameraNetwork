@@ -11,7 +11,6 @@ Created on Fri May 23 14:27:55 2014
 import os
 import time
 import math
-import traceback
 from xml.dom import minidom
 
 import subprocess
@@ -20,7 +19,6 @@ import rospy
 import rospkg
 import std_srvs.srv
 import paramiko
-import
 
 from camera_network_msgs.msg import *
 from camera_network_msgs.srv import *
