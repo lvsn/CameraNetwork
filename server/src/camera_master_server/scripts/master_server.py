@@ -18,7 +18,7 @@ import rospy
 
 import file_transfer_action as fta
 import network_capture_action as nca
-
+import getpass
 
 class Server:
     def __init__(self):
@@ -26,8 +26,13 @@ class Server:
         self.setPictureDirectory()
         self.sftp = fta.sftp_action(self.imagePath)
         self.network_capture = nca.network_capture_action()
+        self.setParam()
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
+
+    def setParam(self):
+        rospy.set_param('/IP/server', os.getenv("ROS_IP"))
+        rospy.set_param('/Username/server', getpass.getuser())
 
     def setPictureDirectory(self):
         """
