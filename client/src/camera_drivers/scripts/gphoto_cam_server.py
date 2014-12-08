@@ -18,6 +18,8 @@ from camera_network_msgs.srv import *
 import os
 import camera_driver as cd
 import subprocess
+import Image
+import numpy
 
 
 join = os.path.join
@@ -53,6 +55,17 @@ class GPhotoServer(cd.camera_driver):
             gphotoCommand = " --capture-image --wait-event=1s --keep"
         msg = self._run_gphoto(gphotoCommand)
         return msg
+
+    def preview_capture_cb(self, req):
+        self._run_gphoto(" --capture-image --wait-event=2s")
+        num = self._get_picture_qty()
+        #--no-keep is not working this command simulate it
+        filename = self.homePath + "/previewImage"
+        self._run_gphoto(" --filename " + filename + " -R -p " + str(num) + " -d " + str(num))
+        picture = Image.open(filename).resize((320, 240))
+        self._publish_picture(numpy.array(picture)[:, :, ::-1])
+        os.remove(filename)
+        return []
 
     def _build_sequence_command(self, data):
         """

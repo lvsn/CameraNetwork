@@ -13,7 +13,6 @@ mkdir ~/Pictures/data
 
 echo "CamNet's folder ready"
 
-
 ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ""
 
 echo "Enter server's user"

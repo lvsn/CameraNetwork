@@ -28,6 +28,7 @@ class CameraHandler:
         rospy.wait_for_service('capture_video')
         rospy.wait_for_service('calibrate_picture')
         rospy.wait_for_service('configure_parameter_queue')
+        rospy.wait_for_service('preview_camera_driver')
 
         self.get_camera_service = rospy.ServiceProxy(
             'get_camera',
@@ -35,6 +36,10 @@ class CameraHandler:
         self.capture_camera_service = rospy.ServiceProxy(
             'capture_camera',
             CaptureService)
+        self.preview_camera_service = rospy.ServiceProxy(
+            'preview_camera_driver',
+            std_srvs.srv.Empty
+        )
         self.set_camera_service = rospy.ServiceProxy(
             'set_camera',
             InCameraData)
@@ -130,10 +135,7 @@ class CameraHandler:
         self.load_camera_service(picture)
 
     def takePreview(self):
-        self.updateCameraSetting()
-        picturePath = 'preview/send.%C'
-        self.capture_camera_service(0)
-        self.load_camera_service(picturePath)
+        self.preview_camera_service()
 
     def calibrate(self):
         self.calibrate_picture_service()

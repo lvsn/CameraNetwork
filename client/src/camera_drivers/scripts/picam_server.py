@@ -12,10 +12,8 @@ from datetime import datetime
 import roslib
 roslib.load_manifest('camera_drivers')
 import rospy
-from sensor_msgs.msg import Image
 import std_srvs.srv
 import cv2
-from cv_bridge import CvBridge, CvBridgeError
 import picamera
 import wiringpi2 as gpio
 import numpy as np
@@ -40,8 +38,6 @@ class picam_server(cd.camera_driver):
         # ROS functions
         super(picam_server, self).__init__()
         rospy.Service('stream_video', Uint32, self.stream_video_cb)
-        self.image_publisher = rospy.Publisher("/preview", Image)
-        self.bridge = CvBridge()
         self.id_gen = self._id_generator()
         self.tmpPath = os.path.join(self.homePath, 'tmp')
 
@@ -67,6 +63,15 @@ class picam_server(cd.camera_driver):
         self._flash_led(nflash=2)
         return 'Image saved as ' + pictureFileName
 
+    def preview_capture_cb(self, req):
+        stream = io.BytesIO()
+        stream.flush()
+        stream.seek(0)
+        self.picam.capture(stream, format='jpeg', resize=(320, 240))
+        data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+        image = cv2.imdecode(data, 1)
+        self._publish_picture(image)
+
     def stream_video_cb(self, req):
         stream = io.BytesIO()
         rospy.loginfo("Start Video streaming with " +
@@ -79,13 +84,7 @@ class picam_server(cd.camera_driver):
             self.picam.capture(stream, format='jpeg', resize=(320, 240))
             data = np.fromstring(stream.getvalue(), dtype=np.uint8)
             image = cv2.imdecode(data, 1)
-            try:
-                self.image_publisher.publish(
-                    self.bridge.cv2_to_imgmsg(
-                        image,
-                        "bgr8"))
-            except CvBridgeError as e:
-                rospy.logwarn("stream_video_cb : " + e)
+            self._publish_picture(image)
         gpio.digitalWrite(self.led, False)
         return {}
 

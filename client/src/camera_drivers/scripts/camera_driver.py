@@ -16,6 +16,8 @@ import rospy
 import std_srvs.srv
 from camera_network_msgs.srv import *
 import subprocess
+import sensor_msgs.msg
+from cv_bridge import CvBridge, CvBridgeError
 
 
 class camera_driver(object):
@@ -30,11 +32,14 @@ class camera_driver(object):
         try:
             self.serverPath = os.environ["CAMNET_SERVER_DATA_DIR"]
         except KeyError:
-            user = rospy.get_param("Username/server")
+            user = rospy.get_param("/Username/server")
             self.serverPath = os.path.expanduser("/home/" + user + "/Pictures/server")
         #should look on param server for serverusername?
         self.parameterQueue = []
+        self.bridge = CvBridge()
+        self.image_publisher = rospy.Publisher("/preview", sensor_msgs.msg.Image, queue_size=1)
         rospy.Service('capture_camera', CaptureService, self.capture_image_cb)
+        rospy.Service('preview_camera_driver', std_srvs.srv.Empty, self.preview_capture_cb)
         rospy.Service('get_camera', OutCameraData, self.get_camera_cb)
         rospy.Service('set_camera', InCameraData, self.set_camera_cb)
         rospy.Service('load_camera', Load, self.load_camera_cb)
@@ -58,6 +63,10 @@ class camera_driver(object):
 
     @abstractmethod
     def capture_image_cb(self, req):
+        pass
+
+    @abstractmethod
+    def preview_capture_cb(self, req):
         pass
 
     @abstractmethod
@@ -85,8 +94,8 @@ class camera_driver(object):
          to user@address (ros server)'s serverPath.
 
         """
-        user = rospy.get_param("Username/server")
-        address = rospy.get_param("IP/server")
+        user = rospy.get_param("/Username/server")
+        address = rospy.get_param("/IP/server")
         rsyncCommand = "-azP " + self.homePath + "/ " + user + "@" + address + ":" + self.serverPath
         rospy.loginfo("launch rsync " + rsyncCommand)
         self._run_rsync(rsyncCommand)
@@ -169,6 +178,20 @@ class camera_driver(object):
         string_ = string_.replace('%C', pictureFormat)
         string_ = string_.replace('%n', str(pictureId))
         return datetime.now().strftime(string_)
+
+    def _publish_picture(self, img):
+        """
+        This function publish opencv image to /preview
+        :param img:
+        """
+        try:
+            self.image_publisher.publish(
+                self.bridge.cv2_to_imgmsg(
+                    img,
+                    "bgr8"))
+        except CvBridgeError as e:
+            rospy.logwarn("imagePublish error : " + e)
+        rospy.loginfo("Image Published to preview")
 
     def _run_rsync(self, cmd):
         """
