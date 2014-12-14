@@ -209,7 +209,7 @@ function device()
             ros : ros,
             name : name + '/DownloadQty'
         });
-        setting.set(qty);
+        setting.set(parseInt(qty));
     }
 
 	this.saveSequence = function(){
