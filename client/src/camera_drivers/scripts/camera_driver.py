@@ -35,6 +35,7 @@ class camera_driver(object):
             user = rospy.get_param("/Username/server")
             self.serverPath = os.path.expanduser("/home/" + user + "/Pictures/server")
         #should look on param server for serverusername?
+        rospy.set_param("DownloadQty", 10)
         self.parameterQueue = []
         self.bridge = CvBridge()
         self.image_publisher = rospy.Publisher("/preview", sensor_msgs.msg.Image, queue_size=1)
@@ -84,8 +85,11 @@ class camera_driver(object):
             msg = self._copy_picture_from_device_to_standard_directory(req.path)
             if not "error" in msg:
                 self._delete_picture_from_device()
+            else:
+                rospy.logerr("Error while loading picture to path : " + msg)
         else:
-            msg = 'error loading camera\'s picture'
+            msg = 'Load aborted'
+            rospy.logerr(msg)
         return msg
 
     def upload_data_to_server(self):

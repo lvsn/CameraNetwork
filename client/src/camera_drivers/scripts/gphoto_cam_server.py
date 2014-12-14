@@ -91,7 +91,8 @@ class GPhotoServer(cd.camera_driver):
         return []
 
     def _copy_picture_from_device_to_standard_directory(self, filename):
-        if self._get_picture_qty() > 10:
+        qty = rospy.get_param("DownloadQty")
+        if self._get_picture_qty() > qty:
             filename = " --filename " + join(self.homePath, filename)
             msg = self._run_gphoto(filename + " -P")
             rospy.loginfo("Picture downloaded to " + filename)
