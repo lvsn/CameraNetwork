@@ -84,6 +84,7 @@ class camera_driver(object):
         if (self._create_picture_standard_directory(req.path) == 1):
             msg = self._copy_picture_from_device_to_standard_directory(req.path)
             if not "error" in msg:
+                rospy.loginfo("Deleting Pictures from camera")
                 self._delete_picture_from_device()
         else:
             msg = 'Load aborted'

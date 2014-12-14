@@ -91,8 +91,13 @@ class GPhotoServer(cd.camera_driver):
         return []
 
     def _copy_picture_from_device_to_standard_directory(self, filename):
-        qty = rospy.get_param("DownloadQty")
-        if self._get_picture_qty() > qty:
+        goalQty = rospy.get_param("DownloadQty")
+        currentQty = self._get_picture_qty()
+        rospy.loginfo('Found ' + str(currentQty) + ' picture(s), will download after ' + goalQty)
+        if goalQty < 0:
+            return "error : qty is negative"
+            #Todo find a way to return without string with error... MathGaron
+        elif currentQty > goalQty:
             filename = " --filename " + join(self.homePath, filename)
             msg = self._run_gphoto(filename + " -P")
             rospy.loginfo("Picture downloaded to " + filename)
@@ -110,7 +115,6 @@ class GPhotoServer(cd.camera_driver):
             value = int(string.split('\n')[-2].split()[0][1:])
         except ValueError:
             value = 0
-        rospy.loginfo('Found ' + str(value) + ' picture(s)')
         return value
 
     def set_camera_cb(self, req):
