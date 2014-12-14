@@ -65,75 +65,14 @@
 	</div> 
 
    <!-- Video interface -->
-     <div class="mainStyle">
+    <div class="mainStyle">
         <h2>VIDEO</h2>
-		<form name="video" action="javascript:void(0)" method="get">
+        <form name="video" action="javascript:void(0)" method="get">
             <label>Video capture Time (s) : </label>
             <input id="video_time" type="number" value="0" name="video_time" ><br>
             <button type="button" class="floatleft" onclick = "networkVideoEvent(this.form)">Start</button>
         </form>
-	</div> 
-
-  <!-- Download interface -->
-	<div class="mainStyle">
-        <h2>FETCH</h2>
-        <div class="parameterStyle right" style="clear: both;">
-			<form name="timelapse" action="javascript:void(0)" method="get">
-				<label>
-                    <span>Device Name :</span>
-                    <input id="download_name" type="text"  value='' name="download_name" >
-                </label>
-				<label>
-                    <span>Username :</span>
-                    <input id="download_username" type="text" value='' name="download_username" >
-                </label>
-                <label>
-                    <span>Password : </span>
-                    <input id="download_password" type="password" value='' name="download_password" >
-                </label>
-				<input type="submit" class="styleButton" onclick="_network_download.addUser(form)" value="Add">
-			</form>
-                 <button type="button" class="styleButton" onclick = "_network_download.delUsers(form)">Delete</button>
-			<button type="button" class="styleButton" onclick = "_network_download.saveUsers(form)">Save</button>
-                <button type="button" class="styleButton" onclick = "_network_download.getUsers(form)">Get</button>
-		</div>
-
-		<form  name="download" action="javascript:void(0)" method="get">
-			<label>
-                <span>Frequency :</span>
-                <input id="input_frequency" type="number" value="0" name="network_download_frequency" >
-                <span>seconds (0 for single shot)</span>
-            </label>
-            <label>
-                <span>Start at :</span>
-                <input id="download_start_at"/>
-                <script type="text/javascript">
-                    $('#download_start_at').timepicker({
-                        'timeFormat': 'G:i',
-                        'scrollDefault': 'now'
-                    });
-                </script>
-            </label>
-
-			<dl>
-				<dt>Status:</dt>
-					<dd id ="network_download_status"></dd>
-				<dt>Feedback:</dt>
-					<dd id="network_download_feedback"></dd>
-				<dt>Result:</dt>
-					<dd id="network_download_result"></dd>
-			</dl>
-            <div style="clear: both;"></div>
-            <div class="floatleft">
-                <input type="submit" class="floatleft" onclick="networkDownloadEvent(this.form,true)" value="Download">
-            </div>
-            <div class="floatright">
-                 <input type="submit" class="floatright" onclick = "networkDownloadEvent(this.form,false)" value="Stop">
-            </div>
-		</form> 
-            
-
-	</div>  
+    </div>
 
     </div>
     </div>

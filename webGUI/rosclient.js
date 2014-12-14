@@ -87,119 +87,6 @@ function network_timelapse()
 	this.result.subscribe(function(msg){
 		$("#network_timelapse_result").text(msg.result.total_picture);
 	});
-};      
-
-function network_download(){
-	this.status = new ROSLIB.Topic({
-		ros : ros,
-		name : '/master/sftp/status',
-		messageType : 'actionlib_msgs/GoalStatusArray'
-	});
-	this.feedback = new ROSLIB.Topic({
-		ros : ros,
-		name : '/master/sftp/feedback',
-		messageType : 'camera_network_msgs/CameraDownloadActionFeedback'
-	});
-	this.result = new ROSLIB.Topic({
-		ros : ros,
-		name : '/master/sftp/result',
-		messageType : 'camera_network_msgs/CameraDownloadActionResult'
-	});
-	this.action = new ROSLIB.ActionClient({
-      	ros : ros,
-   	  	serverName : '/master/sftp',
-      	actionName : 'camera_network_msgs/CameraDownloadAction'
-    }); 
-	
-    this.setAction = function sendGoal(form){
-        var ts = $("#download_start_at").timepicker('getTime', [new Date()]);
-        // If ts not defined or not a D:DD or DD:DD entry, where D is a digit
-        if (ts == null || ts == undefined || $("#download_start_at").val().match(/\d+:\d\d/) == null) {
-            ts = new Date();
-            $("#download_start_at").timepicker('setTime', ts);
-        }
-        var goal = new ROSLIB.Goal({
-            actionClient : _network_download.action,
-            goalMessage : {
-                dowload_frequency_s : parseFloat(form.network_download_frequency.value),
-                start_time : ts.getTime()/1000
-            }
-        });
-        goal.send();
-    }  
-
-    this.stopAction = function(){
-		this.action.cancel();
-	}
-
-    this.addUser = function(form){
-		var add = new ROSLIB.Service({
-			ros : ros,
-			name : '/master/add_user',
-			serviceType : 'camera_network_msgs/User'
-		});
-		var request = new ROSLIB.ServiceRequest({
-                                name : form.download_name.value,
-                                username : form.download_username.value,
-                                password : form.download_password.value
-
-            });
-		add.callService(request, function(result) {});
-	}
-
-    this.delUsers = function(form){
-		var del = new ROSLIB.Service({
-			ros : ros,
-			name : '/master/delete_users',
-			serviceType : 'std_srvs/Empty'
-		});
-		var request = new ROSLIB.ServiceRequest({});
-		del.callService(request, function(result) {});
-	}
-
-    this.saveUsers = function(form){
-		var save = new ROSLIB.Service({
-			ros : ros,
-			name : '/master/save_users',
-			serviceType : 'std_srvs/Empty'
-		});
-		var request = new ROSLIB.ServiceRequest({});
-		save.callService(request, function(result) {});
-	}
-
-    this.getUsers = function(form){
-		var get = new ROSLIB.Service({
-			ros : ros,
-			name : '/master/get_users',
-			serviceType : 'camera_network_msgs/BackMessage'
-		});
-		var request = new ROSLIB.ServiceRequest({});
-		get.callService(request, function(result) {
-                alert(result.message);
-            });
-	}
-   
-	this.feedback.subscribe(function(msg){
-		$("#network_download_feedback").text(msg.feedback.picture_downloaded);
-	});
-
-	this.result.subscribe(function(msg){
-		$("#network_download_result").text(msg.result.total_downloaded);
-	});
-	
-	this.status.subscribe(function(message) {
-		statusList = message.status_list;
-		if(statusList.length > 0){
-			//console.log(message.status_list[0].status);
-			$("#network_download_status").text("Busy");
-			$("#network_download_status").css("color", "orange");
-		}
-		else{
-			$("#network_download_status").text("Idle");
-			$("#network_download_status").css("color", "green");
-		}
-		
-	}); 
 };
 
 function setSelectOptions(selector, values, current_value) {
@@ -506,7 +393,6 @@ function device()
 //   ----  Instances   -----
 
 var _network_timelapse = new network_timelapse();
-var _network_download = new network_download();
 var _current_device;
 var _device_list;
 //var img = new Image;
@@ -654,15 +540,6 @@ function networkVideoEvent(form){
     });
     cmdVideo.publish(msg);
 
-}
-
-function networkDownloadEvent(form, isStart){
-	if(isStart){
-		_network_download.setAction(form);
-	}
-	else{
-		_network_download.stopAction();
-	}
 }
 
 function setParametersEvent(form){

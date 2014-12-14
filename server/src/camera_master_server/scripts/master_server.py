@@ -13,24 +13,25 @@ from __future__ import print_function
 import os
 import errno
 
-import roslib; roslib.load_manifest('camera_master_server')
+import roslib;
+
+roslib.load_manifest('camera_master_server')
 import rospy
 
-import file_transfer_action as fta
 import network_capture_action as nca
 import getpass
 import time
 import thread
+
 
 class Server:
     def __init__(self):
         self.terminateThreads = False
         rospy.init_node('master_server')
         self.setPictureDirectory()
-        self.sftp = fta.sftp_action(self.imagePath)
         self.network_capture = nca.network_capture_action()
         self.setParam()
-        thread.start_new_thread( Server._heart_beat, (self, ))
+        thread.start_new_thread(Server._heart_beat, (self, ))
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
 
@@ -61,7 +62,7 @@ class Server:
                                "CameraNetwork path not set")
 
     def _heart_beat(self):
-        while(not self.terminateThreads):
+        while (not self.terminateThreads):
             connectedDevices = rospy.get_param("/IP")
             for name in connectedDevices:
                 response = os.system("ping -c 1 " + connectedDevices[name] + " > /dev/null 2>&1")
