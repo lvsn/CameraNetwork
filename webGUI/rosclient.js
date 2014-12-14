@@ -202,7 +202,15 @@ function device()
 		    name : name + '/camera_setting/captureSequence'
 	    });
 		setting.set([{}]);
-	} 
+	}
+
+    this.setDownloadQty = function(qty) {
+        var setting = new ROSLIB.Param({
+            ros : ros,
+            name : name + '/DownloadQty'
+        });
+        setting.set(qty);
+    }
 
 	this.saveSequence = function(){
 		var save = new ROSLIB.Service({
@@ -278,17 +286,16 @@ function device()
 		});
 		var request = new ROSLIB.ServiceRequest({
 			iso : form.device_parameter_iso.value,
-                aperture : form.device_parameter_aperture.value,
-                shutterspeed : form.device_parameter_shutterspeed.value,
-                imageformat : form.device_parameter_imageformat.value
+            aperture : form.device_parameter_aperture.value,
+            shutterspeed : form.device_parameter_shutterspeed.value,
+            imageformat : form.device_parameter_imageformat.value
 		});
 		update_srv.callService(request,function(result){});
 
         /* Apply the configuration to the camera */
 		//_current_device.setAction();
-
+        this.setDownloadQty(form.device_dowload_qty.value);
         this.setConfig();
-
 	}
 
 	this.getInformation = function(form){
@@ -315,13 +322,15 @@ function device()
             $("#device_freespace").text(result['freeSpace']);
             $("#device_freeimages").text(result['freeImages']);
 		});
+        param.get(function(value){
+           $("#device_dowload_qty").val(value["DownloadQty"]);
+        });
 	}
 
 	this.refresh = function() {
 		$("#device_name").text(name);
-        	$("#device_ip").text(ip);
+        $("#device_ip").text(ip);
 		param.get(function(value) {
-
 	    	if (value != null && value["camera_model"] != null && value != undefined) {
 	    		$("#device_camera").text(value["camera_model"]);
 	    		$("#device_camera").css("color","black");
@@ -329,7 +338,6 @@ function device()
 	    		$("#device_aperture").text(value["camera_setting"]["aperture"]);
 	    		$("#device_shutterspeed").text(value["camera_setting"]["shutterspeed"]);
 	    		$("#device_imageformat").text(value["camera_setting"]["imageformat"]);
-
 	    		var sequenceSize = value["camera_setting"]["captureSequence"].length;
 	            var sequence = value["camera_setting"]["captureSequence"];
 				var parameterString = '';

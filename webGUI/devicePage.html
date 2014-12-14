@@ -47,6 +47,9 @@
                     <select id="device_parameter_imageformat" value='' name="device_parameter_imageformat" >
                     </select>
                 </label>
+                <labe>Quantity of picture before download :
+                    <input id="device_dowload_qty" type="number" value="1" name="device_dowload_qty" >
+                </labe>
                 <input type="submit" class="styleButton" onclick="setParametersEvent(this.form)" value="Set">
             </form>
             <button type="button" class="styleButton" onclick="calibratePictureEvent(this.form)">Auto</button>
@@ -85,58 +88,58 @@
 
         <!-- Parameter interface -->
         <div class="mainStyle" id="capture_mode">
-                <div style="float:left;">
-                        <p>Capture Parameters:</p>
-                        <p id="device_parameters"></p>
-                </div>
-                <div class="parameterStyle right">
-                        <form  name="timelapse" action="javascript:void(0)" method="get">
-                                <label>Aperture :
-                                    <select id="device_sequence_aperture" value='' name="device_sequence_aperture" >
-                                    </select>
-                                </label>
-                                <label>Shutter Speed :
-                                    <select id="device_sequence_shutterspeed" value='' name="device_sequence_shutterspeed" >
-                                    </select>
-                                </label>
-                                <input type="submit" class="styleButton" onclick="addSequenceEvent(this.form)" value="Add">
-                        </form>
-                        <button type="button" class="styleButton" onclick = "saveSequenceEvent()">Save</button>
+            <div style="float:left;">
+                <p>Capture Parameters:</p>
+                <p id="device_parameters"></p>
+            </div>
+            <div class="parameterStyle right">
+                <form  name="timelapse" action="javascript:void(0)" method="get">
+                    <label>Aperture :
+                        <select id="device_sequence_aperture" value='' name="device_sequence_aperture" >
+                        </select>
+                    </label>
+                    <label>Shutter Speed :
+                        <select id="device_sequence_shutterspeed" value='' name="device_sequence_shutterspeed" >
+                        </select>
+                    </label>
+                    <input type="submit" class="styleButton" onclick="addSequenceEvent(this.form)" value="Add">
+                </form>
+                <button type="button" class="styleButton" onclick = "saveSequenceEvent()">Save</button>
                 <button type="button" class="styleButton" onclick = "removeSequenceEvent(this.form)">Reset</button>
-                </div>
+            </div>
         </div>
 
 
 <!-- Timelaps interface -->
         <div class="mainStyle">
-                <form name="timelapse" action="javascript:void(0)" method="get">
-                        <label>
-            <span>Frequency :</span>
-            <input id="device_timelapse_frequency" type="number" value="0" name="device_timelapse_frequency" >
-            <span>seconds</span>
-        </label>
-                        <label>
-            <span>Quantity :</span>
-            <input id="device_timelapse_qty" type="number" value="1" name="device_timelapse_qty" >
-            <span>(&lt;0 = infinite)</span>
-        </label>
-                        <input type="checkbox" id="device_hdr" value="HDR">HDR<br>
-                        <dl>
-                                <dt>Status:</dt>
-                                        <dd id="device_timelapse_status"></dd>
-                                <dt>Feedback:</dt>
-                                        <dd id="device_timelapse_feedback"></dd>
-                                <dt>Termination:</dt>
-                                        <dd id="device_timelapse_result"></dd>
-                        </dl>
-        <div style="clear: both;"></div>
-        <div class="floatleft">
-            <input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form, true)" value="Launch acquisition">
-        </div>
-        <div class="floatright">
-            <input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form, false)" value="Stop">
-        </div>
-                </form>
+            <form name="timelapse" action="javascript:void(0)" method="get">
+                <label>
+                    <span>Frequency :</span>
+                    <input id="device_timelapse_frequency" type="number" value="0" name="device_timelapse_frequency" >
+                    <span>seconds</span>
+                </label>
+                <label>
+                    <span>Quantity :</span>
+                    <input id="device_timelapse_qty" type="number" value="1" name="device_timelapse_qty" >
+                    <span>(&lt;0 = infinite)</span>
+                </label>
+                <input type="checkbox" id="device_hdr" value="HDR">HDR<br>
+                <dl>
+                    <dt>Status:</dt>
+                        <dd id="device_timelapse_status"></dd>
+                    <dt>Feedback:</dt>
+                        <dd id="device_timelapse_feedback"></dd>
+                    <dt>Termination:</dt>
+                        <dd id="device_timelapse_result"></dd>
+                </dl>
+                <div style="clear: both;"></div>
+                <div class="floatleft">
+                    <input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form, true)" value="Launch acquisition">
+                </div>
+                <div class="floatright">
+                    <input type="submit" class="styleButton" onclick="deviceTimelapsEvent(this.form, false)" value="Stop">
+                </div>
+            </form>
 
         </div> 
         <!-- preview interface -->

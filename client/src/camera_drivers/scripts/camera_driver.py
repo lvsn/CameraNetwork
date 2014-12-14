@@ -85,8 +85,6 @@ class camera_driver(object):
             msg = self._copy_picture_from_device_to_standard_directory(req.path)
             if not "error" in msg:
                 self._delete_picture_from_device()
-            else:
-                rospy.logerr("Error while loading picture to path : " + msg)
         else:
             msg = 'Load aborted'
             rospy.logerr(msg)
