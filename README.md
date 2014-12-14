@@ -8,10 +8,11 @@ The system is mainly used for still pictures. The ROS interface is made of two a
 
 #Camera Driver
 
-This layer interact directly with the camera, it is used by camera controller so it need to implement right services to make it compatible with the system. The two actual drivers are : gphoto and picamera. USB could be supported in the futur.
+This layer interact directly with the camera, it is used by camera controller so it need to implement right services to make it compatible with the system. The two actual drivers are : gphoto and picamera.A mobile prototype is implemented (only capture feature). USB could be supported in the futur.
 
 The services are :
 * capture_camera : service that take picture and store it in default place
+* preview_capture : Method that send preview to mjpeg stream
 * capture_video : service that take video and store it in default place
 * load_camera : service that upload default's picture place to user's place it place the file and rename it with a standard
 * get_camera : service that return camera's data (iso, aperture, shutterspeed, format)
@@ -41,7 +42,8 @@ Services:
 * preview_camera : take a picture and stream it to mjpeg to view (the picture is deleted afterward)
 * shutdown_device : can shutdown or reboot the device
 * calibrate_device : call Camera's Driver service to calibrate and update datas
-* save_config: Save HDR configurations to default param file
+* save_config : Save HDR configurations to default param file
+* capture_video : if supported, will capture a video given a delay in seconds 
 
 Action:
 * timelaps : Take picture with parameters : quantity, delay between each pictures and if HDR or normal pictures
@@ -50,15 +52,7 @@ Action:
 
 Camera Master is an interface to control the whole network at once with extra network features:
 Actions:
-* sftp : open sftp session with every device on the network, it download every file called by load_camera
 * network_timelaps: Implement the same action as Camera Controller but from the network point of view. Instead of calling devices individually, it publish on topic 
-
-  sftp_node maintain a list of user to log into every device (not safe!) it use user:pi password:raspberry if it cant   find it in the list
-  Services:
-  * add_user: add new user to list
-  * delete_users: remove all users from list
-  * save_users: write to default list file
-  * get_users: return the entire list (may be removed, it was for debugging purpose)
 
 Its Launchfile call mjpeg_server for streaming and rosbridge_websocket for javascript bridge. 
 This node have master as namespace.

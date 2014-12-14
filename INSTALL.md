@@ -30,7 +30,6 @@ $ pip install empy
 $ pip install pyyaml
 $ pip install rospkg
 $ pip install pillow
-$ pip install paramiko
 ```
 
 Because ROS Indigo uses an old version of PIL to work, you must setup a proxy to the new Image module as such:
@@ -84,7 +83,7 @@ $ echo ‘source /opt/ros/hydro/setup.bash ’ >> ~/.bashrc
 
 # Camera Network Installation #
 
-will generate camera-network folder:
+will generate camera-network folder and generate key to the server:
 
 ### setup ROS workspace ###
 ```
@@ -96,10 +95,9 @@ $ catkin_make
 $ sudo ./install.sh
 ```
 
-### Install gphoto and upstart ###
+### Install gphoto ###
 ```
-$ sudo ./gphoto2-updater.sh 
-$ sudo apt-get install upstart  
+$ sudo ./gphoto2-updater.sh
 ```
 
 ### Install Bluetooth support ###
@@ -119,18 +117,7 @@ Restart Daemon.
 $ sudo /etc/init.d/bluetooth restart
 ```
 
-### Setup Upstart Job ###
-This section launches the camera controller upon interface connection. It is based on robot_upstart (turtlebot). Detail about this system can be found here: http://wiki.ros.org/robot_upstart .
-
-To create a new upstart service for the device, execute:
-```
-$ rosrun robot_upstart install camera_controler/launch/camera_controler_gphoto.launch --interface wlan0 --master http://<MASTER'S URL>:11311 --setup /home/pi/ros_catkin_ws/install_isolated/setup.bash 
-```
-Add this line around the beginning of /usr/sbin/camera-start:
-```
-export CAMERA_NAME=<Unique name>
-```
-You will then be able to start and enable the ``camera`` service.
+### Setup Client Launchfile ###
 
 Configure camera_control.launch as you need:
 (the param file can be changed)

@@ -20,7 +20,6 @@ import rospy
 
 import network_capture_action as nca
 import getpass
-import time
 import thread
 
 
