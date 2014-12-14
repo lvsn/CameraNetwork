@@ -251,11 +251,8 @@ class GPhotoServer(cd.camera_driver):
 
         r = envoy.run(cmd)
 
-        if r.status_code == 1:
-            if 'No camera found' in r.std_err:
-                rospy.logerror('Error talking to the camera: ' + stderr)
-            return 'error'
-
+        if r.status_code != 0:
+            rospy.logerr("gphoto2 process error : " + r.std_err)
         return r
 
 

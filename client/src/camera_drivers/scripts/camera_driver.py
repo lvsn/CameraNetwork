@@ -203,4 +203,7 @@ class camera_driver(object):
         :return envoy:  return envoy object with stdout stderr etc
         """
         cmd = 'rsync ' + cmd
-        return envoy.run(cmd)
+        r = envoy.run(cmd)
+        if r.status_code != 0:
+            rospy.logerr("rsync process error : " + r.std_err)
+        return r
