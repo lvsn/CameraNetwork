@@ -15,8 +15,8 @@ from datetime import datetime
 import rospy
 import std_srvs.srv
 from camera_network_msgs.srv import *
-import subprocess
 import sensor_msgs.msg
+import envoy
 from cv_bridge import CvBridge, CvBridgeError
 
 
@@ -200,18 +200,7 @@ class camera_driver(object):
         """
         Launch a rsync process
         :param cmd: command string ex: '--remove-source-files -azP /home/user/test/ server@192.0.0.2:/home/user/test'
-        :return string:  return execution feedback string
+        :return envoy:  return envoy object with stdout stderr etc
         """
         cmd = 'rsync ' + cmd
-
-        p = subprocess.Popen(cmd, shell=True, executable="/bin/bash",
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-        )
-
-        stdout, stderr = p.communicate()
-        ret = p.returncode
-        if ret != 0:
-            print stderr
-
-        return stdout
+        return envoy.run(cmd)

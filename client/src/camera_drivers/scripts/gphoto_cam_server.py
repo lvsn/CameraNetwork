@@ -17,7 +17,7 @@ import rospy
 from camera_network_msgs.srv import *
 import os
 import camera_driver as cd
-import subprocess
+import envoy
 import Image
 import numpy
 
@@ -54,7 +54,7 @@ class GPhotoServer(cd.camera_driver):
         else:
             gphotoCommand = " --capture-image --wait-event=1s --keep"
         msg = self._run_gphoto(gphotoCommand)
-        return msg
+        return msg.std_out
 
     def preview_capture_cb(self, req):
         self._run_gphoto(" --capture-image --wait-event=2s")
@@ -93,13 +93,13 @@ class GPhotoServer(cd.camera_driver):
     def _copy_picture_from_device_to_standard_directory(self, filename):
         goalQty = rospy.get_param("DownloadQty")
         currentQty = self._get_picture_qty()
-        rospy.loginfo('Found ' + str(currentQty) + ' picture(s), will download after ' + goalQty)
+        rospy.loginfo('Found ' + str(currentQty) + ' picture(s), will download after ' + str(goalQty))
         if goalQty < 0:
             return "error : qty is negative"
             #Todo find a way to return without string with error... MathGaron
         elif currentQty > goalQty:
             filename = " --filename " + join(self.homePath, filename)
-            msg = self._run_gphoto(filename + " -P")
+            msg = self._run_gphoto(filename + " -P").std_out
             rospy.loginfo("Picture downloaded to " + filename)
             self.upload_data_to_server()
         else:
@@ -110,9 +110,9 @@ class GPhotoServer(cd.camera_driver):
         self._run_gphoto(" -DR")
 
     def _get_picture_qty(self):
-        string = self._run_gphoto(' -L')
+        msg = self._run_gphoto(' -L')
         try:
-            value = int(string.split('\n')[-2].split()[0][1:])
+            value = int(msg.std_out.split('\n')[-2].split()[0][1:])
         except ValueError:
             value = 0
         return value
@@ -127,7 +127,7 @@ class GPhotoServer(cd.camera_driver):
         commandCall += self._create_set_command(self.imageformatConfig, req.imageformat)
         commandCall += self._create_set_command(self.apertureConfig, req.aperture)
         commandCall += self._create_set_command(self.shutterspeedConfig, req.shutterspeed)
-        return self._run_gphoto(commandCall)
+        return self._run_gphoto(commandCall).std_out
 
     def _create_set_command(self, config, string, prefix=" --"):
         command = ""
@@ -151,18 +151,18 @@ class GPhotoServer(cd.camera_driver):
         """
         rospy.loginfo("Getting camera's Configuration")
 
-        iso = self._run_gphoto(" --get-config " + self.isoConfig)
+        iso = self._run_gphoto(" --get-config " + self.isoConfig).std_out
         imageformat = self._run_gphoto(
             " --get-config " +
-            self.imageformatConfig)
+            self.imageformatConfig).std_out
         aperture = self._run_gphoto(
             " --get-config " +
-            self.apertureConfig)
+            self.apertureConfig).std_out
         shutterspeed = self._run_gphoto(
             " --get-config " +
-            self.shutterspeedConfig)
+            self.shutterspeedConfig).std_out
 
-        memorydata = self._run_gphoto(" --storage-info")
+        memorydata = self._run_gphoto(" --storage-info").std_out
         totalspace, freespace, freeimages = self._parse_device_space(memorydata)
 
         if not req.getAllInformation:
@@ -221,7 +221,7 @@ class GPhotoServer(cd.camera_driver):
         camera = ''
         r = rospy.Rate(0.25)  # retry connection every 4 seconds
         while camera == '':
-            cameralist = self._run_gphoto(" --auto-detect")
+            cameralist = self._run_gphoto(" --auto-detect").std_out
             camera = self._parse_gphoto_camera_list(cameralist)
             if camera == '':
                 rospy.logwarn("No Camera Found")
@@ -249,20 +249,14 @@ class GPhotoServer(cd.camera_driver):
     def _run_gphoto(self, cmd):
         cmd = gphoto2Executable + cmd
 
-        p = subprocess.Popen(cmd, shell=True, executable="/bin/bash",
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-        )
+        r = envoy.run(cmd)
 
-        stdout, stderr = p.communicate()
-        ret = p.returncode
-
-        if ret == 1:
-            if 'No camera found' in stderr:
+        if r.status_code == 1:
+            if 'No camera found' in r.std_err:
                 rospy.logerror('Error talking to the camera: ' + stderr)
             return 'error'
 
-        return stdout
+        return r
 
 
 if __name__ == "__main__":

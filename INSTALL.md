@@ -30,6 +30,7 @@ $ pip install empy
 $ pip install pyyaml
 $ pip install rospkg
 $ pip install pillow
+$ pip install envoy
 ```
 
 Because ROS Indigo uses an old version of PIL to work, you must setup a proxy to the new Image module as such:
