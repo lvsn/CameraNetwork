@@ -1,6 +1,8 @@
 from scripts.Util.extract import *
 from scripts.Util.convert import *
 import os
+import sys
+
 __author__ = 'jbecirovski'
 
 
@@ -11,6 +13,9 @@ def sort_pix_by_date(path_src):
     :return: dictionary
     """
     dict_by_date = {}
+    total_file = len(os.listdir(path_src))
+    each_file = 1/float(total_file)
+    i = 0
     for file in os.listdir(path_src):
         if file.endswith('.CR2'):
             exif_date = extract_date_from_exif(path_src + file)
@@ -18,6 +23,10 @@ def sort_pix_by_date(path_src):
                 dict_by_date[exif_date].append(file)
             except KeyError:
                 dict_by_date[exif_date] = [file]
+        i += each_file
+        sys.stdout.write("\r > Indexing by date: {:>6.2%}".format(i))
+        sys.stdout.flush()
+    print('')
     return dict_by_date
 
 
@@ -29,6 +38,9 @@ def sort_pix_by_time(path_src, list_pix=0):
     """
     dict_by_time = {}
     exif_ref = '000000'
+    total_file = len(os.listdir(path_src))
+    each_file = 1/float(total_file)
+    i = 0
     for file in (sorted(os.listdir(path_src)) if not list_pix else sorted(list_pix)):
         if file.endswith('.CR2'):
             exif_time = extract_time_from_exif(path_src + file)
@@ -37,6 +49,10 @@ def sort_pix_by_time(path_src, list_pix=0):
                 exif_ref = exif_time
             else:
                 dict_by_time[exif_ref].append(file)
+        i += each_file
+        sys.stdout.write("\r > Indexing by timestamp: {:>6.2%}".format(i))
+        sys.stdout.flush()
+    print('')
     return dict_by_time
 
 

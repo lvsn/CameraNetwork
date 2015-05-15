@@ -2,6 +2,7 @@ import os
 from scripts.Util.extract import *
 from scripts.Util.convert import *
 from scripts.Util.sort import *
+import sys
 
 __author__ = 'jbecirovski'
 
@@ -15,7 +16,8 @@ def create_folder_from_dictionary(path_dst, dict_tree):
     for key in dict_tree.keys():
         try:
             os.mkdir(path_dst + key)
-            print('\_ MKDIR {}{}'.format(path_dst, key))
+            sys.stdout.write('\r > MKDIR {}{}'.format(path_dst, key))
+            sys.stdout.flush()
         except FileExistsError:
             pass
         if isinstance(dict_tree[key], dict):
@@ -40,7 +42,8 @@ def move_rename_pix(path_src, path_dst, dict_pix, dict_exif=0):
                     exif_date = extract_date_from_exif(path_src + file, dict_exif)
                     new_pic_name = '{}_{}_{}.CR2'.format(exif_date[2:], exif_time, i + 1)
                     os.rename(path_src + file, path_dst + key + '/' + new_pic_name)
-                    print('\_ MV {} to {}'.format(file, path_dst + key + '/' + new_pic_name))
+                    sys.stdout.write('\r > MV {} to {}'.format(file, path_dst + key + '/' + new_pic_name))
+                    sys.stdout.flush()
         except NotADirectoryError as e:
             print(e)
 
@@ -55,6 +58,10 @@ def organize_folder(path_src):
     dict_folder = sort_pix_by_time_inside_date(path_src)
     print('> Folder tree creating ...')
     create_folder_from_dictionary(path_src, dict_folder)
+    print('\r > Done')
     print('> Pictures renaming ...')
     move_rename_pix(path_src, path_src, dict_folder)
+    print('\r > Done')
     print('Folder organization finished')
+
+organize_folder('/home/jbecirovski/backup-camera/')
