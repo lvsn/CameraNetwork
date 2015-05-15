@@ -63,5 +63,3 @@ def organize_folder(path_src):
     move_rename_pix(path_src, path_src, dict_folder)
     print('\r > Done')
     print('Folder organization finished')
-
-organize_folder('/home/jbecirovski/backup-camera/')
