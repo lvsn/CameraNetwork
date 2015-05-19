@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script Organizer 0.2.0
+# Script Organizer 0.2.1
 # Created by Julien Becirovski
 
 function checkArgument {
@@ -30,6 +30,7 @@ function checkFilesExtension {
 }
 
 function checkOptions {
+    # Check and apply options
     eval COND_GET_PIX=false
     eval COND_ORG_PIX=false
     eval COND_SND_PIX=false
@@ -37,10 +38,10 @@ function checkOptions {
 
     while getopts ":" opt; do
         case $OPTARG in
-            g) COND_GET_PIX=true ;;
-            o) COND_ORG_PIX=true ;;
-            s) COND_SND_PIX=true ;;
-            p) COND_RPI_PIX=true ;;
+            g) COND_GET_PIX=true ;; # Get pictures from camera to src path
+            o) COND_ORG_PIX=true ;; # Organize pictures inside src path
+            s) COND_SND_PIX=true ;; # Send pictures from src to dst path
+            p) COND_RPI_PIX=true ;; # Get pictures serie per serie
             # TODO Make helper
             \?) echo "fuck all" >&2 ;;
         esac
@@ -58,8 +59,8 @@ function getRawSerieFromCamera {
     echo -e "Getting raw pictures serie from camera ..."
     cd $1
     COUNT_RAW_CAM=$(gphoto2 --list-files | grep '.CR2' | wc -l)
-    if [ ${COUNT_RAW_CAM} -gt 15 ]; then
-        COUNT_RAW_CAM=15
+    if [ ${COUNT_RAW_CAM} -gt ${SERIE_MAX} ]; then
+        COUNT_RAW_CAM=${SERIE_MAX}
     fi
 
     for range in $(seq 1 ${COUNT_RAW_CAM}); do
@@ -130,7 +131,9 @@ function sendRawDataToVictoria {
 }
 
 function main {
-    # launch processes to download and upload pictures with options
+    # initialisation watchdog and current path
+    WATCH_DOG=0
+    SERIE_MAX=7
     DIR_PATH="`dirname \"$0\"`"
     DIR_PATH="`( cd \"${DIR_PATH}\" && pwd )`"
     if [ -z "$DIR_PATH" ]; then
@@ -138,9 +141,10 @@ function main {
         exit 4
     fi
 
+    # launch processes to download and upload pictures with options
     checkOptions $1
     checkArgument $2
-    while [ $(gphoto2 --list-files | grep '.CR2' | wc -l) != 0 ]; do
+    while [ $(gphoto2 --list-files | grep '.CR2' | wc -l) != 0 -o ${WATCH_DOG} -eq 200 ]; do
         if [ ${COND_GET_PIX} = true ]; then
             getRawDataFromCamera $2
         fi
@@ -152,6 +156,7 @@ function main {
         if [ ${COND_SND_PIX} = true ]; then
             sendRawDataToVictoria $2 $3
         fi
+        let WATCH_DOG++
     done
     }
 
