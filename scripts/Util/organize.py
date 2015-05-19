@@ -53,13 +53,21 @@ def organize_folder(path_src):
     Organize folder like : path_src/YYYYMMDD/HHMMSS/YYMMDD_HHMMSS_n.CR2
     :param path_src: string
     """
+    folder_process = 'processed'
+
     print('Folder organization begin')
     print('> Folder indexing ...')
     dict_folder = sort_pix_by_time_inside_date(path_src)
+
+    try:
+        os.mkdir(path_src + folder_process)
+    except FileExistsError:
+        pass
+
     print('> Folder tree creating ...')
-    create_folder_from_dictionary(path_src, dict_folder)
+    create_folder_from_dictionary(path_src + folder_process + '/', dict_folder)
     print('\r > Done                         ')
     print('> Pictures renaming ...')
-    move_rename_pix(path_src, path_src, dict_folder)
+    move_rename_pix(path_src, path_src + folder_process + '/', dict_folder)
     print('\r > Done                         ')
     print('Folder organization finished')
