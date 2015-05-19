@@ -53,6 +53,14 @@ def sort_pix_by_time(path_src, list_pix=0):
         sys.stdout.write("\r > Indexing by timestamp: {:>6.2%}".format(i))
         sys.stdout.flush()
     print('')
+
+    try:
+        for time_key in dict_by_time.keys():
+            if not len(dict_by_time[time_key]) == 7:
+                del dict_by_time[time_key]
+    except KeyError:
+        pass
+
     return dict_by_time
 
 
@@ -67,5 +75,6 @@ def sort_pix_by_time_inside_date(path_src):
     dict_by_time_inside_date.update(sort_pix_by_date(path_src))
     for date in dict_by_time_inside_date.keys():
         list_files = dict_by_time_inside_date[date]
-        dict_by_time_inside_date[date] = sort_pix_by_time(path_src, list_files)
+        dict_sorted = sort_pix_by_time(path_src, list_files)
+        dict_by_time_inside_date[date] = dict_sorted
     return dict_by_time_inside_date
