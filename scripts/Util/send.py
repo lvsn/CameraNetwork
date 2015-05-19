@@ -11,3 +11,4 @@ def send_folder_to(path_src, path_dst):
     """
     print('Folder sending ...')
     os.system('rsync -avrz --progress --remove-source-files {} {}'.format(path_src, path_dst))
+    print('Folder sent')

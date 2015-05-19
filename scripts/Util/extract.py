@@ -43,7 +43,7 @@ def extract_date_from_exif(path_src, dict_exif=0):
     month = convert_month_StrToInt(str_timestamp[1])
     day = str_timestamp[2]
 
-    return year + month + day
+    return '{:0>4}{:0>2}{:0>2}'.format(year, month, day)
 
 
 def extract_time_from_exif(path_src, dict_exif=0):
@@ -62,4 +62,4 @@ def extract_time_from_exif(path_src, dict_exif=0):
     minute = str_timestamp[3].split(':')[1]
     second = str_timestamp[3].split(':')[2]
 
-    return hour + minute + second
+    return '{:0>2}{:0>2}{:0>2}'.format(hour, minute, second)
