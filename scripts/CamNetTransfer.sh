@@ -1,11 +1,11 @@
 #!/bin/bash
-# Script Organizer 0.1.0
+# Script Organizer 0.1.1
 # Created by Julien Becirovski
 
 function checkArgument {
     # Check if arguments are available
     if [ -z "$1" ]; then
-        echo -e "\e[0;31mERROR: Invalid path.\e[0m"
+        echo -e "\e[0;31mERROR: Invalid path: $1\e[0m"
         exit 1
     else
         if [ -d "$1" ]; then
@@ -63,7 +63,7 @@ function getRawDataFromCamera {
 function sendRawDataToVictoria {
 
     echo -e "Folder sending ..."
-    rsync -avrz --progress --remove-source-files $1 $2
+    rsync -vrz --progress --remove-source-files --no-owner --no-group --chmod=ugo+rwx,Dugo+rwx $1 $2
 
     COUNT_RAW_DATA=$(find $1 -type f -name "*.CR2" | wc -l)
     if [ ${COUNT_RAW_DATA} == 0 ]; then
