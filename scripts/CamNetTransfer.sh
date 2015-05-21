@@ -1,22 +1,49 @@
 #!/bin/bash
-# Script Organizer 0.2.2
+# Script Organizer 0.2.3
 # Created by Julien Becirovski
 
-function display_error {
+function displayError {
     # Just format error message
     echo -e "\e[0;31mERROR: $1\e[0m"
 }
 
+function helpText {
+
+    echo -e "Usage: CamNetTransfer [OPTION...] [SRC_PATH] [DST_PATH]
+
+Common options
+ -?, -h             Print complet help message on program usage
+ -g                 Get raw pictures from camera to source
+                    folder and delete it if raw pictures exist
+                    in source folder.
+ -o                 Organize source folder with raw pictures:
+                    |_ YYYYMMDD
+                     |_ HHMMSS (7 pictures per time folder)
+                       |_ YYMMDD_HHMMSS_1.CR2
+                       |_ ...
+                       |_ YYMMDD_HHMMSS_n.CR2
+                       ...
+ -s                 Send source folder to destination folder
+                    thanks to rsync. SSH transfer is possible.
+
+Miscellaneous options
+ -p                 Process serial raw pictures (currently 7).
+                    This is specific option for low data storage
+                    like Raspberry Pi.
+"
+    exit 0
+
+}
 function checkArgument {
     # Check if arguments are available
     if [ -z "$1" ]; then
-        display_error "Invalid path: $1"
+        displayError "Invalid path: $1"
         exit 1
     else
         if [ -d "$1" ]; then
             echo "FOUND: Path $1"
         else
-            display_error "Invalid path: $1"
+            displayError "Invalid path: $1"
             exit 2
         fi
     fi
@@ -26,7 +53,7 @@ function checkFilesExtension {
     # check if processing source folder contains raw pictures
     COUNT_RAW_DATA=$(find $1 -type f -name "*.CR2" | wc -l)
     if [ ${COUNT_RAW_DATA} == 0 ]; then
-        display_error "No raw pictures in folder: $1"
+        displayError "No raw pictures in folder: $1"
         exit 3
     else
         echo "FOUND: $COUNT_RAW_DATA raw pictures in folder: $1"
@@ -49,9 +76,8 @@ function checkOptions {
             a)  COND_GET_PIX=true    # Standard use
                 COND_ORG_PIX=true
                 COND_SND_PIX=true ;;
-            # TODO Make helper
-            \?|h) echo -e "Helper: blablabal" >&2 ;;
-            *)  display_error "Invalid arguments ${OPTARG}"
+            \?|h) helpText >&2 ;;
+            *)  displayError "Invalid arguments ${OPTARG}"
                 exit ${ER_BAD_ARGS} ;;
         esac
     done
@@ -82,7 +108,7 @@ function getRawDataFromCamera {
         echo -e "Getting raw pictures from camera ..."
         MSG=$(cd $1 && gphoto2 --get-all-raw-data --force-overwrite)
         if [[ $(echo ${MSG} | grep -o 'Error' | wc -w) -ne 0 ]]; then
-            display_error "Impossible to check transfer"
+            displayError "Impossible to check transfer"
             exit 5
         fi
         echo -e "Raw pictures are gotten"
@@ -125,7 +151,7 @@ function sendRawDataToVictoria {
         rm -rf $1/processed
         echo -e "Remove source folders."
     else
-        display_error "${COUNT_RAW_DATA} Raw data not sent."
+        displayError "${COUNT_RAW_DATA} Raw data not sent."
         exit 6
     fi
 
@@ -139,7 +165,7 @@ function main {
     DIR_PATH="`dirname \"$0\"`"
     DIR_PATH="`( cd \"${DIR_PATH}\" && pwd )`"
     if [ -z "$DIR_PATH" ]; then
-        display_error "Script path not found."
+        displayError "Script path not found."
         exit 4
     fi
 
@@ -174,9 +200,9 @@ function main {
 #   Launch transfer from camera to unprocess folder in victoria
 # ---------------------------------------------------------------
 
-echo -e "-----------------------------------"
-echo -e " Camera Network Transfer begin ... "
-echo -e "-----------------------------------"
+echo -e "-------------------------"
+echo -e " Camera Network Transfer "
+echo -e "-------------------------"
 
 ER_BAD_ARGS=65
 
@@ -190,7 +216,7 @@ else
         SRC_PATH=$2
         DST_PATH=$3
     else
-        display_error "Need 2 or 3 arguments."
+        displayError "Need 2 or 3 arguments."
         exit ${ER_BAD_ARGS}
     fi
 fi
