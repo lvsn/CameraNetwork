@@ -13,6 +13,7 @@ def create_folder_from_dictionary(path_dst, dict_tree):
     :param path_dst: string
     :param dict_tree: dictionary
     """
+
     for key in dict_tree.keys():
         try:
             os.mkdir(path_dst + key)
@@ -66,8 +67,8 @@ def organize_folder(path_src):
 
     print('> Folder tree creating ...')
     create_folder_from_dictionary(path_src + folder_process + '/', dict_folder)
-    print('\r > Done                         ')
+    print(' > Done                         ')
     print('> Pictures renaming ...')
     move_rename_pix(path_src, path_src + folder_process + '/', dict_folder)
-    print('\r > Done                         ')
+    print(' > Done                         ')
     print('Folder organization finished')

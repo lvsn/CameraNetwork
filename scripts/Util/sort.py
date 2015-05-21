@@ -60,7 +60,6 @@ def sort_pix_by_time(path_src, list_pix=0):
                 del dict_by_time[time_key]
     except KeyError:
         pass
-
     return dict_by_time
 
 
