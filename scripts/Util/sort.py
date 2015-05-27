@@ -44,22 +44,32 @@ def sort_pix_by_time(path_src, list_pix=0):
     for file in (sorted(os.listdir(path_src)) if not list_pix else sorted(list_pix)):
         if file.endswith('.CR2'):
             exif_time = extract_time_from_exif(path_src + file)
-            if convert_timestamp_second(exif_time) >= convert_timestamp_second(exif_ref) + 110:
-                dict_by_time[exif_time] = [file]
+            if convert_timestamp_second(exif_time) >= convert_timestamp_second(exif_ref) + 60:
+                dict_by_time[exif_time] = {'data': [file]}
                 exif_ref = exif_time
             else:
-                dict_by_time[exif_ref].append(file)
+                dict_by_time[exif_ref]['data'].append(file)
         i += each_file
         sys.stdout.write("\r > Indexing by timestamp: {:>6.2%}".format(i))
         sys.stdout.flush()
+
+    # Add pattern
+    for key_time in dict_by_time:
+        first_time = convert_timestamp_second(extract_time_from_exif(path_src + dict_by_time[key_time]['data'][0]))
+        last_time = convert_timestamp_second(extract_time_from_exif(path_src + dict_by_time[key_time]['data'][-1]))
+        if first_time + 20 > last_time and len(dict_by_time[key_time]['data']) == 7:
+            dict_by_time[key_time]['pattern'] = [2, 1, 3, 5, 4, 6, 7]
+        else:
+            dict_by_time[key_time]['pattern'] = range(1, len(dict_by_time[key_time]['data']) + 1)
     print('')
 
     try:
         for time_key in dict_by_time.keys():
-            if not len(dict_by_time[time_key]) == 7:
+            if not len(dict_by_time[time_key]['data']) == 7:
                 del dict_by_time[time_key]
     except KeyError:
         pass
+
     return dict_by_time
 
 

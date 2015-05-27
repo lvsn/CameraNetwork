@@ -6,7 +6,7 @@ __version__ = "1.0.0"
 __maintainer__ = 'jbecirovski'
 
 
-def Autobracketing():
+def capture_AEB_with_preset():
     """
     Autobracketing (AEB) is a feature of some more advanced cameras, where the camera will take several
     successive shots with slightly different settings. In this case, the autobracketing take two
