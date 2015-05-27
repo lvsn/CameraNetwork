@@ -210,11 +210,18 @@ ER_BAD_ARGS=65
 if [ $# -eq 2 ]; then
     PARAM="-a"
     SRC_PATH=$1
+    if [[ "$SRC_PATH" != /* ]]; then
+        SRC_PATH="$PWD/$SRC_PATH"
+    fi
+
     DST_PATH=$2
 else
     if [ $# -eq 3 ]; then
         PARAM=$1
         SRC_PATH=$2
+        if [[ "$SRC_PATH" != /* ]]; then
+            SRC_PATH="$PWD/$SRC_PATH"
+        fi
         DST_PATH=$3
     else
         displayError "Need 2 or 3 arguments."
