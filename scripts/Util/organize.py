@@ -1,3 +1,4 @@
+
 import os
 from scripts.Util.extract import *
 from scripts.Util.convert import *
@@ -18,7 +19,7 @@ def create_folder_from_dictionary(path_dst, dict_tree):
             os.mkdir(path_dst + key)
             sys.stdout.write('\r > MKDIR {}{}'.format(path_dst, key))
             sys.stdout.flush()
-        except FileExistsError:
+        except:
             pass
         if isinstance(dict_tree[key], dict):
             try:
@@ -64,9 +65,9 @@ def organize_folder(path_src):
 
     try:
         os.mkdir(path_src + folder_process)
-    except FileExistsError:
+    except:
         pass
-    print(dict_folder)
+
     print('> Folder tree creating ...')
     create_folder_from_dictionary(path_src + folder_process + '/', dict_folder)
     print(' > Done                         ')

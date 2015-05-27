@@ -94,7 +94,7 @@ function getRawSerieFromCamera {
     for range in $(seq 1 ${COUNT_RAW_CAM}); do
         gphoto2 --get-file=${range} --force-overwrite
     done
-    cd ..
+    cd $OLDPWD
     echo -e "Raw pictures serie are gotten"
 
 }
@@ -125,6 +125,7 @@ function purgeCamera {
     echo -e "FOUND: ${COUNT_RAW_CAM} pictures inside camera and ${COUNT_RAW_DST} inside folder."
 
     INCR=1
+    cd $1
     for range in $(seq 1 ${COUNT_RAW_CAM}); do
         FIRST_FILE=$(gphoto2 --list-files | egrep -o '[[:digit:]]{1}[[:alpha:]]{1}[[:digit:]]{1}[[:alpha:]]{1}[[:digit:]]{4}.CR2' | sed -n ${INCR}p)
         IS_EXIST_FILE=$(find $1 -type f -name "${FIRST_FILE}" | wc -l)
@@ -134,13 +135,13 @@ function purgeCamera {
             let INCR++
         fi
     done
-
+    cd $OLDPWD
 
     echo -e "Camera purged"
 
 }
 
-function sendRawDataToVictoria {
+function sendRawDataToDst {
 
     echo -e "Folder sending ..."
     rsync -vrz --progress --remove-source-files --no-owner --no-group --chmod=ugo+rwx,Dugo+rwx $1/processed/ $2
@@ -181,7 +182,7 @@ function main {
             python ${DIR_PATH}/organizer.py $2
         fi
         if [ ${COND_SND_PIX} = true ]; then
-            sendRawDataToVictoria $2 $3
+            sendRawDataToDst $2 $3
         fi
 
         # loop breaker
