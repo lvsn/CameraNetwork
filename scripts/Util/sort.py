@@ -44,7 +44,7 @@ def sort_pix_by_time(path_src, list_pix=0):
     for file in (sorted(os.listdir(path_src)) if not list_pix else sorted(list_pix)):
         if file.endswith('.CR2'):
             exif_time = extract_time_from_exif(path_src + file)
-            if convert_timestamp_second(exif_time) >= convert_timestamp_second(exif_ref) + 150 or len(dict_by_time[exif_ref]) == 7:
+            if convert_timestamp_second(exif_time) >= convert_timestamp_second(exif_ref) + 110:
                 dict_by_time[exif_time] = [file]
                 exif_ref = exif_time
             else:
