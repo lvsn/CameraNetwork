@@ -113,7 +113,7 @@ include_directories(
 
 ## Declare a cpp executable
 # add_executable(camera_controler_node src/camera_controler_node.cpp)
-add_executable(image_streamer src/image_streamer.cpp)
+# add_executable(image_streamer src/image_streamer.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -124,7 +124,7 @@ add_executable(image_streamer src/image_streamer.cpp)
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries (image_streamer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+# target_link_libraries (image_streamer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
 #############
 ## Install ##
