@@ -9,7 +9,7 @@ Created on Thu May 22 16:21:09 2014
 Object Facade object for the Camera Driver. Make the use of it easier or
 controler's services.
 """
-import rospy
+import rospy, subprocess, threading
 import std_srvs.srv
 from camera_network_msgs.srv import *
 
@@ -136,6 +136,40 @@ class CameraHandler:
 
     def takePreview(self):
         self.preview_camera_service()
+
+    def takeAEBPicutre(self, timelapse=120.0):
+        rospy.loginfo('*** Stop all AEB process ***')
+        self.stopAEBProcess()
+        rospy.loginfo('*** Take AEB picture ***')
+        rospy.loginfo('Preset the ISO, fileformat, etc.')
+        subprocess.call('gphoto2 --reset', shell=True)
+        subprocess.call('gphoto2 --set-config imageformat=32', shell=True)
+        rospy.loginfo('\_ Keep photo in SD card')
+        subprocess.call('gphoto2 --set-config capturetarget=1', shell=True)
+        subprocess.call('gphoto2 --set-config iso=1', shell=True)
+        subprocess.call('gphoto2 --set-config autopoweroff="0"', shell=True)
+
+        rospy.loginfo('Capturing')
+        threading.Timer(timelapse, self.captureAEBPicture).start()
+
+        rospy.loginfo('Capturing with AEB')
+        self.captureAEBPicture()
+
+    def captureAEBPicture(self):
+        subprocess.call('gphoto2 --set-config /main/capturesettings/aeb="+/- 3" --set-config /main/capturesettings/aperture="16" --set-config /main/capturesettings/shutterspeed="1/1000" --set-config /main/actions/eosremoterelease=2 --wait-event=1s', shell=True)
+        subprocess.call('gphoto2 --set-config /main/capturesettings/aperture=4 --set-config /main/capturesettings/shutterspeed="1/30" --set-config /main/actions/eosremoterelease=2 --wait-event=1s', shell=True)
+        subprocess.call('gphoto2 --set-config /main/capturesettings/aeb=0 --set-config /main/capturesettings/shutterspeed="1" --capture-image', shell=True)
+
+    def stopAEBProcess(self):
+        rospy.loginfo('AEB stopping begin...')
+        str_sub = subprocess.check_output('/bin/ps aux | /bin/grep python | /bin/grep launch_aeb.py', shell=True).splitlines()
+        if len(str_sub) > 1:
+            pid = str_sub[0].split()[1]
+            rospy.loginfo('\_ AEB process present with PID: {}'.format(pid))
+            subprocess.call('kill {}'.format(pid), shell=True)
+            rospy.loginfo('\_ AEB finished.')
+        else:
+            rospy.loginfo('\_ AEB not running.')
 
     def calibrate(self):
         self.calibrate_picture_service()

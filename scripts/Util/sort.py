@@ -63,12 +63,12 @@ def sort_pix_by_time(path_src, list_pix=0):
             dict_by_time[key_time]['pattern'] = range(1, len(dict_by_time[key_time]['data']) + 1)
     print('')
 
-    try:
-        for time_key in dict_by_time.keys():
-            if not len(dict_by_time[time_key]['data']) == 7:
-                del dict_by_time[time_key]
-    except KeyError:
-        pass
+    # try:
+    #     for time_key in dict_by_time.keys():
+    #         if not len(dict_by_time[time_key]['data']) == 7:
+    #             del dict_by_time[time_key]
+    # except KeyError:
+    #     pass
 
     return dict_by_time
 

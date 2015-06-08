@@ -1,1 +1,2 @@
 bool isHdr
+bool isAEB

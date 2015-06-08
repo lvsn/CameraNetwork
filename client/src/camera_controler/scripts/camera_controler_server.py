@@ -116,6 +116,9 @@ class Server:
         if req.isHdr:
             rospy.loginfo("Taking hdr picture")
             self.cam_handler.takeHDRPicture(0)
+        elif req.isAEB:
+            rospy.loginfo("Taking AEB picture")
+            self.cam_handler.takeAEBPicutre()
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)

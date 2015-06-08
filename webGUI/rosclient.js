@@ -59,6 +59,7 @@ function network_timelapse()
 				picture_qty : parseFloat(form.network_timelapse_qty.value),
 				inter_picture_delay_s : parseFloat(form.network_timelapse_frequency.value),
 				is_hdr : $('#network_hdr').is(':checked')
+				is_aeb : $('#network_aeb').is(':checked')
 			}
 		});
 		goal.send();
@@ -187,6 +188,7 @@ function device()
 				picture_qty : parseFloat(picture_qty),
 				inter_picture_delay_s : parseFloat(inter_picture_delay_s),
 				is_hdr : $('#device_hdr').is(':checked')
+				is_aeb : $('#device_aeb').is(':checked')
 			}
 		});
 		goal.send();

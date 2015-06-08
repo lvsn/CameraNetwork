@@ -1,12 +1,13 @@
 import threading
 import subprocess
+from time import sleep
 
 __author__ = 'jesangfox'
 __version__ = "1.0.0"
 __maintainer__ = 'jbecirovski'
 
 
-def capture_AEB_with_preset():
+def capture_AEB_with_preset(timelapse=120.0):
     """
     Autobracketing (AEB) is a feature of some more advanced cameras, where the camera will take several
     successive shots with slightly different settings. In this case, the autobracketing take two
@@ -36,12 +37,17 @@ def capture_AEB_with_preset():
         subprocess.call('gphoto2 --set-config /main/capturesettings/aperture=4 --set-config /main/capturesettings/shutterspeed="1/30" --set-config /main/actions/eosremoterelease=2 --wait-event=1s', shell=True)
         subprocess.call('gphoto2 --set-config /main/capturesettings/aeb=0 --set-config /main/capturesettings/shutterspeed="1" --capture-image', shell=True)
 
-    def capture():
+    def capture(timelapse):
         """ Take a group of images every 120 seconds """
         print("Capturing")
-        threading.Timer(120.0, capture).start()
+        threading.Timer(timelapse, capture).start()
+        # threading.Timer(30.0, capture).start()modify for testing dome at 7:41 4 Jun 2015
         capturingAEB()
         print("Done")
 
     refreshCamera()
-    capture()
+    capture(timelapse)
+
+# if __name__ == '__main__': modify for testing dome at 7:41 4 Jun 2015
+#     sleep(10)
+#     capture_AEB_with_preset()

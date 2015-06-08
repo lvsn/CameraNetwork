@@ -3,7 +3,9 @@ import os
 from scripts.Util.extract import *
 from scripts.Util.convert import *
 from scripts.Util.sort import *
-import sys
+import sys, subprocess
+
+
 
 __author__ = 'jbecirovski'
 
@@ -52,6 +54,13 @@ def move_rename_pix(path_src, path_dst, dict_pix, dict_exif=0):
             print(e)
 
 
+def rename_with_timestamp(path_src):
+    print('> Pictures renaming with timestamp ...')
+    files = subprocess.check_output('ls {}'.format(path_src))
+    print(files)
+    print('  > Done')
+
+
 def organize_folder(path_src):
     """
     Organize folder like : path_src/YYYYMMDD/HHMMSS/YYMMDD_HHMMSS_n.CR2
@@ -60,6 +69,8 @@ def organize_folder(path_src):
     folder_process = 'processed'
 
     print('Folder organization begin')
+    print('> Pictures renaming with timestamp ...')
+    print('  > Done')
     print('> Folder indexing ...')
     dict_folder = sort_pix_by_time_inside_date(path_src)
 

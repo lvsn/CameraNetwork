@@ -1,4 +1,3 @@
-#!/sbin/env python
 
 import glob
 import os
