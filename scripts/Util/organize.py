@@ -30,33 +30,9 @@ def create_folder_from_dictionary(path_dst, dict_tree):
                 create_folder_from_dictionary(path_dst + key + '/', dict_tree[key])
 
 
-def move_rename_pix(path_src, path_dst, dict_pix, dict_exif=0):
-    """
-    Rename picture to YYMMDD_HHMMSS_n.CR2
-    :param path_src: string
-    :param path_dst: string
-    :param dict_pix: dictionary
-    :param dict_exif: dictionary
-    """
-    for key in sorted(dict_pix.keys()):
-        try:
-            if isinstance(dict_pix[key], dict) and 'data' not in dict_pix[key].keys():
-                move_rename_pix(path_src, path_dst + key + '/', dict_pix[key], dict_exif)
-            else:
-                for i, file in enumerate(sorted(dict_pix[key]['data'])):
-                    exif_time = extract_time_from_exif(path_src + file, dict_exif)
-                    exif_date = extract_date_from_exif(path_src + file, dict_exif)
-                    new_pic_name = '{}_{}_{}.CR2'.format(exif_date[2:], exif_time, dict_pix[key]['pattern'][i])
-                    os.rename(path_src + file, path_dst + key + '/' + new_pic_name)
-                    sys.stdout.write('\r > MV {} to {}'.format(file, path_dst + key + '/' + new_pic_name))
-                    sys.stdout.flush()
-        except:
-            raise AssertionError
-
-
 def rename_with_timestamp(path_src):
     """
-    Rename all raw img inside path folder with timestamp from their exif
+    Rename all raw img inside path folder with timestamp from their exif like YYMMDD_HHMMSS_n.CR2
     :param path_src: str path
     """
     print('> Pictures renaming with timestamp ...')
@@ -80,6 +56,11 @@ def rename_with_timestamp(path_src):
     print('  > renaming Done')
 
 def create_dict_with_files(src_path):
+    """
+    Create dictionary thanks to file names like YYMMDD_HHMMSS_n.CR2
+    :param src_path: str path
+    :return: dictionary [date][time][file for file in files]
+    """
     print('> Creating dictionary with file names')
     files = subprocess.check_output(['ls', src_path]).splitlines()
     files = [file for file in files if '.CR2' in file]
@@ -123,6 +104,11 @@ def create_dict_with_files(src_path):
     return dict_date
 
 def move_with_dictionary(src_path, dst_path, tree_files):
+    """
+    :param src_path: str source path where pictures are
+    :param dst_path: str destination path where pictures should move
+    :param tree_files: dict with tree of directories and files
+    """
     print('> Pictures moving ...')
     for date in tree_files.keys():
         print('>> Date: {}'.format(date))

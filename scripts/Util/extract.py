@@ -15,8 +15,8 @@ def extract_exif(path_src):
 
     try:
         if not info_exif:
-            raise FileNotFoundError
-    except FileNotFoundError:
+            raise AssertionError
+    except AssertionError:
         print('Current path is not available :', path_src)
         return None
 
