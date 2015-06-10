@@ -8,6 +8,4 @@ __author__ = 'jbecirovski'
 
 if __name__ == '__main__':
     path_src = sys.argv[1] + '/'
-    #print(path_src)
-    #rename_with_timestamp(path_src)
     organize_folder(path_src)
