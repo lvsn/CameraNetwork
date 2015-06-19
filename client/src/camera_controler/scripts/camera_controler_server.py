@@ -114,11 +114,8 @@ class Server:
     def capture_listen_cb(self, req):
         # Simply print out values in our custom message.
         if req.isHdr:
-            rospy.loginfo("Taking hdr picture")
-            self.cam_handler.takeHDRPicture(0)
-        elif req.isAEB:
             rospy.loginfo("Taking AEB picture")
-            self.cam_handler.takeAEBPicutre()
+            self.cam_handler.takeAEBPicture()
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)

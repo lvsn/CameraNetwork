@@ -82,7 +82,8 @@ class TimelapsAction:
 
     def _take_picture(self, isHdr, pictureId):
         if(isHdr):
-            self.cam_handler.takeHDRPicture(pictureId, loadCamera=True)
+            pass
+            #self.cam_handler.takeHDRPicture(pictureId, loadCamera=True)
         else:
             self.cam_handler.takeSinglePicture(pictureId, loadCamera=True)
 

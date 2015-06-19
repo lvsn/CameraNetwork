@@ -2,7 +2,6 @@
 float32 picture_qty
 float32 inter_picture_delay_s
 bool is_hdr
-bool is_aeb
 ---
 #result
 string total_picture

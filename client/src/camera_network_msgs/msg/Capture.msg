@@ -1,2 +1,1 @@
 bool isHdr
-bool isAEB

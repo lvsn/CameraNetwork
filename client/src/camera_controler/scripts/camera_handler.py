@@ -9,6 +9,7 @@ Created on Thu May 22 16:21:09 2014
 Object Facade object for the Camera Driver. Make the use of it easier or
 controler's services.
 """
+import os
 import rospy, subprocess, threading
 import std_srvs.srv
 from camera_network_msgs.srv import *
@@ -107,7 +108,6 @@ class CameraHandler:
         except rospy.ServiceException as e:
             rospy.logwarn("Service call failed: %s", e)
 
-
     def takeSinglePicture(self, pictureId, setCamera=True, loadCamera=False):
         pictureName = str(pictureId)
         # picture path ex : pictureId-n_23May14_10h30m00s.jpg  (n depend on
@@ -137,10 +137,23 @@ class CameraHandler:
     def takePreview(self):
         self.preview_camera_service()
 
-    def takeAEBPicutre(self, timelapse=120.0):
+    def takeAEBPicture(self, timelapse=120.0):
         rospy.loginfo('*** Stop all AEB process ***')
         self.stopAEBProcess()
+
+        rospy.loginfo('Launch timelaps: {}'.format(timelapse))
+        threading.Timer(timelapse, self.captureAEBPicture).start()
+
+        rospy.loginfo('Capturing with AEB')
+        self.captureAEBPicture()
+
+    def captureAEBPicture(self):
+
         rospy.loginfo('*** Take AEB picture ***')
+
+        rospy.loginfo('Lock process')
+        subprocess.call('mkdir {}lock'.format(os.path.realpath(__file__)))
+
         rospy.loginfo('Preset the ISO, fileformat, etc.')
         subprocess.call('gphoto2 --reset', shell=True)
         subprocess.call('gphoto2 --set-config imageformat=32', shell=True)
@@ -149,16 +162,13 @@ class CameraHandler:
         subprocess.call('gphoto2 --set-config iso=1', shell=True)
         subprocess.call('gphoto2 --set-config autopoweroff="0"', shell=True)
 
-        rospy.loginfo('Capturing')
-        threading.Timer(timelapse, self.captureAEBPicture).start()
-
-        rospy.loginfo('Capturing with AEB')
-        self.captureAEBPicture()
-
-    def captureAEBPicture(self):
+        rospy.loginfo('Taking AEB pictures')
         subprocess.call('gphoto2 --set-config /main/capturesettings/aeb="+/- 3" --set-config /main/capturesettings/aperture="16" --set-config /main/capturesettings/shutterspeed="1/1000" --set-config /main/actions/eosremoterelease=2 --wait-event=1s', shell=True)
         subprocess.call('gphoto2 --set-config /main/capturesettings/aperture=4 --set-config /main/capturesettings/shutterspeed="1/30" --set-config /main/actions/eosremoterelease=2 --wait-event=1s', shell=True)
         subprocess.call('gphoto2 --set-config /main/capturesettings/aeb=0 --set-config /main/capturesettings/shutterspeed="1" --capture-image', shell=True)
+
+        rospy.loginfo('Unlock process')
+        subprocess.call('rmdir {}lock'.format(os.path.realpath(__file__)))
 
     def stopAEBProcess(self):
         rospy.loginfo('AEB stopping begin...')
