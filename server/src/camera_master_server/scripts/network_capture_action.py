@@ -25,12 +25,12 @@ class network_capture_action:
         
         self.picture_count = 0
         self.msg = Capture()
-        self.msg.isHdr = True
+        self.msg.mode = True
         
 
         
     def execute(self,goal):
-        self.msg.isHdr = goal.is_hdr
+        self.msg.mode = goal.mode
         period = goal.inter_picture_delay_s
         hz = self._sec_to_hz(period)
         picture_goal = self._get_frame_qty(goal.picture_qty)

@@ -1,8 +1,7 @@
 #goal
 float32 picture_qty
 float32 inter_picture_delay_s
-bool is_hdr
-bool is_aeb
+int8 mode
 ---
 #result
 string total_picture

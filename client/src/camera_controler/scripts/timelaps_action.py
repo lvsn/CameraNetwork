@@ -9,13 +9,16 @@ Created on Wed May 21 14:59:35 2014
 Object that implement a Timelaps action : use a camera handler to take picture
 in a timelaps manner with HDR capabilities.
 """
+import math
+
 import roslib
 roslib.load_manifest('camera_controler')
 import rospy
 import actionlib
+import envoy
+
 import camera_handler as ch
 from camera_network_msgs.msg import *
-import math
 
 
 class TimelapsAction:
@@ -41,10 +44,9 @@ class TimelapsAction:
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
             self.picture_count += 1
-            self._take_picture(goal.is_hdr, self.picture_count)
+            self._take_picture(goal.mode, self.picture_count)
             self._send_feedback(self.picture_count, picture_goal, hz)
-            interupt = self._sleep(timestamp)
-            if(interupt):
+            if self._sleep(timestamp):
                 break
 
         succes_msg = CameraControlActionResult
@@ -80,10 +82,26 @@ class TimelapsAction:
             frame_qty = Qty
         return frame_qty
 
-    def _take_picture(self, isHdr, pictureId):
-        if(isHdr):
-            pass
-            #self.cam_handler.takeHDRPicture(pictureId, loadCamera=True)
+    def _take_picture(self, mode, pictureId):
+        if mode == 1:
+            self.cam_handler.takeHDRPicture(pictureId, loadCamera=True)
+        elif mode == 2:
+            rospy.loginfo("Getting shell command:\n{}".format(self.cam_handler.shell_config))
+            if 'gphoto2 --shell' in self.cam_handler.shell_config:
+                cmdHeader = self.cam_handler.shell_config.splitlines()[0]
+                cmdSequence = self.cam_handler.shell_config.replace('gphoto2 --shell', '')
+                r = envoy.run(cmdHeader, data=cmdSequence)
+                if r.status_code:
+                    rospy.logerr(r.std_out)
+                else:
+                    rospy.loginfo(r.std_out)
+            else:
+                for cmdLine in self.cam_handler.shell_config.splitlines():
+                    r = envoy.run(cmdLine)
+                    if r.status_code:
+                        rospy.logerr(r.std_out)
+                    else:
+                        rospy.loginfo(r.std_out)
         else:
             self.cam_handler.takeSinglePicture(pictureId, loadCamera=True)
 

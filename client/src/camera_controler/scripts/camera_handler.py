@@ -55,6 +55,16 @@ class CameraHandler:
             'configure_parameter_queue',
             ParameterQueue)
         self.updateCameraSetting()
+                # --- shell option --- #jb
+        rospy.Service(
+            'save_config_shell',
+            CommandOption,
+            self.save_settings_shell_cb)
+        rospy.Service(
+            'get_config_shell',
+            std_srvs.srv.Trigger(),
+            self.get_settings_shell_cb)
+        self.shell_config = ''
 
     def updateCameraSetting(self, configDict={}):
         '''
@@ -192,3 +202,18 @@ class CameraHandler:
 
     def _generatePictureName(self, name):
         return '%B/{name}-%n_%Y-%m-%d_%Hh%Mm%Ss.%f.%C'.format(**locals())
+
+    def save_settings_shell_cb(self, req):
+        # --- save_config_shell ---
+        rospy.loginfo('Saving new settings shell: {}'.format(req.option))
+        self.shell_config = req.option
+        return {}
+
+    def get_settings_shell_cb(self, req):
+        # --- get_config_shell ---
+        if not self.shell_config:
+            rospy.logwarn('No current shell settings')
+            return {'success': 0, 'message': 'No current shell settings'}
+        else:
+            rospy.loginfo('Getting shell config')
+            return {'success': 1, 'message': self.shell_config}

@@ -1,6 +1,6 @@
-aperture: '4.0'
+aperture: '4'
 captureSequence:
-- {aperture: '4.0', shutterspeed: 1/2000}
+- {aperture: '4', shutterspeed: 1/2000}
 - {shutterspeed: 1/100}
 - {aperture: '9', shutterspeed: 1/8}
 imageformat: '0'

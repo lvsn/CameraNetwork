@@ -1,1 +1,1 @@
-bool isHdr
+int8 mode

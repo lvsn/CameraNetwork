@@ -127,6 +127,7 @@ function device()
 	var action;
 	var name;
 	var ip;
+	var output;
 
 	this.createRosAttribute = function(pName, pIP){
 		name = pName;
@@ -186,7 +187,8 @@ function device()
 			goalMessage : {
 				picture_qty : parseFloat(picture_qty),
 				inter_picture_delay_s : parseFloat(inter_picture_delay_s),
-				is_hdr : $('#device_hdr').is(':checked')
+				mode : parseInt($('input[name=capture_type]:checked', 'form[name=timelapse]').val())
+				//, shell_command : $('#shellCommand').val()
 			}
 		});
 		goal.send();
@@ -218,6 +220,31 @@ function device()
 			name : '/' + name +'/save_config',
 			serviceType : 'std_srvs/Empty'
 		});
+		var request = new ROSLIB.ServiceRequest({});
+		save.callService(request, function(result) {});
+	}
+
+	this.saveSequenceShell = function(){
+	// ----- save sequence shell ----- #jb
+		var save = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name +'/save_config_shell',
+			serviceType : 'camera_network_msgs/CommandOption'
+		});
+		//alert($('#shellCommand').val())
+		var request = new ROSLIB.ServiceRequest({option: $('#shellCommand').val()});
+		save.callService(request, function(result) {});
+		this.output = new this.getSequenceShell()
+	}
+
+	this.getSequenceShell = function(){
+	// ----- save sequence shell ----- #jb
+		var save = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name +'/get_config_shell',
+			serviceType : 'std_srvs/Trigger'
+		});
+		//alert($('#shellCommand').val())
 		var request = new ROSLIB.ServiceRequest({});
 		save.callService(request, function(result) {});
 	}
@@ -330,6 +357,7 @@ function device()
 	this.refresh = function() {
 		$("#device_name").text(name);
         $("#device_ip").text(ip);
+        $("#msg_output").text(output);
 		param.get(function(value) {
 	    	if (value != null && value["camera_model"] != null && value != undefined) {
 	    		$("#device_camera").text(value["camera_model"]);
@@ -577,6 +605,13 @@ function addSequenceEvent(form){
 function saveSequenceEvent(form){
 	if(!noDeviceAlert()){
 		_current_device.saveSequence();		
+	}
+}
+
+function saveSequenceShellEvent(form){
+// --- save shell configuration --- #jb
+	if(!noDeviceAlert()){
+		_current_device.saveSequenceShell(form);
 	}
 }
 

@@ -75,7 +75,7 @@ class GPhotoServer(cd.camera_driver):
         :param data:
         :return commandcall:
         """
-        commandcall = " --shell <<EOF"
+        commandcall = " --shell"
         for param in data:
             commandcall += self._create_set_command(self.isoConfig, param['iso'], prefix="\n")
             commandcall += self._create_set_command(self.imageformatConfig, param['imageformat'], prefix="\n")
@@ -83,7 +83,7 @@ class GPhotoServer(cd.camera_driver):
             commandcall += self._create_set_command(self.shutterspeedConfig, param['shutterspeed'], prefix="\n")
             commandcall += "\ncapture-image --keep"
             commandcall += "\nwait-event 1s"
-        commandcall += "\nEOF"
+        commandcall += "\nquit"
         return commandcall
 
     def capture_video_cb(self, req):
@@ -248,12 +248,21 @@ class GPhotoServer(cd.camera_driver):
 
     def _run_gphoto(self, cmd):
         cmd = gphoto2Executable + cmd
+        data = ""
 
-        r = envoy.run(cmd)
+        if '--shell' in cmd:
+            data = cmd.replace('gphoto2 --shell', '')
+            cmd = 'gphoto2 --shell'
+
+        r = self._run_command(cmd, data=data)
 
         if r.status_code != 0:
+            rospy.logerr("gphoto2 sequence error : " + r.std_out)
             rospy.logerr("gphoto2 process error : " + r.std_err)
         return r
+
+    def _run_command(self, cmd, data):
+        return envoy.run(cmd, data=data)
 
 
 if __name__ == "__main__":

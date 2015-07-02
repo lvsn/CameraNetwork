@@ -48,6 +48,7 @@ class Server:
             'save_config',
             std_srvs.srv.Empty(),
             self.save_settings_cb)
+
         rospy.Service(
             'preview_camera',
             std_srvs.srv.Empty(),
@@ -113,9 +114,14 @@ class Server:
 
     def capture_listen_cb(self, req):
         # Simply print out values in our custom message.
-        if req.isHdr:
-            rospy.loginfo("Taking AEB picture")
-            self.cam_handler.takeAEBPicture()
+        rospy.logerr("Mode: {}".format(req.mode))
+        #raise Exception(req.mode)
+        if req.mode == 1:
+            rospy.loginfo("Taking hdr picture")
+            self.cam_handler.takeHDRPicture(0)
+        elif req.mode == 2:
+            rospy.loginfo("Taking pictures with shell commands")
+            # TODO self.cam_handler.takeShellPicture
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)

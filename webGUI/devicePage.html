@@ -123,7 +123,9 @@
                     <input id="device_timelapse_qty" type="number" value="1" name="device_timelapse_qty" >
                     <span>(&lt;0 = infinite)</span>
                 </label>
-                    <input type="checkbox" id="device_hdr" value="HDR">AEB<br>
+                <label for="capture_plain"><input type="radio" name="capture_type" id="capture_plain" value="0" checked="checked" />Normal</label>
+                <label for="capture_hdr"><input type="radio" name="capture_type" id="capture_hdr" value="1" />HDR</label>
+                <label for="capture_shell"><input type="radio" name="capture_type" id="capture_shell" value="2" />Shell</label>
                 <dl>
                     <dt>Status:</dt>
                         <dd id="device_timelapse_status"></dd>
@@ -142,7 +144,27 @@
             </form>
 
         </div> 
-        <!-- preview interface -->
+        <!-- text interface -->
+	<div class="mainStyle">
+		<form name="timelapse" action="javascript:void(0)" method="get"><fieldset>
+			<label>Shell command :</label>
+            <div class="center">
+			    <textarea id="shellCommand" rows="10" cols="50"></textarea>
+                <dl>
+                    <dt>Output:</dt><br />
+                    <dd id="msg_output"></dd>
+                </dl>
+            </div>
+            <div class="floatright">
+			    <button type="reset">Reset</button>
+            </div>
+            <div class="floatleft">
+			    <button type="button" class="styleButton" onclick = "saveSequenceShellEvent(this.form)">Save</button>
+            </div>
+		</fieldset></form>
+	</div>        
+
+        <!-- beta interface
         <div class="mainStyle">
                 <form class="parameterStyle right" name="stream" action="javascript:void(0)" method="get">
               Frames:<input id="device_stream_frames" type="number" value="10" name="device_stream_frames" >
@@ -151,7 +173,7 @@
                 <img id="preview_image" alt="some_text">
         <br>
                 <button type="button" class="floatleft" onclick = "drawPreviewEvent()">Preview</button>
-        </div>
+        </div> -->
 
         <div class="mainStyle">
                 <button type="button" class="floatleft" onclick = "shutdownDeviceEvent()">Shutdown Device</button>
