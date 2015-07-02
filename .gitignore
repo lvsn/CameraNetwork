@@ -1,6 +1,7 @@
 build
 devel
 install
+.save/*
 client/src/CMakeLists.txt
 server/src/CMakeLists.txt
 webGUI/*~

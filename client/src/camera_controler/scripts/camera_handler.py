@@ -65,6 +65,7 @@ class CameraHandler:
             std_srvs.srv.Trigger(),
             self.get_settings_shell_cb)
         self.shell_config = ''
+        self.lock = False
 
     def updateCameraSetting(self, configDict={}):
         '''
@@ -205,8 +206,11 @@ class CameraHandler:
 
     def save_settings_shell_cb(self, req):
         # --- save_config_shell ---
-        rospy.loginfo('Saving new settings shell: {}'.format(req.option))
-        self.shell_config = req.option
+        if not self.lock:
+            rospy.loginfo('Saving new settings shell: {}'.format(req.option))
+            self.shell_config = req.option
+        else:
+            rospy.logwarn('Camera locked. You cant save your shell settings')
         return {}
 
     def get_settings_shell_cb(self, req):

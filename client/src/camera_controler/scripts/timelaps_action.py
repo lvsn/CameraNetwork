@@ -41,6 +41,7 @@ class TimelapsAction:
         picture_goal = self._get_frame_qty(goal.picture_qty)
         self.picture_count = 0
 
+        self.cam_handler.lock = True
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
             self.picture_count += 1
@@ -48,7 +49,7 @@ class TimelapsAction:
             self._send_feedback(self.picture_count, picture_goal, hz)
             if self._sleep(timestamp):
                 break
-
+        self.cam_handler.lock = False
         succes_msg = CameraControlActionResult
         succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.action.set_succeeded(succes_msg)

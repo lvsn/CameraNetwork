@@ -19,17 +19,15 @@ class network_capture_action:
         rospy.loginfo("Initialising Network timlaps action")
         self.publisher = rospy.Publisher("/network_capture_chatter", Capture, queue_size=1)
         rospy.sleep(0.5) #let time for connections
-        self.action = actionlib.SimpleActionServer('network_timelaps',CameraControlAction,
-                                                   self.execute,False)                                               
+        self.action = actionlib.SimpleActionServer('network_timelaps', CameraControlAction,
+                                                   self.execute, False)
         self.action.start()
         
         self.picture_count = 0
         self.msg = Capture()
         self.msg.mode = True
         
-
-        
-    def execute(self,goal):
+    def execute(self, goal):
         self.msg.mode = goal.mode
         period = goal.inter_picture_delay_s
         hz = self._sec_to_hz(period)
@@ -40,7 +38,7 @@ class network_capture_action:
             timestamp = rospy.get_time() + period
             self.picture_count += 1
             self.publisher.publish(self.msg)
-            self._send_feedback(self.picture_count,picture_goal,hz)
+            self._send_feedback(self.picture_count, picture_goal, hz)
             interupt = self._sleep(timestamp)
             if(interupt):
                 break
@@ -62,7 +60,7 @@ class network_capture_action:
                     return True
         return False
 
-    def _sec_to_hz(self,Tsec):
+    def _sec_to_hz(self, Tsec):
         try:
             hz = math.fabs(1/Tsec)
             rospy.loginfo("Frequency set to " + str(hz) + " hz.")
@@ -71,14 +69,14 @@ class network_capture_action:
             rospy.logwarn("Can not set 0 as frequency... setting frequency to 1 hz")
         return hz
             
-    def _get_frame_qty(self,Qty):
+    def _get_frame_qty(self, Qty):
         if Qty < 0:
             frame_qty = float('inf')
         else:
             frame_qty = Qty
         return frame_qty
             
-    def _send_feedback(self,count,goal,frequency):
+    def _send_feedback(self, count, goal, frequency):
         feedback_msg = CameraControlActionFeedback
         feedback_msg.picture_taken = 'Picture taken:' + str(count) \
             + '/' + str(goal) + ' (' + str(frequency) + 'Hz)'

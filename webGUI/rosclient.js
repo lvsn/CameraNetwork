@@ -155,7 +155,7 @@ function device()
 			ros : ros,
 			serverName : name + '/timelaps',
 			actionName : 'camera_network_msgs/CameraControlAction'  
-	  	});  
+	  	});
 		
 		feedback.subscribe(function(msg){
 			$("#device_timelapse_feedback").text(msg.feedback.picture_taken);
@@ -234,10 +234,10 @@ function device()
 		//alert($('#shellCommand').val())
 		var request = new ROSLIB.ServiceRequest({option: $('#shellCommand').val()});
 		save.callService(request, function(result) {});
-		this.output = new this.getSequenceShell()
+		//this.output = new this.getSequenceShell()
 	}
 
-	this.getSequenceShell = function(){
+	/** this.getSequenceShell = function(){
 	// ----- save sequence shell ----- #jb
 		var save = new ROSLIB.Service({
 			ros : ros,
@@ -247,7 +247,7 @@ function device()
 		//alert($('#shellCommand').val())
 		var request = new ROSLIB.ServiceRequest({});
 		save.callService(request, function(result) {});
-	}
+	} **/
 	
 	this.shutdownDevice = function(){
 		var shutdown = new ROSLIB.Service({
