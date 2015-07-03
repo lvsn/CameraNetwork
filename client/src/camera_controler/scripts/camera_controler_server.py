@@ -24,6 +24,7 @@ import std_srvs.srv
 from camera_network_msgs.srv import *
 from camera_network_msgs.msg import *
 import subprocess
+import envoy
 
 
 class Server:
@@ -114,14 +115,25 @@ class Server:
 
     def capture_listen_cb(self, req):
         # Simply print out values in our custom message.
-        rospy.logerr("Mode: {}".format(req.mode))
-        #raise Exception(req.mode)
         if req.mode == 1:
             rospy.loginfo("Taking hdr picture")
             self.cam_handler.takeHDRPicture(0)
         elif req.mode == 2:
-            rospy.loginfo("Taking pictures with shell commands")
-            # TODO self.cam_handler.takeShellPicture
+            rospy.loginfo("Getting shell command:\n{}".format(self.cam_handler.shell_config))
+            if 'gphoto2 --shell' in self.cam_handler.shell_config:
+                cmdHeader = self.cam_handler.shell_config.splitlines()[0]
+                cmdSequence = self.cam_handler.shell_config.replace('gphoto2 --shell', '')
+                r = envoy.run(cmdHeader, data=cmdSequence)
+                if r.status_code:
+                    rospy.logerr(r.std_out)
+                else:
+                    rospy.loginfo(r.std_out)
+            else:
+                for cmdLine in self.cam_handler.shell_config.splitlines():
+                    rospy.loginfo('Cmd executing: ' + cmdLine)
+                    r = envoy.run(cmdLine)
+                    if r.status_code:
+                        rospy.logerr(r.std_out)
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)

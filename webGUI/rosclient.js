@@ -58,7 +58,7 @@ function network_timelapse()
 			goalMessage : {
 				picture_qty : parseFloat(form.network_timelapse_qty.value),
 				inter_picture_delay_s : parseFloat(form.network_timelapse_frequency.value),
-				is_hdr : $('#network_hdr').is(':checked')
+				mode : parseInt($('input[name=capture_type_net]:checked', 'form[name=network]').val())
 			}
 		});
 		goal.send();
@@ -188,7 +188,6 @@ function device()
 				picture_qty : parseFloat(picture_qty),
 				inter_picture_delay_s : parseFloat(inter_picture_delay_s),
 				mode : parseInt($('input[name=capture_type]:checked', 'form[name=timelapse]').val())
-				//, shell_command : $('#shellCommand').val()
 			}
 		});
 		goal.send();

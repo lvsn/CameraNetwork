@@ -43,10 +43,10 @@
                 <input id="network_quantity" type="number" value="1" name="network_timelapse_qty" >
                 <span>(-1 = perpetual capture)</span>
             </label>
-            <label>
-                <input type="checkbox" id="network_hdr" value="HDR">HDR<br>
-            </label>
-      		<dl>
+            <label for="capture_plain_net"><input type="radio" name="capture_type_net" id="capture_plain_net" value=0 checked="checked">Normal</label>
+            <label for="capture_hdr_net"><input type="radio" name="capture_type_net" id="capture_hdr_net" value=1>HDR</label>
+            <label for="capture_shell_net"><input type="radio" name="capture_type_net" id="capture_shell_net" value=2>Shell</label>
+            <dl>
                 <dt>Status:</dt>
                     <dd id="network_timelapse_status"></dd>
                 <dt>Feedback:</dt>
@@ -56,15 +56,15 @@
       		</dl>
             <div style="clear: both;"></div>
             <div class="floatleft">
-                <input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form,true)" value="Launch acquisition">
+                <input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form, true)" value="Launch acquisition">
             </div>
             <div class="floatright">
-                <input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form,false)" value="Stop">
+                <input type="submit" class="floatleft" onclick="networkTimelapsEvent(this.form, false)" value="Stop">
             </div>
         </form>
 	</div> 
 
-   <!-- Video interface -->
+   <!-- Video interface
     <div class="mainStyle">
         <h2>VIDEO</h2>
         <form name="video" action="javascript:void(0)" method="get">
@@ -74,7 +74,7 @@
         </form>
     </div>
 
-    </div>
+    </div> -->
     </div>
 
 </body>
