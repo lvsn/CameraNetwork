@@ -1,6 +1,8 @@
 build
 devel
 install
+build-yahog
+install-yahog
 .save/*
 client/src/CMakeLists.txt
 server/src/CMakeLists.txt
