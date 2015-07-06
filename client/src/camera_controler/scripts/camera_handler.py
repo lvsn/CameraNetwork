@@ -9,11 +9,13 @@ Created on Thu May 22 16:21:09 2014
 Object Facade object for the Camera Driver. Make the use of it easier or
 controler's services.
 """
-import os
+import os, sys, envoy
 import rospy, subprocess, threading
 import std_srvs.srv
 from camera_network_msgs.srv import *
+from time import sleep
 
+GREP_CAMERA_PATTERN = '[[:digit:]]{1}[[:alpha:]]{1}[[:digit:]]{1}[[:alpha:]]{1}[[:digit:]]{4}.CR2'
 
 class CameraHandler:
     """
@@ -55,17 +57,26 @@ class CameraHandler:
             'configure_parameter_queue',
             ParameterQueue)
         self.updateCameraSetting()
-                # --- shell option --- #jb
+
+        rospy.loginfo('Setting up CameraHandler Service')
         rospy.Service(
             'save_config_shell',
             CommandOption,
             self.save_settings_shell_cb)
+
+        # rospy.Service(
+        #     'get_config_shell',
+        #     std_srvs.srv.Trigger(),
+        #     self.get_config_shell_cb)
+
         rospy.Service(
-            'get_config_shell',
-            std_srvs.srv.Trigger(),
-            self.get_settings_shell_cb)
+            'download_data',
+            std_srvs.srv.Empty(),
+            self.download_data_cb)
+
         self.shell_config = ''
         self.lock = False
+        rospy.loginfo('... CameraHandler set up done ...')
 
     def updateCameraSetting(self, configDict={}):
         '''
@@ -148,50 +159,6 @@ class CameraHandler:
     def takePreview(self):
         self.preview_camera_service()
 
-    def takeAEBPicture(self, timelapse=120.0):
-        rospy.loginfo('*** Stop all AEB process ***')
-        self.stopAEBProcess()
-
-        rospy.loginfo('Launch timelaps: {}'.format(timelapse))
-        threading.Timer(timelapse, self.captureAEBPicture).start()
-
-        rospy.loginfo('Capturing with AEB')
-        self.captureAEBPicture()
-
-    def captureAEBPicture(self):
-
-        rospy.loginfo('*** Take AEB picture ***')
-
-        rospy.loginfo('Lock process')
-        subprocess.call('mkdir {}lock'.format(os.path.realpath(__file__)))
-
-        rospy.loginfo('Preset the ISO, fileformat, etc.')
-        subprocess.call('gphoto2 --reset', shell=True)
-        subprocess.call('gphoto2 --set-config imageformat=32', shell=True)
-        rospy.loginfo('\_ Keep photo in SD card')
-        subprocess.call('gphoto2 --set-config capturetarget=1', shell=True)
-        subprocess.call('gphoto2 --set-config iso=1', shell=True)
-        subprocess.call('gphoto2 --set-config autopoweroff="0"', shell=True)
-
-        rospy.loginfo('Taking AEB pictures')
-        subprocess.call('gphoto2 --set-config /main/capturesettings/aeb="+/- 3" --set-config /main/capturesettings/aperture="16" --set-config /main/capturesettings/shutterspeed="1/1000" --set-config /main/actions/eosremoterelease=2 --wait-event=1s', shell=True)
-        subprocess.call('gphoto2 --set-config /main/capturesettings/aperture=4 --set-config /main/capturesettings/shutterspeed="1/30" --set-config /main/actions/eosremoterelease=2 --wait-event=1s', shell=True)
-        subprocess.call('gphoto2 --set-config /main/capturesettings/aeb=0 --set-config /main/capturesettings/shutterspeed="1" --capture-image', shell=True)
-
-        rospy.loginfo('Unlock process')
-        subprocess.call('rmdir {}lock'.format(os.path.realpath(__file__)))
-
-    def stopAEBProcess(self):
-        rospy.loginfo('AEB stopping begin...')
-        str_sub = subprocess.check_output('/bin/ps aux | /bin/grep python | /bin/grep launch_aeb.py', shell=True).splitlines()
-        if len(str_sub) > 1:
-            pid = str_sub[0].split()[1]
-            rospy.loginfo('\_ AEB process present with PID: {}'.format(pid))
-            subprocess.call('kill {}'.format(pid), shell=True)
-            rospy.loginfo('\_ AEB finished.')
-        else:
-            rospy.loginfo('\_ AEB not running.')
-
     def calibrate(self):
         self.calibrate_picture_service()
         setting = self.get_camera_service(False)
@@ -213,11 +180,105 @@ class CameraHandler:
             rospy.logwarn('Camera locked. You cant save your shell settings')
         return {}
 
-    def get_settings_shell_cb(self, req):
-        # --- get_config_shell ---
-        if not self.shell_config:
-            rospy.logwarn('No current shell settings')
-            return {'success': 0, 'message': 'No current shell settings'}
+    # def get_config_shell_cb(self, req):
+    #     # --- get_config_shell ---
+    #     if not self.shell_config:
+    #         rospy.logwarn('No current shell settings')
+    #         return {'success': 0, 'message': 'No current shell settings'}
+    #     else:
+    #         rospy.loginfo('Getting shell config')
+    #         return {'success': 1, 'message': self.shell_config}
+
+    def download_data_cb(self, req):
+        rospy.loginfo('*** Service: Downloading raw data')
+        self.load_data_cb(10)
+        rospy.loginfo('*** Service Done')
+        return {}
+
+    def load_data_cb(self, number=None):
+        """
+        Routine: Loads raw data from camera to local pictures folder
+        1 - Waiting for camera using and lock camera
+        2 - getting camera list files
+        3 - downloading number raw data
+        4 - delete it if downloaded and unclaim camera
+        5 - unlock camera
+        """
+        # 1 - Waiting for camera using and claim camera
+        self.waiting_for_using()
+        self.lock = True
+
+        # 2 - Getting camera list files
+        # TODO Check execution time with threading.lock something like this
+        try:
+            camera_list = self._run_cmd('gphoto2 --list-files').splitlines()
+            camera_list_files = [line.split()[1] for line in camera_list if '#' in line]
+            i = 0
+
+            if number is None or number > len(camera_list_files):
+                number = len(camera_list_files)
+
+            # 3 - Download number=X raw data
+            while i < number:
+
+                if len(camera_list_files) == 0:
+                    rospy.loginfo('Camera empty')
+                    break
+
+                os.chdir('/home/jbecirovski/camnet-output/')
+                folder_list_files = [file for file in os.listdir('/home/jbecirovski/camnet-output')]
+
+                if not camera_list_files[0] in folder_list_files:
+                    self._run_cmd('gphoto2 --get-file=1', 'get first file in camera')
+                    rospy.loginfo('#({}/{}) '.format(i + 1, number) + camera_list_files[0] + ' downloaded to folder')
+
+                folder_list_files = [file for file in os.listdir('/home/jbecirovski/camnet-output')]
+
+                # 4 - Delete image
+                if camera_list_files[0] in folder_list_files:
+                    self._run_cmd('gphoto2 --delete-file=1 --recurse')
+                    #rospy.loginfo(camera_list_files[0] + ' deleted from camera')
+                    camera_list_files.pop(0)
+                    i += 1
+        except:
+            err_type, err_tb, e = sys.exc_info()
+            rospy.logerr(err_tb)
+
+        # 5 - unlock
+        self.lock = False
+
+    def organize_raw_data(self):
+        """
+        Routine: Organises raw data in local pictures folder
+        """
+        pass
+
+    def send_raw_data(self):
+        """
+        Routine: Sends raw data from local pictures folder to another folder using rsync
+        """
+        pass
+
+    def waiting_for_using(self):
+        """
+        Routine: Waits until camera is no longer used
+        """
+        while True:
+            if self.lock:
+                sleep(1)
+            else:
+                break
+
+    def _run_cmd(self, cmd, category='Unspecified CameraError'):
+        """
+        Run command and raise if error is detected.
+        :param cmd: str - shell command
+        :param category: str - choose your category
+        :return: str - shell output
+        """
+        cmd_output = envoy.run(cmd)
+        if cmd_output.status_code:
+            rospy.logwarn(category + ':\n' + cmd)
+            raise AssertionError(category + ': ' + cmd_output.std_err)
         else:
-            rospy.loginfo('Getting shell config')
-            return {'success': 1, 'message': self.shell_config}
+            return cmd_output.std_out

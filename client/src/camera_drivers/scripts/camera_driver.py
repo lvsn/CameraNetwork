@@ -35,6 +35,7 @@ class camera_driver(object):
             user = rospy.get_param("/Username/server")
             self.serverPath = os.path.expanduser("/home/" + user + "/Pictures/server")
         #should look on param server for serverusername?
+        
         rospy.set_param("DownloadQty", 10)
         self.parameterQueue = []
         self.bridge = CvBridge()
@@ -45,14 +46,8 @@ class camera_driver(object):
         rospy.Service('set_camera', InCameraData, self.set_camera_cb)
         rospy.Service('load_camera', Load, self.load_camera_cb)
         rospy.Service('capture_video', Uint32, self.capture_video_cb)
-        rospy.Service(
-            'calibrate_picture',
-            std_srvs.srv.Empty,
-            self.calibrate_picture_cb)
-        rospy.Service(
-            'configure_parameter_queue',
-            ParameterQueue,
-            self.set_parameter_queue_cb)
+        rospy.Service('calibrate_picture', std_srvs.srv.Empty, self.calibrate_picture_cb)
+        rospy.Service('configure_parameter_queue', ParameterQueue, self.set_parameter_queue_cb)
         rospy.loginfo("Camera Service Ready")
 
     def __del__(self):
@@ -204,6 +199,6 @@ class camera_driver(object):
         """
         cmd = 'rsync ' + cmd
         r = envoy.run(cmd)
-        if r.status_code != 0:
+        if r.status_code:
             rospy.logerr("rsync process error : " + r.std_err)
         return r
