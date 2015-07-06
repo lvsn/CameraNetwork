@@ -520,7 +520,7 @@ function refreshSelect()
 
     /* Set currently selected device to previously selected one */
     if (_current_device != undefined) {
-        $("#deviceList").val(_current_device.ip);
+        $("#deviceList").val(_current_device.getIp());
     }
 
     /* Trigger onChange event */
