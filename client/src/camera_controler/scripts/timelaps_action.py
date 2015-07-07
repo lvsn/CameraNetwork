@@ -50,13 +50,13 @@ class TimelapsAction:
             if self._sleep(timestamp):
                 break
         self.cam_handler.lock = False
-        succes_msg = CameraControlActionResult
-        succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
-        self.action.set_succeeded(succes_msg)
+        success_msg = CameraControlActionResult
+        success_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
+        self.action.set_succeeded(success_msg)
 
     def _sleep(self, timestamp):
         """
-        Sleep until the timestamp (in seconds) if there is an interuption to the action, it return True.
+        Sleep until the timestamp (in seconds) if there is an interruption to the action, it return True.
         it give a resolution of 2 sec.
         :param timestamp:
         :return bool:

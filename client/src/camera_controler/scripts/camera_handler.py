@@ -13,9 +13,7 @@ import os, sys, envoy
 import rospy, subprocess, threading
 import std_srvs.srv
 from camera_network_msgs.srv import *
-from time import sleep
 
-GREP_CAMERA_PATTERN = '[[:digit:]]{1}[[:alpha:]]{1}[[:digit:]]{1}[[:alpha:]]{1}[[:digit:]]{4}.CR2'
 
 class CameraHandler:
     """
@@ -71,7 +69,7 @@ class CameraHandler:
 
         rospy.Service(
             'download_data',
-            std_srvs.srv.Empty(),
+            Uint32,
             self.download_data_cb)
 
         self.shell_config = ''
@@ -191,11 +189,14 @@ class CameraHandler:
 
     def download_data_cb(self, req):
         rospy.loginfo('*** Service: Downloading raw data')
-        self.load_data_cb(10)
+        rospy.loginfo('Loading data from camera: %s pictures' % req.integer)
+        self.load_data_cb(req.integer)
+        rospy.loginfo('Sending data to destination')
+        self.send_raw_data()
         rospy.loginfo('*** Service Done')
         return {}
 
-    def load_data_cb(self, number=None):
+    def load_data_cb(self, number=-1):
         """
         Routine: Loads raw data from camera to local pictures folder
         1 - Waiting for camera using and lock camera
@@ -204,23 +205,21 @@ class CameraHandler:
         4 - delete it if downloaded and unclaim camera
         5 - unlock camera
         """
-        # 1 - Waiting for camera using and claim camera
-        self.waiting_for_using()
-        self.lock = True
-
-        # 2 - Getting camera list files
-        # TODO Check execution time with threading.lock something like this
         try:
+            # 1 - Waiting for camera using and claim camera
+            self.waiting_for_using()
+            self.lock = True
+
+            # 2 - Getting camera list files
+            # TODO Check execution time with threading.lock something like that
             camera_list = self._run_cmd('gphoto2 --list-files').splitlines()
             camera_list_files = [line.split()[1] for line in camera_list if '#' in line]
             i = 0
-
-            if number is None or number > len(camera_list_files):
+            if number < 1 or number > len(camera_list_files):
                 number = len(camera_list_files)
 
             # 3 - Download number=X raw data
             while i < number:
-
                 if len(camera_list_files) == 0:
                     rospy.loginfo('Camera empty')
                     break
@@ -237,7 +236,6 @@ class CameraHandler:
                 # 4 - Delete image
                 if camera_list_files[0] in folder_list_files:
                     self._run_cmd('gphoto2 --delete-file=1 --recurse')
-                    #rospy.loginfo(camera_list_files[0] + ' deleted from camera')
                     camera_list_files.pop(0)
                     i += 1
         except:
@@ -248,26 +246,68 @@ class CameraHandler:
         self.lock = False
 
     def organize_raw_data(self):
+        # TODO Make organizer pictures
         """
         Routine: Organises raw data in local pictures folder
         """
         pass
 
     def send_raw_data(self):
+        # TODO Make sender pictures with rsync
         """
         Routine: Sends raw data from local pictures folder to another folder using rsync
+        1 - Getting path source
+        2 - Getting path destination
+        3 - Sending with rsync
         """
-        pass
+        try:
+            # 1 - Getting path pictures folder
+            path_src = os.environ.get('CAMNET_OUTPUT_DIR')
+            if path_src is None or not os.path.isdir(path_src):
+                rospy.logwarn('Bad source path for sending pictures: %s' % path_src)
+                try:
+                    path_src = os.environ.get('HOME') + '/camnet-output/'
+                    os.mkdir(path_src)
+                except:
+                    rospy.logwarn('Default path is already present: %s' % path_src)
+            rospy.loginfo('Source path taken')
 
-    def waiting_for_using(self):
+            # 2 - Getting path destination
+            path_dst = os.environ.get('CAMNET_SERVER_DATA_DIR')
+            if path_dst is None:
+                path_dst = 'JUBEC7@victoria.gel.ulaval.ca:/home-local/yahog.extra.nobkp/www/pictures/test_pro/'
+                rospy.logwarn('Bad destination path for sending pictures: %s' % path_src)
+            rospy.loginfo('Destination path taken: %s' % path_src)
+
+            # 3 - Sending with rsync
+            # TODO Sending with rsync: Find way to show progress / checkpoint with command
+            cmd = 'rsync -vrz --progress --remove-source-files --no-owner --no-group --chmod=ugo+rwx,Dugo+rwx'
+            time_out = '--timeout=10'
+
+            while True:
+                try:
+                    self._run_cmd(' '.join([cmd, time_out, path_src, path_dst]), 'SendRawData - rsync')
+                    break
+                except AssertionError as e:
+                    rospy.logwarn('Rsync Error: %s' % e)
+        except:
+            err_type, err_tb, e = sys.exc_info()
+            rospy.logerr(err_tb)
+
+    def waiting_for_using(self, time_out=20):
         """
-        Routine: Waits until camera is no longer used
+        Routine: Waits until camera is no longer used.
         """
-        while True:
+        while time_out > 0:
             if self.lock:
-                sleep(1)
+                rospy.sleep(1)
             else:
                 break
+            time_out -= 1
+
+        if time_out <= 0:
+            rospy.logwarn('Command TimeOut: Watchdog trigger enabled')
+            raise AssertionError('Timeout')
 
     def _run_cmd(self, cmd, category='Unspecified CameraError'):
         """
