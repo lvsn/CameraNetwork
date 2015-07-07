@@ -14,6 +14,8 @@ import rospy, subprocess, threading
 import std_srvs.srv
 from camera_network_msgs.srv import *
 
+DL_DATA_SERIE_SIZE = 10
+
 
 class CameraHandler:
     """
@@ -78,7 +80,7 @@ class CameraHandler:
         rospy.loginfo('Taking Environment Data')
         try:
             self.path_src = os.environ.get('CAMNET_OUTPUT_DIR')
-            if self.path_src is None or os.path.isdir(self.path_src):
+            if self.path_src is None or not os.path.isdir(self.path_src):
                 rospy.logwarn('Bad source path for sending pictures: %s' % self.path_src)
                 self.path_src = os.environ['HOME'] + '/camera-output/'
                 try:
@@ -207,20 +209,22 @@ class CameraHandler:
     #         rospy.loginfo('Getting shell config')
     #         return {'success': 1, 'message': self.shell_config}
 
-
     def download_data_cb(self, req):
         threading.Thread(target=self.download_data_sequence, args=(req,)).start()
         return {}
 
     def download_data_sequence(self, req):
-        rospy.loginfo('*** Service: Downloading raw data')
-        rospy.loginfo('Loading data from camera: %s pictures' % req.integer)
-        self.load_data_cb(req.integer)
-        rospy.loginfo('Sending data to destination')
-        self.send_raw_data()
-        rospy.loginfo('*** Service Done')
+        count = req.integer
+        while count >= 0:
+            rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
+            rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
+            self.load_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
+            rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
+            self.send_data()
+            rospy.loginfo('ServiceDownloadData: sequence done')
+            count -= DL_DATA_SERIE_SIZE
 
-    def load_data_cb(self, number=-1):
+    def load_data(self, number=-1):
         """
         Routine: Loads raw data from camera to local pictures folder
         1 - Waiting for camera using and lock camera
@@ -276,7 +280,7 @@ class CameraHandler:
         """
         pass
 
-    def send_raw_data(self):
+    def send_data(self):
         # TODO Make sender pictures with rsync
         """
         Routine: Sends raw data from local pictures folder to another folder using rsync
