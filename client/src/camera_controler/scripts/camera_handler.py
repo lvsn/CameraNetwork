@@ -74,6 +74,26 @@ class CameraHandler:
 
         self.shell_config = ''
         self.lock = False
+
+        rospy.loginfo('Taking Environment Data')
+        try:
+            self.path_src = os.environ.get('CAMNET_OUTPUT_DIR')
+            if self.path_src is None or os.path.isdir(self.path_src):
+                rospy.logwarn('Bad source path for sending pictures: %s' % self.path_src)
+                self.path_src = os.environ['HOME'] + '/camera-output/'
+                try:
+                    os.mkdir(self.path_src)
+                except:
+                    rospy.logwarn('Default path is already present: %s' % self.path_src)
+        except :
+            rospy.logerr('Taking Env Data Error')
+
+        self.path_dst = os.environ.get('CAMNET_SERVER_DATA_DIR')
+        if self.path_dst is None:
+            self.path_dst = 'JUBEC7@victoria.gel.ulaval.ca:/home-local/yahog.extra.nobkp/www/pictures/test_pro/'
+            rospy.logwarn('Bad destination path for sending pictures: %s' % self.path_dst)
+        rospy.loginfo('Destination path taken: %s' % self.path_dst)
+
         rospy.loginfo('... CameraHandler set up done ...')
 
     def updateCameraSetting(self, configDict={}):
@@ -218,7 +238,7 @@ class CameraHandler:
             if number < 1 or number > len(camera_list_files):
                 number = len(camera_list_files)
 
-            # 3 - Download number=X raw data
+            # 3 - Download number raw data
             while i < number:
                 if len(camera_list_files) == 0:
                     rospy.loginfo('Camera empty')
@@ -262,22 +282,10 @@ class CameraHandler:
         """
         try:
             # 1 - Getting path pictures folder
-            path_src = os.environ.get('CAMNET_OUTPUT_DIR')
-            if path_src is None or not os.path.isdir(path_src):
-                rospy.logwarn('Bad source path for sending pictures: %s' % path_src)
-                try:
-                    path_src = os.environ.get('HOME') + '/camnet-output/'
-                    os.mkdir(path_src)
-                except:
-                    rospy.logwarn('Default path is already present: %s' % path_src)
-            rospy.loginfo('Source path taken')
+            path_src = self.path_src
 
             # 2 - Getting path destination
-            path_dst = os.environ.get('CAMNET_SERVER_DATA_DIR')
-            if path_dst is None:
-                path_dst = 'JUBEC7@victoria.gel.ulaval.ca:/home-local/yahog.extra.nobkp/www/pictures/test_pro/'
-                rospy.logwarn('Bad destination path for sending pictures: %s' % path_src)
-            rospy.loginfo('Destination path taken: %s' % path_src)
+            path_dst = self.path_dst
 
             # 3 - Sending with rsync
             # TODO Sending with rsync: Find way to show progress / checkpoint with command
