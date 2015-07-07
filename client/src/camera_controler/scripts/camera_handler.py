@@ -207,14 +207,18 @@ class CameraHandler:
     #         rospy.loginfo('Getting shell config')
     #         return {'success': 1, 'message': self.shell_config}
 
+
     def download_data_cb(self, req):
+        threading.Thread(target=self.download_data_sequence, args=(req,)).start()
+        return {}
+
+    def download_data_sequence(self, req):
         rospy.loginfo('*** Service: Downloading raw data')
         rospy.loginfo('Loading data from camera: %s pictures' % req.integer)
         self.load_data_cb(req.integer)
         rospy.loginfo('Sending data to destination')
         self.send_raw_data()
         rospy.loginfo('*** Service Done')
-        return {}
 
     def load_data_cb(self, number=-1):
         """
@@ -244,14 +248,14 @@ class CameraHandler:
                     rospy.loginfo('Camera empty')
                     break
 
-                os.chdir('/home/jbecirovski/camnet-output/')
-                folder_list_files = [file for file in os.listdir('/home/jbecirovski/camnet-output')]
+                os.chdir(self.path_src)
+                folder_list_files = [file for file in os.listdir(self.path_src)]
 
                 if not camera_list_files[0] in folder_list_files:
                     self._run_cmd('gphoto2 --get-file=1', 'get first file in camera')
                     rospy.loginfo('#({}/{}) '.format(i + 1, number) + camera_list_files[0] + ' downloaded to folder')
 
-                folder_list_files = [file for file in os.listdir('/home/jbecirovski/camnet-output')]
+                folder_list_files = [file for file in os.listdir(self.path_src)]
 
                 # 4 - Delete image
                 if camera_list_files[0] in folder_list_files:
