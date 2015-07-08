@@ -257,6 +257,16 @@ function device()
 		var request = new ROSLIB.ServiceRequest({option:"-h"});
 		shutdown.callService(request, function(result) {});
 	}
+
+	this.downloadDevice = function(){
+		var download = new ROSLIB.Service({
+			ros : ros,
+			name : '/' + name + '/download_data',
+			serviceType : 'camera_network_msgs/Uint32'
+		});
+		var request = new ROSLIB.ServiceRequest({integer:0});
+		download.callService(request, function(result) {});
+	}
 	
 	this.rebootDevice = function(){
 		var shutdown = new ROSLIB.Service({
@@ -648,6 +658,17 @@ function shutdownDeviceEvent(form){
 		    _current_device.clean();
 			_current_device = undefined;
 		}		
+	}
+}
+
+function downloadDeviceEvent(form){
+	if(!noDeviceAlert()){
+		var r = confirm("Are you sure you want to download all pictures from device?");
+		if (r == true) {
+		    _current_device.downloadDevice();
+		    _current_device.clean();
+			_current_device = undefined;
+		}
 	}
 }
 
