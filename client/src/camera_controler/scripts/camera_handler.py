@@ -74,8 +74,10 @@ class CameraHandler:
             Uint32,
             self.download_data_cb)
 
+        self.current_status = 'Idle'
         self.shell_config = ''
-        self.lock = False
+        self.lock_gphoto = False
+        self.cam_threads = {'LoadData': threading.Thread(target=self.download_data_sequence, name='LoadData')}
 
         rospy.loginfo('Taking Environment Data')
         try:
@@ -104,7 +106,6 @@ class CameraHandler:
         configDict must contain the supported key to update parameter server:
             ex: if only 'iso' is present, only the iso parameter will be updated
         '''
-
         if 'iso' in configDict:
             rospy.set_param('camera_setting/iso', configDict['iso'])
 
@@ -193,7 +194,7 @@ class CameraHandler:
 
     def save_settings_shell_cb(self, req):
         # --- save_config_shell ---
-        if not self.lock:
+        if not self.lock_gphoto:
             rospy.loginfo('Saving new settings shell: {}'.format(req.option))
             self.shell_config = req.option
         else:
@@ -210,35 +211,57 @@ class CameraHandler:
     #         return {'success': 1, 'message': self.shell_config}
 
     def download_data_cb(self, req):
-        threading.Thread(target=self.download_data_sequence, args=(req,)).start()
+        """
+        CallBack Ros Service: Launch thread for downloading pictures from camera to server.
+        Check if current thread is starting or not.
+        :param req: uInt32.integer = int
+        :return: empty dict
+        """
+        if not self.cam_threads['LoadData'].is_alive():
+            self.cam_threads['LoadData'] = threading.Thread(target=self.download_data_sequence,
+                                                            name='LoadData',
+                                                            args=(req.integer,))
+            self.cam_threads['LoadData'].start()
+        else:
+            rospy.logwarn('*** Loading process is currently activate ***')
         return {}
 
-    def download_data_sequence(self, req):
-        count = req.integer
-        while count >= 0:
-            rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
-            rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
-            self.load_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
-            rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
-            self.send_data()
-            rospy.loginfo('ServiceDownloadData: sequence done')
-            count -= DL_DATA_SERIE_SIZE
+    def download_data_sequence(self, count):
+        """
+        Routine: == Download data sequence ==
+        1 - Adjust count with pictures list
+        2 - Load from camera for each group of DL_DATA_SERIE_SIZE pictures
+        3 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
+        4 - Repeat it until count is over
+        :param count: int - number of pictures for downloading
+        """
+        try:
+            list_pictures = (self._run_cmd('gphoto2 --list-files')).splitlines()
+            count_pictures = len([line.split()[1] for line in list_pictures if '#' in line])
+
+            if count > count_pictures:
+                count = count_pictures
+            while count >= 0:
+                rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
+                rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
+                self.load_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
+                rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
+                self.send_data()
+                rospy.loginfo('ServiceDownloadData: sequence done')
+                count -= DL_DATA_SERIE_SIZE
+        except:
+            err_type, err_tb, e = sys.exc_info()
+            rospy.logerr(err_tb)
 
     def load_data(self, number=-1):
         """
         Routine: Loads raw data from camera to local pictures folder
-        1 - Waiting for camera using and lock camera
-        2 - getting camera list files
-        3 - downloading number raw data
-        4 - delete it if downloaded and unclaim camera
-        5 - unlock camera
+        1 - getting camera list files
+        2 - downloading number raw data
+        3 - delete it if downloaded
         """
         try:
-            # 1 - Waiting for camera using and claim camera
-            self.waiting_for_using()
-            self.lock = True
-
-            # 2 - Getting camera list files
+            # 1 - Getting camera list files
             # TODO Check execution time with threading.lock something like that
             camera_list = self._run_cmd('gphoto2 --list-files').splitlines()
             camera_list_files = [line.split()[1] for line in camera_list if '#' in line]
@@ -246,7 +269,7 @@ class CameraHandler:
             if number < 1 or number > len(camera_list_files):
                 number = len(camera_list_files)
 
-            # 3 - Download number raw data
+            # 2 - Download number raw data
             while i < number:
                 if len(camera_list_files) == 0:
                     rospy.loginfo('Camera empty')
@@ -261,7 +284,7 @@ class CameraHandler:
 
                 folder_list_files = [file for file in os.listdir(self.path_src)]
 
-                # 4 - Delete image
+                # 3 - Delete image
                 if camera_list_files[0] in folder_list_files:
                     self._run_cmd('gphoto2 --delete-file=1 --recurse')
                     camera_list_files.pop(0)
@@ -269,9 +292,6 @@ class CameraHandler:
         except:
             err_type, err_tb, e = sys.exc_info()
             rospy.logerr(err_tb)
-
-        # 5 - unlock
-        self.lock = False
 
     def organize_raw_data(self):
         # TODO Make organizer pictures
@@ -315,7 +335,7 @@ class CameraHandler:
         Routine: Waits until camera is no longer used.
         """
         while time_out > 0:
-            if self.lock:
+            if self.lock_gphoto:
                 rospy.sleep(1)
             else:
                 break
@@ -332,7 +352,19 @@ class CameraHandler:
         :param category: str - choose your category
         :return: str - shell output
         """
+        # Check
+        if 'gphoto2' in cmd:
+            try:
+                self.waiting_for_using()
+            except:
+                raise AssertionError(category + ': ' + cmd)
+            self.lock_gphoto = True
+
         cmd_output = envoy.run(cmd)
+
+        if 'gphoto2' in cmd:
+            self.lock_gphoto = False
+
         if cmd_output.status_code:
             rospy.logwarn(category + ':\n' + cmd)
             raise AssertionError(category + ': ' + cmd_output.std_err)
