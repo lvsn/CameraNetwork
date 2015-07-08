@@ -74,6 +74,7 @@ class CameraHandler:
             Uint32,
             self.download_data_cb)
 
+        # TODO Make current_status service
         self.current_status = 'Idle'
         self.shell_config = ''
         self.lock_gphoto = False
@@ -230,21 +231,26 @@ class CameraHandler:
         """
         Routine: == Download data sequence ==
         1 - Adjust count with pictures list
-        2 - Load from camera for each group of DL_DATA_SERIE_SIZE pictures
-        3 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
-        4 - Repeat it until count is over
+        2 - for each group of DL_DATA_SERIE_SIZE pictures
+        3 - Load pictures from camera
+        4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
         :param count: int - number of pictures for downloading
         """
         try:
+            # 1 - Adjust count with pictures list
             list_pictures = (self._run_cmd('gphoto2 --list-files')).splitlines()
             count_pictures = len([line.split()[1] for line in list_pictures if '#' in line])
-
-            if count > count_pictures:
+            if count > count_pictures or count == 0:
                 count = count_pictures
+
+            # 2 - for each group of DL_DATA_SERIE_SIZE pictures
             while count >= 0:
+                # 3 - Load pictures from camera
                 rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
                 rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
                 self.load_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
+
+                # 4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
                 rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
                 self.send_data()
                 rospy.loginfo('ServiceDownloadData: sequence done')
@@ -352,7 +358,6 @@ class CameraHandler:
         :param category: str - choose your category
         :return: str - shell output
         """
-        # Check
         if 'gphoto2' in cmd:
             try:
                 self.waiting_for_using()
