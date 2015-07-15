@@ -9,12 +9,11 @@ Created on Thu May 22 16:21:09 2014
 Object Facade object for the Camera Driver. Make the use of it easier or
 controler's services.
 """
-import os, sys, envoy
-import rospy, subprocess, threading
+import threading
+
 import std_srvs.srv
 from camera_network_msgs.srv import *
-
-DL_DATA_SERIE_SIZE = 10
+from scripts.Util.command import *
 
 
 class CameraHandler:
@@ -173,8 +172,8 @@ class CameraHandler:
         if loadCamera:
             self.load_camera_service(picturePath)
 
-    def takeVideo(self, time):
-        self.capture_video_service(time)
+    def takeVideo(self, time_period):
+        self.capture_video_service(time_period)
         picture = self._generatePictureName('video')
         self.load_camera_service(picture)
 
@@ -238,7 +237,7 @@ class CameraHandler:
         """
         try:
             # 1 - Adjust count with pictures list
-            list_pictures = (self._run_cmd('gphoto2 --list-files')).splitlines()
+            list_pictures = (Command.run('gphoto2 --list-files')).splitlines()
             count_pictures = len([line.split()[1] for line in list_pictures if '#' in line])
             if count > count_pictures or count == 0:
                 count = count_pictures
@@ -269,7 +268,7 @@ class CameraHandler:
         try:
             # 1 - Getting camera list files
             # TODO Check execution time with threading.lock something like that
-            camera_list = self._run_cmd('gphoto2 --list-files').splitlines()
+            camera_list = Command.run('gphoto2 --list-files').splitlines()
             camera_list_files = [line.split()[1] for line in camera_list if '#' in line]
             i = 0
             if number < 1 or number > len(camera_list_files):
@@ -285,14 +284,14 @@ class CameraHandler:
                 folder_list_files = [file for file in os.listdir(self.path_src)]
 
                 if not camera_list_files[0] in folder_list_files:
-                    self._run_cmd('gphoto2 --get-file=1', 'get first file in camera')
+                    Command.run('gphoto2 --get-file=1', 'get first file in camera')
                     rospy.loginfo('#({}/{}) '.format(i + 1, number) + camera_list_files[0] + ' downloaded to folder')
 
                 folder_list_files = [file for file in os.listdir(self.path_src)]
 
                 # 3 - Delete image
                 if camera_list_files[0] in folder_list_files:
-                    self._run_cmd('gphoto2 --delete-file=1 --recurse')
+                    Command.run('gphoto2 --delete-file=1 --recurse')
                     camera_list_files.pop(0)
                     i += 1
         except:
@@ -307,7 +306,6 @@ class CameraHandler:
         pass
 
     def send_data(self):
-        # TODO Make sender pictures with rsync
         """
         Routine: Sends raw data from local pictures folder to another folder using rsync
         1 - Getting path source
@@ -328,50 +326,10 @@ class CameraHandler:
 
             while True:
                 try:
-                    self._run_cmd(' '.join([cmd, time_out, path_src, path_dst]), 'SendRawData - rsync')
+                    Command.run(' '.join([cmd, time_out, path_src, path_dst]), 'SendRawData - rsync')
                     break
                 except AssertionError as e:
                     rospy.logwarn('Rsync Error: %s' % e)
         except:
             err_type, err_tb, e = sys.exc_info()
             rospy.logerr(err_tb)
-
-    def waiting_for_using(self, time_out=20):
-        """
-        Routine: Waits until camera is no longer used.
-        """
-        while time_out > 0:
-            if self.lock_gphoto:
-                rospy.sleep(1)
-            else:
-                break
-            time_out -= 1
-
-        if time_out <= 0:
-            rospy.logwarn('Command TimeOut: Watchdog trigger enabled')
-            raise AssertionError('Timeout')
-
-    def _run_cmd(self, cmd, category='Unspecified CameraError'):
-        """
-        Run command and raise if error is detected.
-        :param cmd: str - shell command
-        :param category: str - choose your category
-        :return: str - shell output
-        """
-        if 'gphoto2' in cmd:
-            try:
-                self.waiting_for_using()
-            except:
-                raise AssertionError(category + ': ' + cmd)
-            self.lock_gphoto = True
-
-        cmd_output = envoy.run(cmd)
-
-        if 'gphoto2' in cmd:
-            self.lock_gphoto = False
-
-        if cmd_output.status_code:
-            rospy.logwarn(category + ':\n' + cmd)
-            raise AssertionError(category + ': ' + cmd_output.std_err)
-        else:
-            return cmd_output.std_out
