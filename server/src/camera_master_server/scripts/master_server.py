@@ -10,10 +10,12 @@ Server that handle action/services from user.
 """
 from __future__ import print_function
 
-import os
+
+import os, sys
+sys.path.append(os.path.expanduser('~/camera-network'))
 import errno
 
-import roslib;
+import roslib
 
 roslib.load_manifest('camera_master_server')
 import rospy
@@ -21,6 +23,7 @@ import rospy
 import network_capture_action as nca
 import getpass
 import thread
+from scripts.Util.constant import *
 
 
 class Server:
@@ -35,7 +38,7 @@ class Server:
         rospy.spin()
 
     def setParam(self):
-        rospy.set_param('/IP/server', os.getenv("ROS_IP"))
+        rospy.set_param('/IP/server', ROS_IP)
         rospy.set_param('/Username/server', getpass.getuser())
 
     def setPictureDirectory(self):
@@ -44,21 +47,7 @@ class Server:
         environment variable. If not found, reverts to ~/Pictures.
         If the directory does not exists, it tries to create it.
         """
-        try:
-            self.imagePath = os.environ["CAMNET_OUTPUT_DIR"]
-        except KeyError:
-            self.imagePath = os.path.expanduser("~/Pictures")
-            rospy.logwarn(
-                "Could not find the CAMNET_OUTPUT_DIR environment variable.\n"
-                "Reverting to ~/Pictures as the picture directory."
-            )
-
-        try:
-            os.makedirs(self.imagePath)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                rospy.logfatal("Install file not executed! : "
-                               "CameraNetwork path not set")
+        self.imagePath = CAMNET_OUTPUT_DIR
 
     def _heart_beat(self):
         while (not self.terminateThreads):

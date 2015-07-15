@@ -9,11 +9,15 @@ Created on Thu May 22 16:21:09 2014
 Object Facade object for the Camera Driver. Make the use of it easier or
 controler's services.
 """
-import threading
+import os, sys
+sys.path.append(os.path.expanduser('~/camera-network'))
 
+import threading
+import rospy
 import std_srvs.srv
 from camera_network_msgs.srv import *
 from scripts.Util.command import *
+from scripts.Util.constant import *
 
 
 class CameraHandler:
@@ -81,10 +85,10 @@ class CameraHandler:
 
         rospy.loginfo('Taking Environment Data')
         try:
-            self.path_src = os.environ.get('CAMNET_OUTPUT_DIR')
+            self.path_src = CAMNET_OUTPUT_DIR
             if self.path_src is None or not os.path.isdir(self.path_src):
                 rospy.logwarn('Bad source path for sending pictures: %s' % self.path_src)
-                self.path_src = os.environ['HOME'] + '/camera-output/'
+                self.path_src = HOME_DIR + '/camera-output/'
                 try:
                     os.mkdir(self.path_src)
                 except:
@@ -92,10 +96,7 @@ class CameraHandler:
         except :
             rospy.logerr('Taking Env Data Error')
 
-        self.path_dst = os.environ.get('CAMNET_SERVER_DATA_DIR')
-        if self.path_dst is None:
-            self.path_dst = 'JUBEC7@victoria.gel.ulaval.ca:/home-local/yahog.extra.nobkp/www/pictures/test_pro/'
-            rospy.logwarn('Bad destination path for sending pictures: %s' % self.path_dst)
+        self.path_dst = CAMNET_SERVER_DATA_DIR
         rospy.loginfo('Destination path taken: %s' % self.path_dst)
 
         rospy.loginfo('... CameraHandler set up done ...')

@@ -7,7 +7,7 @@ from scripts.Util.constant import *
 __author__ = 'jbecirovski'
 
 
-class Locker:
+class Locker(object):
     @staticmethod
     def lock(process_name=LOCK_DEFAULT_PROCESS):
         try:
@@ -29,7 +29,7 @@ class Locker:
         else:
             return False
 
-class Command:
+class Command(object):
     @staticmethod
     def run(cmd, msg='unspecified category'):
         try:
@@ -50,4 +50,4 @@ class Command:
             return cmd_output.std_out
 
         except:
-            rospy.logerr('*** ERROR: command [{}]: {}'.format(cmd, sys.exc_info()[0]))
+            rospy.logerr('*** ERROR: command [{}]: {}'.format(cmd, sys.exc_info()[1]))

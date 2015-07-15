@@ -10,11 +10,13 @@ Abstract class of camera_driver
 """
 from abc import ABCMeta, abstractmethod
 
-import os
+import os, sys
+sys.path.append(os.path.expanduser('~/camera-network'))
 from datetime import datetime
 import rospy
 import std_srvs.srv
 from camera_network_msgs.srv import *
+from scripts.Util.constant import *
 import sensor_msgs.msg
 import envoy
 from cv_bridge import CvBridge, CvBridgeError
@@ -26,11 +28,11 @@ class camera_driver(object):
     def __init__(self):
         self.cameraModel = None
         try:
-            self.homePath = os.environ["CAMNET_OUTPUT_DIR"]
+            self.homePath = CAMNET_OUTPUT_DIR
         except KeyError:
-            self.homePath = os.path.expanduser("~/Pictures")
+            self.homePath = HOME_DIR
         try:
-            self.serverPath = os.environ["CAMNET_SERVER_DATA_DIR"]
+            self.serverPath = CAMNET_SERVER_DATA_DIR
         except KeyError:
             user = rospy.get_param("/Username/server")
             self.serverPath = os.path.expanduser("/home/" + user + "/Pictures/server")

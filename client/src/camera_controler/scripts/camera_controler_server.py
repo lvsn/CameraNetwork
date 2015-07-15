@@ -18,13 +18,15 @@ import rospkg
 import rosparam
 import timelaps_action as ta
 import camera_handler as ch
-import os
+import os, sys
+sys.path.append(os.path.expanduser('~/camera-network'))
 import std_msgs.msg
 import std_srvs.srv
 from camera_network_msgs.srv import *
 from camera_network_msgs.msg import *
 import subprocess
 import envoy
+from scripts.Util.constant import *
 
 
 class Server:
@@ -81,7 +83,7 @@ class Server:
         except KeyError:
             pass
         try:
-            rospy.delete_param('/IP/' + os.environ['CAMERA_NAME'])
+            rospy.delete_param('/IP/' + CAMERA_NAME)
         except KeyError:
             pass
 

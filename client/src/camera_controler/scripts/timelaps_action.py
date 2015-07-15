@@ -15,11 +15,10 @@ import roslib
 roslib.load_manifest('camera_controler')
 import rospy
 import actionlib
-import envoy
 
 import camera_handler as ch
 from camera_network_msgs.msg import *
-
+from scripts.Util.command import *
 
 class TimelapsAction:
 
@@ -71,9 +70,9 @@ class TimelapsAction:
     def _sec_to_hz(self, Tsec):
         try:
             hz = math.fabs(1 / Tsec)
-            rospy.loginfo("Frequency set to " + str(hz) + " hz.")
         except ZeroDivisionError:
             hz = -1
+        rospy.loginfo("Frequency set to {:.4f} hz.".format(str(hz)))
         return hz
 
     def _get_frame_qty(self, Qty):
@@ -87,21 +86,8 @@ class TimelapsAction:
         if mode == 1:
             self.cam_handler.takeHDRPicture(pictureId, loadCamera=True)
         elif mode == 2:
-            rospy.loginfo("Getting shell command:\n{}".format(self.cam_handler.shell_config))
-            if 'gphoto2 --shell' in self.cam_handler.shell_config:
-                cmdHeader = self.cam_handler.shell_config.splitlines()[0]
-                cmdSequence = self.cam_handler.shell_config.replace('gphoto2 --shell', '')
-                r = envoy.run(cmdHeader, data=cmdSequence)
-                if r.status_code:
-                    rospy.logerr(r.std_out)
-                else:
-                    rospy.loginfo(r.std_out)
-            else:
-                for cmdLine in self.cam_handler.shell_config.splitlines():
-                    rospy.loginfo('Cmd executing: ' + cmdLine)
-                    r = envoy.run(cmdLine)
-                    if r.status_code:
-                        rospy.logerr(r.std_out)
+            for cmdLine in self.cam_handler.shell_config.splitlines():
+                Command.run(cmdLine)
         else:
             self.cam_handler.takeSinglePicture(pictureId, loadCamera=True)
 
