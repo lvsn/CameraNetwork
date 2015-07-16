@@ -6,8 +6,8 @@ Created on Wed May 21 14:59:35 2014
 @author: mathieugaron
 @email: mathieugaron1991@hotmail.com
 
-Object that implement a Timelaps action : use a camera handler to take picture
-in a timelaps manner with HDR capabilities.
+Object that implement a Timelapse action : use a camera handler to take picture
+in a timelapse manner with HDR capabilities.
 """
 import math
 
@@ -20,14 +20,14 @@ import camera_handler as ch
 from camera_network_msgs.msg import *
 from scripts.Util.command import *
 
-class TimelapsAction:
+class TimelapseAction:
 
     def __init__(self, cam_handler):
-        rospy.loginfo("Setting up Timelaps Action")
+        rospy.loginfo("Setting up Timelapse Action")
 
         self.picture_count = 0
         self.action = actionlib.SimpleActionServer(
-            'timelaps',
+            'timelapse',
             CameraControlAction,
             self.execute,
             False)
@@ -99,7 +99,7 @@ class TimelapsAction:
 
 
 if __name__ == "__main__":
-    rospy.init_node('timelaps_server')
+    rospy.init_node('timelapse_server')
     camH = ch.CameraHandler()
-    action = TimelapsAction(camH)
+    action = TimelapseAction(camH)
     rospy.spin()

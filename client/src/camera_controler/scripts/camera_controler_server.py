@@ -16,7 +16,7 @@ roslib.load_manifest("camera_controler")
 import rospy
 import rospkg
 import rosparam
-import timelaps_action as ta
+import timelapse_action as ta
 import camera_handler as ch
 import os, sys
 sys.path.append(os.path.expanduser('~/camera-network'))
@@ -31,10 +31,10 @@ from scripts.Util.constant import *
 
 class Server:
     def __init__(self):
-        rospy.init_node('timelaps_server')
+        rospy.init_node('timelapse_server')
 
         self.cam_handler = ch.CameraHandler()
-        self.TimelapsAction = ta.TimelapsAction(self.cam_handler)
+        self.TimelapsAction = ta.TimelapseAction(self.cam_handler)
         rospy.Subscriber(
             '/network_capture_chatter',
             Capture,
@@ -73,7 +73,7 @@ class Server:
 
     def shutdown(self):
         del self.cam_handler
-        del self.TimelapsAction
+        del self.TimelapseAction
         try:
             rospy.delete_param('camera_setting')
         except KeyError:

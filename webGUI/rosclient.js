@@ -33,22 +33,22 @@ function network_timelapse()
 {
 	this.status = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelaps/status',
+		name : '/master/network_timelapse/status',
 		messageType : 'actionlib_msgs/GoalStatusArray',
 	});
 	this.feedback = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelaps/feedback',
+		name : '/master/network_timelapse/feedback',
 		messageType : 'camera_network_msgs/CameraControlActionFeedback'
 	});
 	this.result = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelaps/result',
+		name : '/master/network_timelapse/result',
 		messageType : 'camera_network_msgs/CameraControlActionResult',
 	});	
 	this.action = new ROSLIB.ActionClient({
       	ros : ros,
-   	  	serverName : '/master/network_timelaps',
+   	  	serverName : '/master/network_timelapse',
       	actionName : 'camera_network_msgs/CameraControlAction'
     }); 
     
@@ -138,22 +138,22 @@ function device()
 		}); 
 		status = new ROSLIB.Topic({
 			ros : ros,
-			name :  name + '/timelaps/status',
+			name :  name + '/timelapse/status',
 			messageType : 'actionlib_msgs/GoalStatusArray'
 		});
 		feedback = new ROSLIB.Topic({
 			ros : ros,
-			name : name + '/timelaps/feedback',
+			name : name + '/timelapse/feedback',
 			messageType : 'camera_network_msgs/CameraControlActionFeedback'
 		});
 		result = new ROSLIB.Topic({
 			ros : ros,
-			name : name + '/timelaps/result',
+			name : name + '/timelapse/result',
 			messageType : 'camera_network_msgs/CameraControlActionResult'
 		});
 		action = new ROSLIB.ActionClient({
 			ros : ros,
-			serverName : name + '/timelaps',
+			serverName : name + '/timelapse',
 			actionName : 'camera_network_msgs/CameraControlAction'  
 	  	});
 		
@@ -563,7 +563,7 @@ function selectEvent(select) {
     getDeviceInformation();
 }
 
-function networkTimelapsEvent(form,isStart){
+function networkTimelapseEvent(form,isStart){
 	if(isStart){
 		_network_timelapse.setAction(form);
 	}
@@ -624,7 +624,7 @@ function saveSequenceShellEvent(form){
 	}
 }
 
-function deviceTimelapsEvent(form, isStart){
+function deviceTimelapseEvent(form, isStart){
 	if (isStart) {
 		_current_device.setAction(form);
 	} else{
