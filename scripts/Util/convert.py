@@ -1,8 +1,21 @@
-
-from scripts.Util.extract import *
 import os
 
+import datetime
+import time
+import pysolar.solar
+
+from constant import *
+from extract import *
+
+
 __author__ = 'jbecirovski'
+
+class DatetimePysolar(datetime.datetime):
+    def __init__(self, year, month, day, hour, minute, seconde):
+        datetime.datetime.__init__(year, month, day, hour, minute, seconde)
+
+    def timestamp(self):
+        return time.mktime(self.timetuple())
 
 
 def convert_month_StrToInt(str_month):

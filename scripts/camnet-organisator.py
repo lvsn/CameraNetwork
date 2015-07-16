@@ -1,6 +1,7 @@
 import os, subprocess, sys
 
 import exifread
+from scripts.Util.convert import *
 
 __author__ = 'jbecirovski'
 

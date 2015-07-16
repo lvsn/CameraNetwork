@@ -8,6 +8,7 @@ __author__ = 'jbecirovski'
 
 
 class Locker(object):
+    """ Control lock process by creating and deleting empty file inside tmpfs folder (LOCK_DIR) """
     @staticmethod
     def lock(process_name=LOCK_DEFAULT_PROCESS):
         try:

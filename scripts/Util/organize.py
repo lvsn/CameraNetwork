@@ -1,11 +1,9 @@
 
-import os
-from scripts.Util.extract import *
-from scripts.Util.convert import *
-from scripts.Util.sort import *
-import sys, subprocess
+import os, sys, subprocess
 
-
+from extract import *
+from convert import *
+from sort import *
 
 __author__ = 'jbecirovski'
 
@@ -100,8 +98,27 @@ def create_dict_with_files(src_path):
                     del dict_date[date][time]
                 except KeyError:
                     pass
-    print('> Done')
+    print('>> Done')
     return dict_date
+
+def organize_dictionary_day_night(dict_date_time):
+    print('> Converting datetime dictionary by day and night ...')
+    dict_day_night = {}
+    for k_date in dict_date_time.keys():
+        for k_time in k_date.keys():
+            date_time = DatetimePysolar(int(k_date[:4]),
+                                        int(k_date[4:6]),
+                                        int(k_date[6:]),
+                                        int(k_time[:2]),
+                                        int(k_time[2:4]),
+                                        int(k_date[4:]))
+            solar_altitude = pysolar.solar.get_altitude(LATITUDE_DEG, LONGITUDE_DEG, date_time)
+            if solar_altitude > 0:
+                dict_day_night[k_date] = {k_time: k_date[k_time]}
+            else:
+                dict_day_night[k_date + '_N'] = {k_time: k_date[k_time]}
+    print('>> Done')
+    return dict_day_night
 
 def move_with_dictionary(src_path, dst_path, tree_files):
     """
@@ -132,6 +149,7 @@ def organize_folder(path_src):
     rename_with_timestamp(path_src)
     print('> Folder indexing ...')
     dict_date = create_dict_with_files(path_src)
+    dict_date = organize_dictionary_day_night(dict_date)
 
     try:
         os.mkdir(path_src + folder_process)

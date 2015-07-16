@@ -78,7 +78,7 @@ class camera_driver(object):
         2- transfert picture from device(ex camera) to directory
         3- delete picture from device
         '''
-        if (self._create_picture_standard_directory(req.path) == 1):
+        if self._create_picture_standard_directory(req.path) == 1:
             msg = self._copy_picture_from_device_to_standard_directory(req.path)
             if not "error" in msg:
                 rospy.loginfo("Deleting Pictures from camera")

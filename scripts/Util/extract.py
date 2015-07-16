@@ -1,5 +1,6 @@
-from scripts.Util.convert import *
 import os
+
+from convert import *
 
 __author__ = 'jbecirovski'
 
