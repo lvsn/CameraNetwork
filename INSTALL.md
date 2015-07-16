@@ -31,6 +31,7 @@ $ pip install pyyaml
 $ pip install rospkg
 $ pip install pillow
 $ pip install envoy
+$ pip install exifread
 ```
 
 Because ROS Indigo uses an old version of PIL to work, you must setup a proxy to the new Image module as such:
@@ -93,7 +94,12 @@ $ cd camera-network/<client-or-server>/src
 $ catkin_init_workspace
 $ cd ..
 $ catkin_make
-$ sudo ./install.sh
+$ catkin_make install
+$ ln -sv ~/camera-network/client/src/camera_controler/launch ~/camera-network/client/install/share/camera_controler/
+$ ln -sv ~/camera-network/client/src/camera_controler/param ~/camera-network/client/install/share/camera_controler/
+$ ln -sv ~/camera-network/client/src/camera_controler/scripts/*.py ~/camera-network/client/install/share/camera_controler/
+$ ln -sv ~/camera-network/client/src/camera_drivers/launch ~/camera-network/client/install/share/camera_drivers/
+$ ln -sv ~/camera-network/client/src/camera_drivers/scripts/*.py ~/camera-network/client/install/share/camera_drivers/
 ```
 
 ### Install gphoto ###
