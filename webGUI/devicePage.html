@@ -150,10 +150,6 @@
 			<label>Shell command :</label>
             <div class="center">
 			    <textarea id="shellCommand" rows="10" cols="50"></textarea>
-                <dl>
-                    <dt>Output:</dt><br />
-                    <dd id="msg_output"></dd>
-                </dl>
             </div>
             <div class="floatright">
 			    <button type="reset">Reset</button>
@@ -162,6 +158,9 @@
 			    <button type="button" class="styleButton" onclick = "saveSequenceShellEvent(this.form)">Save</button>
             </div>
 		</fieldset></form>
+        <div class="center">
+            <textarea id="roslog" rows="10" cols="100" disabled></textarea>
+        </div>
 	</div>        
 
         <!-- beta interface

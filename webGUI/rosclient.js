@@ -26,6 +26,16 @@ ros.on('error', function() {
     ros_conn_state = 'NOT CONNECTED';
 });
 
+var log_listener = new ROSLIB.Topic({
+	ros : ros,
+	name : '/rosout',
+	messageType : 'rosgraph_msgs/Log'});
+
+log_listener.subscribe(function(message) {
+	addROSlogLine(message);
+	// log_listener.unsubscribe();
+});
+
 
 //   ---- Class ---- 
  
@@ -711,3 +721,20 @@ $(document).ready(function() {
     var refreshScreenTimer = setInterval(refreshScreen, 1000);
 
 });
+
+function addROSlogLine(msg) {
+	var level = document;
+	if(msg.level == 2){
+		level = 'INFO:';
+	}else if(msg.level == 4){
+		level = 'WARN:';
+	}else if(msg.level == 6){
+		level = 'ERROR:';
+	}else{
+		level = 'FATAL:';}
+	// Current Error that's flood console
+	if("Could not process inbound connection: [/rosbridge_websocket] is not a publisher".indexOf(msg.msg)){
+		var str_info = level + '[' + msg.name + ']' + '[' + msg.function + ']';
+		$('#roslog').val(str_info + '\n >> ' + msg.msg + '\n\n' + $('#roslog').val());
+	}
+}
