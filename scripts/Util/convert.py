@@ -11,6 +11,7 @@ from extract import *
 __author__ = 'jbecirovski'
 
 class DatetimePysolar(datetime.datetime):
+    """ PySolar need python3.4 and this class allows to be used with python2.7 """
     def __init__(self, year, month, day, hour, minute, seconde):
         datetime.datetime.__init__(year, month, day, hour, minute, seconde)
 
@@ -18,7 +19,7 @@ class DatetimePysolar(datetime.datetime):
         return time.mktime(self.timetuple())
 
 
-def convert_month_StrToInt(str_month):
+def cvt_month_str_to_int(str_month):
     """
     :param str_month: str month like Dec/December, etc.
     :return: str integer of month
@@ -32,7 +33,7 @@ def convert_month_StrToInt(str_month):
         print('TypeError:', msg, 'should be string.')
 
 
-def convert_timestamp_second(str_timestamp):
+def cvt_timestamp_to_second(str_timestamp):
     """
     Convert str format HHMMSS to second
     :param str_timestamp: string
@@ -40,8 +41,19 @@ def convert_timestamp_second(str_timestamp):
     """
     return int(str_timestamp[:2])*3600 + int(str_timestamp[2:4])*60 + int(str_timestamp[4:6])
 
+def get_yesterday(str_date):
+    """
+    Get yesterday date from str_date.
+    :param str_date: str - YYYYMMDD
+    :return: str - (YYYYMMDD - 1xD)
+    """
+    d_date = datetime.date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
+    t_yesterday = datetime.timedelta(days=1)
+    d_yesterday = d_date - t_yesterday
+    return '{}{:0>2}{:0>2}'.format(d_yesterday.year, d_yesterday.month, d_yesterday.day)
 
-def convert_name_timestamp(src_path, file):
+
+def cvt_name_timestamp(src_path, file):
     """
     :param src_path: str
     """

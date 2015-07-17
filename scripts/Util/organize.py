@@ -82,14 +82,17 @@ def create_dict_with_files(src_path):
 
         for file in file_list:
             file_splited = file.split('_')
-            file_time = convert_timestamp_second(file_splited[1])
+            file_time = cvt_timestamp_to_second(file_splited[1])
 
-            if file_time >= convert_timestamp_second(time_ref) + 60:
+            if file_time >= cvt_timestamp_to_second(time_ref) + 60:
                 dict_date[date][file_splited[1]] = []
                 dict_date[date][file_splited[1]].append(file)
                 time_ref = file_splited[1]
             else:
-                dict_date[date][time_ref].append(file)
+                if time_ref in dict_date[date].keys():
+                    dict_date[date][time_ref].append(file)
+                else:
+                    dict_date[date][time_ref] = [file]
 
     for date in dict_date.keys():
         for time in dict_date[date].keys():

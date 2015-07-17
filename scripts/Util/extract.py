@@ -41,7 +41,7 @@ def extract_date_from_exif(path_src, dict_exif=0):
         str_timestamp = dict_exif['Timestamp'].split()
 
     year = str_timestamp[-1]
-    month = convert_month_StrToInt(str_timestamp[1])
+    month = cvt_month_str_to_int(str_timestamp[1])
     day = str_timestamp[2]
 
     return '{:0>4}{:0>2}{:0>2}'.format(year, month, day)

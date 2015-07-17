@@ -44,7 +44,7 @@ def sort_pix_by_time(path_src, list_pix=0):
     for file in (sorted(os.listdir(path_src)) if not list_pix else sorted(list_pix)):
         if file.endswith('.CR2'):
             exif_time = extract_time_from_exif(path_src + file)
-            if convert_timestamp_second(exif_time) >= convert_timestamp_second(exif_ref) + 60:
+            if cvt_timestamp_to_second(exif_time) >= cvt_timestamp_to_second(exif_ref) + 60:
                 dict_by_time[exif_time] = {'data': [file]}
                 exif_ref = exif_time
             else:
@@ -55,8 +55,8 @@ def sort_pix_by_time(path_src, list_pix=0):
 
     # Add pattern
     for key_time in dict_by_time:
-        first_time = convert_timestamp_second(extract_time_from_exif(path_src + dict_by_time[key_time]['data'][0]))
-        last_time = convert_timestamp_second(extract_time_from_exif(path_src + dict_by_time[key_time]['data'][-1]))
+        first_time = cvt_timestamp_to_second(extract_time_from_exif(path_src + dict_by_time[key_time]['data'][0]))
+        last_time = cvt_timestamp_to_second(extract_time_from_exif(path_src + dict_by_time[key_time]['data'][-1]))
         if first_time + 20 > last_time and len(dict_by_time[key_time]['data']) == 7:
             dict_by_time[key_time]['pattern'] = [2, 1, 3, 5, 4, 6, 7]
         else:

@@ -2,6 +2,7 @@ import os, subprocess, sys
 
 import exifread
 from scripts.Util.convert import *
+from Util.convert import *
 
 __author__ = 'jbecirovski'
 
@@ -96,14 +97,17 @@ def create_dict_with_files(src_path):
 
         for file in file_list:
             file_splited = file.split('_')
-            file_time = convert_timestamp_second(file_splited[1])
+            file_time = cvt_timestamp_to_second(file_splited[1])
 
-            if file_time >= convert_timestamp_second(time_ref) + 60:
+            if file_time >= cvt_timestamp_to_second(time_ref) + 60:
                 dict_date[date][file_splited[1]] = []
                 dict_date[date][file_splited[1]].append(file)
                 time_ref = file_splited[1]
             else:
-                dict_date[date][time_ref].append(file)
+                try:
+                    dict_date[date][time_ref].append(file)
+                except KeyError:
+                    dict_date[date][time_ref] = [file]
 
     sys.stdout.write('> Done\n')
     return dict_date
@@ -128,11 +132,9 @@ def create_folder_from_dictionary(path_dst, dict_tree):
             sys.stdout.write('> MKDIR {}\n'.format(os.path.join(path_dst, key)))
         except:
             pass
+
         if isinstance(dict_tree[key], dict):
-            try:
-                dict_tree[key]['data']
-            except KeyError:
-                create_folder_from_dictionary(os.path.join(path_dst, key), dict_tree[key])
+            create_folder_from_dictionary(os.path.join(path_dst, key), dict_tree[key])
 
 def move_with_dictionary(src_path, dst_path, tree_files):
     """
@@ -151,6 +153,41 @@ def move_with_dictionary(src_path, dst_path, tree_files):
                 os.rename(os.path.join(src_path, file), os.path.join(dst_path, date, time, new_file))
     sys.stdout.write('> Moving done\n')
 
+def organize_dictionary_day_night(dict_date_time):
+    """ Manage day and night with standard datetime dictionary """
+    print('> Converting datetime dictionary by day and night ...')
+    dict_day_night = {}
+    for k_date in dict_date_time.keys():
+        for k_time in dict_date_time[k_date].keys():
+            print(k_date)
+            print(k_time)
+            print(dict_date_time[k_date][k_time])
+            date_time = DatetimePysolar(int(k_date[0:4]),
+                                        int(k_date[4:6]),
+                                        int(k_date[6:8]),
+                                        int(k_time[0:2]),
+                                        int(k_time[2:4]),
+                                        int(k_time[4:6]))
+            solar_altitude = pysolar.solar.get_altitude(LATITUDE_DEG, LONGITUDE_DEG, date_time)
+            if solar_altitude > 0:
+                try:
+                    dict_day_night[k_date].update({k_time: dict_date_time[k_date][k_time]})
+                except KeyError:
+                    dict_day_night[k_date] = {k_time: dict_date_time[k_date][k_time]}
+            else:
+                try:
+                    if cvt_timestamp_to_second(k_time) > cvt_timestamp_to_second('120000'):
+                        dict_day_night[k_date + '_N'].update({k_time: dict_date_time[k_date][k_time]})
+                    else:
+                        dict_day_night[get_yesterday(k_date) + '_N'].update({k_time: dict_date_time[k_date][k_time]})
+                except KeyError:
+                    if cvt_timestamp_to_second(k_time) > cvt_timestamp_to_second('120000'):
+                        dict_day_night[k_date + '_N'] = {k_time: dict_date_time[k_date][k_time]}
+                    else:
+                        dict_day_night[get_yesterday(k_date) + '_N'] = {k_time: dict_date_time[k_date][k_time]}
+    print('>> Done')
+    return dict_day_night
+
 if __name__ == '__main__':
     """
     Organize raw data with specific name in specific folders.
@@ -162,6 +199,7 @@ if __name__ == '__main__':
     sys.stdout.write('Current path: %s\n' % os.getcwd())
     regroup_all_raw_data(os.getcwd())
     folder_tree = create_dict_with_files(os.path.join(os.getcwd(), 'processed'))
+    folder_tree = organize_dictionary_day_night(folder_tree)
     create_folder_from_dictionary(os.getcwd(), folder_tree)
     move_with_dictionary(os.path.join(os.getcwd(), 'processed'), os.getcwd(), folder_tree)
     sys.stdout.write('*** CAMNET ORGANIZER - Finished ***\n')
