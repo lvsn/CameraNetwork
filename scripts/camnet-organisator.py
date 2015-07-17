@@ -1,5 +1,5 @@
 import os, subprocess, sys
-
+sys.path.append(os.path.join(os.path.dirname(__file__)))
 import exifread
 from scripts.Util.convert import *
 from Util.convert import *

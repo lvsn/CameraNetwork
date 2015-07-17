@@ -33,22 +33,22 @@ function network_timelapse()
 {
 	this.status = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelapse/status',
+		name : '/master/network_timelaps/status',
 		messageType : 'actionlib_msgs/GoalStatusArray',
 	});
 	this.feedback = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelapse/feedback',
+		name : '/master/network_timelaps/feedback',
 		messageType : 'camera_network_msgs/CameraControlActionFeedback'
 	});
 	this.result = new ROSLIB.Topic({
 		ros : ros,
-		name : '/master/network_timelapse/result',
+		name : '/master/network_timelaps/result',
 		messageType : 'camera_network_msgs/CameraControlActionResult',
 	});	
 	this.action = new ROSLIB.ActionClient({
       	ros : ros,
-   	  	serverName : '/master/network_timelapse',
+   	  	serverName : '/master/network_timelaps',
       	actionName : 'camera_network_msgs/CameraControlAction'
     }); 
     
@@ -138,22 +138,22 @@ function device()
 		}); 
 		status = new ROSLIB.Topic({
 			ros : ros,
-			name :  name + '/timelapse/status',
+			name :  name + '/timelaps/status',
 			messageType : 'actionlib_msgs/GoalStatusArray'
 		});
 		feedback = new ROSLIB.Topic({
 			ros : ros,
-			name : name + '/timelapse/feedback',
+			name : name + '/timelaps/feedback',
 			messageType : 'camera_network_msgs/CameraControlActionFeedback'
 		});
 		result = new ROSLIB.Topic({
 			ros : ros,
-			name : name + '/timelapse/result',
+			name : name + '/timelaps/result',
 			messageType : 'camera_network_msgs/CameraControlActionResult'
 		});
 		action = new ROSLIB.ActionClient({
 			ros : ros,
-			serverName : name + '/timelapse',
+			serverName : name + '/timelaps',
 			actionName : 'camera_network_msgs/CameraControlAction'  
 	  	});
 		

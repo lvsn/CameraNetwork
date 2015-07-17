@@ -20,14 +20,14 @@ import camera_handler as ch
 from camera_network_msgs.msg import *
 from scripts.Util.command import *
 
-class TimelapseAction:
+class TimelapsAction:
 
     def __init__(self, cam_handler):
         rospy.loginfo("Setting up Timelapse Action")
 
         self.picture_count = 0
         self.action = actionlib.SimpleActionServer(
-            'timelapse',
+            'timelaps',
             CameraControlAction,
             self.execute,
             False)
@@ -72,7 +72,7 @@ class TimelapseAction:
             hz = math.fabs(1 / Tsec)
         except ZeroDivisionError:
             hz = -1
-        rospy.loginfo("Frequency set to {:.4f} hz.".format(str(hz)))
+        rospy.loginfo("Frequency set to {:.4f} hz.".format(hz))
         return hz
 
     def _get_frame_qty(self, Qty):
@@ -99,7 +99,7 @@ class TimelapseAction:
 
 
 if __name__ == "__main__":
-    rospy.init_node('timelapse_server')
+    rospy.init_node('timelaps_server')
     camH = ch.CameraHandler()
-    action = TimelapseAction(camH)
+    action = TimelapsAction(camH)
     rospy.spin()

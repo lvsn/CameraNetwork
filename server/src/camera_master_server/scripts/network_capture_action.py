@@ -19,7 +19,7 @@ class network_capture_action:
         rospy.loginfo("Initialising Network timlaps action")
         self.publisher = rospy.Publisher("/network_capture_chatter", Capture, queue_size=1)
         rospy.sleep(0.5) #let time for connections
-        self.action = actionlib.SimpleActionServer('network_timelapse', CameraControlAction,
+        self.action = actionlib.SimpleActionServer('network_timelaps', CameraControlAction,
                                                    self.execute, False)
         self.action.start()
         
