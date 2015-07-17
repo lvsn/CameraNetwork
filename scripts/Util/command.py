@@ -39,7 +39,7 @@ class Command(object):
                 while Locker.is_lock(process_name):
                     time.sleep(0.01)
                 Locker.lock(process_name)
-
+            rospy.loginfo('Cmd exec:\n {}'.format(cmd))
             cmd_output = envoy.run(cmd)
             if process_name in LOCK_WHITE_LIST:
                 Locker.unlock(process_name)
