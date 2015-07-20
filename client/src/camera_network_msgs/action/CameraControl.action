@@ -2,6 +2,7 @@
 float32 picture_qty
 float32 inter_picture_delay_s
 int8 mode
+bool download
 ---
 #result
 string total_picture
