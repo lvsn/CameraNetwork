@@ -68,7 +68,8 @@ function network_timelapse()
 			goalMessage : {
 				picture_qty : parseFloat(form.network_timelapse_qty.value),
 				inter_picture_delay_s : parseFloat(form.network_timelapse_frequency.value),
-				mode : parseInt($('input[name=capture_type_net]:checked', 'form[name=network]').val())
+				mode : parseInt($('input[name=capture_type_net]:checked', 'form[name=network]').val()),
+				download: document.getElementById('capture_download_net').checked
 			}
 		});
 		goal.send();
@@ -197,7 +198,8 @@ function device()
 			goalMessage : {
 				picture_qty : parseFloat(picture_qty),
 				inter_picture_delay_s : parseFloat(inter_picture_delay_s),
-				mode : parseInt($('input[name=capture_type]:checked', 'form[name=timelapse]').val())
+				mode : parseInt($('input[name=capture_type]:checked', 'form[name=timelapse]').val()),
+				download: document.getElementById('capture_download').checked
 			}
 		});
 		goal.send();
@@ -245,18 +247,6 @@ function device()
 		save.callService(request, function(result) {});
 		//this.output = new this.getSequenceShell()
 	}
-
-	/** this.getSequenceShell = function(){
-	// ----- save sequence shell ----- #jb
-		var save = new ROSLIB.Service({
-			ros : ros,
-			name : '/' + name +'/get_config_shell',
-			serviceType : 'std_srvs/Trigger'
-		});
-		//alert($('#shellCommand').val())
-		var request = new ROSLIB.ServiceRequest({});
-		save.callService(request, function(result) {});
-	} **/
 	
 	this.shutdownDevice = function(){
 		var shutdown = new ROSLIB.Service({
@@ -723,6 +713,7 @@ $(document).ready(function() {
 });
 
 function addROSlogLine(msg) {
+// TODO ROSlog: find way to disable flood command (about websocket warnings)
 	var level = document;
 	if(msg.level == 2){
 		level = 'INFO:';
@@ -732,9 +723,6 @@ function addROSlogLine(msg) {
 		level = 'ERROR:';
 	}else{
 		level = 'FATAL:';}
-	// Current Error that's flood console
-	if("Could not process inbound connection: [/rosbridge_websocket] is not a publisher".indexOf(msg.msg)){
-		var str_info = level + '[' + msg.name + ']' + '[' + msg.function + ']';
-		$('#roslog').val(str_info + '\n >> ' + msg.msg + '\n\n' + $('#roslog').val());
-	}
+	var str_info = level + '[' + msg.name + ']' + '[' + msg.function + ']';
+	$('#roslog').val(str_info + '\n >> ' + msg.msg + '\n\n' + $('#roslog').val());
 }
