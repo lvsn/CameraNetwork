@@ -67,11 +67,6 @@ class CameraHandler:
             CommandOption,
             self.save_settings_shell_cb)
 
-        # rospy.Service(
-        #     'get_config_shell',
-        #     std_srvs.srv.Trigger(),
-        #     self.get_config_shell_cb)
-
         rospy.Service(
             'download_data',
             Uint32,
@@ -202,16 +197,10 @@ class CameraHandler:
             rospy.logwarn('Camera locked. You cant save your shell settings')
         return {}
 
-    # def get_config_shell_cb(self, req):
-    #     # --- get_config_shell ---
-    #     if not self.shell_config:
-    #         rospy.logwarn('No current shell settings')
-    #         return {'success': 0, 'message': 'No current shell settings'}
-    #     else:
-    #         rospy.loginfo('Getting shell config')
-    #         return {'success': 1, 'message': self.shell_config}
-
     def download_data_cb(self, req):
+        self.download_data(req.integer)
+
+    def download_data(self, req):
         """
         CallBack Ros Service: Launch thread for downloading pictures from camera to server.
         Check if current thread is starting or not.
@@ -221,7 +210,7 @@ class CameraHandler:
         if not self.cam_threads['LoadData'].is_alive():
             self.cam_threads['LoadData'] = threading.Thread(target=self.download_data_sequence,
                                                             name='LoadData',
-                                                            args=(req.integer,))
+                                                            args=(req,))
             self.cam_threads['LoadData'].start()
         else:
             rospy.logwarn('*** Loading process is currently activate ***')
@@ -246,9 +235,10 @@ class CameraHandler:
             # 2 - for each group of DL_DATA_SERIE_SIZE pictures
             while count >= 0:
                 # 3 - Load pictures from camera
-                rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
-                rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
-                self.load_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
+                if not [str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())]:
+                    rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
+                    rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
+                    self.load_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
 
                 # 4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
                 rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
@@ -298,13 +288,6 @@ class CameraHandler:
         except:
             err_type, err_tb, e = sys.exc_info()
             rospy.logerr(err_tb)
-
-    def organize_raw_data(self):
-        # TODO Make organizer pictures
-        """
-        Routine: Organises raw data in local pictures folder
-        """
-        pass
 
     def send_data(self):
         """

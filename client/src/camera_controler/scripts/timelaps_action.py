@@ -16,6 +16,7 @@ roslib.load_manifest('camera_controler')
 import rospy
 import actionlib
 
+from camera_network_msgs.srv import *
 import camera_handler as ch
 from camera_network_msgs.msg import *
 from scripts.Util.command import *
@@ -38,13 +39,15 @@ class TimelapsAction:
         periode = abs(goal.inter_picture_delay_s)
         hz = self._sec_to_hz(periode)
         picture_goal = self._get_frame_qty(goal.picture_qty)
+        self.picture_qty = goal.picture_qty
         self.picture_count = 0
-
+        self.prog_downld = goal.download
         self.cam_handler.lock = True
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
             self.picture_count += 1
             self._take_picture(goal.mode, self.picture_count)
+            self._progressive_downloading()
             self._send_feedback(self.picture_count, picture_goal, hz)
             if self._sleep(timestamp):
                 break
@@ -83,13 +86,26 @@ class TimelapsAction:
         return frame_qty
 
     def _take_picture(self, mode, pictureId):
+        """
+        1 - take picture with specific mode
+        :param mode: int - 0: single | 1: HDR | 2: shell
+        :param pictureId:
+        """
         if mode == 1:
-            self.cam_handler.takeHDRPicture(pictureId, loadCamera=True)
+            self.cam_handler.takeHDRPicture(pictureId, loadCamera=False)
         elif mode == 2:
             for cmdLine in self.cam_handler.shell_config.splitlines():
                 Command.run(cmdLine)
         else:
-            self.cam_handler.takeSinglePicture(pictureId, loadCamera=True)
+            self.cam_handler.takeSinglePicture(pictureId, loadCamera=False)
+
+    def _progressive_downloading(self):
+        if self.prog_downld:
+            rospy.loginfo('downloading begin !')
+
+            self.cam_handler.download_data(0)
+        else:
+            rospy.loginfo('no downloading !')
 
     def _send_feedback(self, count, goal, frequency):
         feedback_msg = CameraControlActionFeedback
