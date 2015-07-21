@@ -132,7 +132,7 @@ class Server:
                     rospy.loginfo(r.std_out)
             else:
                 for cmdLine in self.cam_handler.shell_config.splitlines():
-                    rospy.loginfo('Cmd executing: ' + cmdLine)
+                    #rospy.loginfo('Cmd executing: ' + cmdLine)
                     r = envoy.run(cmdLine)
                     if r.status_code:
                         rospy.logerr(r.std_out)

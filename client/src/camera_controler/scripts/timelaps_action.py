@@ -41,13 +41,10 @@ class TimelapsAction:
         picture_goal = self._get_frame_qty(goal.picture_qty)
         self.picture_qty = goal.picture_qty
         self.picture_count = 0
-        self.prog_downld = goal.download
+        self.cam_handler.cam_dl = goal.download
 
-        if self.prog_downld:
+        if self.cam_handler.cam_dl:
             self.cam_handler.download_data(True)
-        else:
-            if self.cam_handler.cam_threads['LoadData'].is_alive():
-                self.cam_handler.cam_threads['LoadData'].stop()
 
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
@@ -100,13 +97,14 @@ class TimelapsAction:
             self.cam_handler.takeHDRPicture(pictureId, loadCamera=False)
         elif mode == 2:
             for cmdLine in self.cam_handler.shell_config.splitlines():
+                rospy.loginfo('Cmd execute: {}'.format(cmdLine))
                 Command.run(cmdLine)
         else:
             self.cam_handler.takeSinglePicture(pictureId, loadCamera=False)
         Locker.unlock(LOCK_CAMNET_CAPTURE)
 
     def _progressive_downloading(self):
-        if self.prog_downld:
+        if self.cam_dl:
             rospy.loginfo('downloading begin !')
 
             self.cam_handler.download_data(0)

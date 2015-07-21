@@ -77,6 +77,7 @@ class CameraHandler:
         self.shell_config = ''
         self.lock_gphoto = False
         self.cam_threads = {'LoadData': threading.Thread(target=self.proc_dl_raw_data, name='LoadData')}
+        self.cam_dl = False
 
         rospy.loginfo('Taking Environment Data')
         try:
@@ -267,6 +268,8 @@ class CameraHandler:
                     if number_pictures > 0:
                         self.send_data()
                 rospy.sleep(1)
+                if not self.cam_dl:
+                    break
         except:
             rospy.logerr(sys.exc_info()[1])
 
