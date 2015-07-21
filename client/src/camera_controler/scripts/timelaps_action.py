@@ -42,16 +42,16 @@ class TimelapsAction:
         self.picture_qty = goal.picture_qty
         self.picture_count = 0
         self.prog_downld = goal.download
-        self.cam_handler.lock = True
+        self._progressive_downloading()
+        Locker.lock(LOCK_CAMNET_CAPTURE)
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
             self.picture_count += 1
             self._take_picture(goal.mode, self.picture_count)
-            self._progressive_downloading()
             self._send_feedback(self.picture_count, picture_goal, hz)
             if self._sleep(timestamp):
                 break
-        self.cam_handler.lock = False
+        Locker.unlock(LOCK_CAMNET_CAPTURE)
         success_msg = CameraControlActionResult
         success_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.action.set_succeeded(success_msg)

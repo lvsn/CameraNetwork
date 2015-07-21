@@ -76,7 +76,7 @@ class CameraHandler:
         self.current_status = 'Idle'
         self.shell_config = ''
         self.lock_gphoto = False
-        self.cam_threads = {'LoadData': threading.Thread(target=self.download_data_sequence, name='LoadData')}
+        self.cam_threads = {'LoadData': threading.Thread(target=self.proc_dl_raw_data, name='LoadData')}
 
         rospy.loginfo('Taking Environment Data')
         try:
@@ -208,7 +208,7 @@ class CameraHandler:
         :return: empty dict
         """
         if not self.cam_threads['LoadData'].is_alive():
-            self.cam_threads['LoadData'] = threading.Thread(target=self.download_data_sequence,
+            self.cam_threads['LoadData'] = threading.Thread(target=self.proc_dl_raw_data,
                                                             name='LoadData',
                                                             args=(req,))
             self.cam_threads['LoadData'].start()
@@ -216,7 +216,7 @@ class CameraHandler:
             rospy.logwarn('*** Loading process is currently activate ***')
         return {}
 
-    def download_data_sequence(self, count):
+    def download_all_raw_data(self, count):
         """
         Routine: == Download data sequence ==
         1 - Adjust count with pictures list
@@ -238,7 +238,7 @@ class CameraHandler:
                 if not [str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())]:
                     rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
                     rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
-                    self.load_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
+                    self.load_raw_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
 
                 # 4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
                 rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
@@ -249,7 +249,28 @@ class CameraHandler:
             err_type, err_tb, e = sys.exc_info()
             rospy.logerr(err_tb)
 
-    def load_data(self, number=-1):
+    def proc_dl_raw_data(self, req):
+        # TODO proc_dl_raw_data: make documentation
+        """
+        Process which download raw data anything.
+        :return:
+        """
+        try:
+            while True:
+                # 1 - check if camnet is capturing.
+                if not Locker.is_lock(LOCK_CAMNET_CAPTURE):
+                    # 2 - check if output folder is empty and load pictures left by DL_DATA_SERIE_SIZE
+                    number_pictures = len([str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())])
+                    number_pictures_left = DL_DATA_SERIE_SIZE - number_pictures
+                    if number_pictures_left > 0:
+                        self.load_raw_data(number_pictures_left)
+                    if number_pictures > 0:
+                        self.send_data()
+                rospy.sleep(5)
+        except:
+            rospy.logerr(sys.exc_info()[1])
+
+    def load_raw_data(self, number=-1):
         """
         Routine: Loads raw data from camera to local pictures folder
         1 - getting camera list files
