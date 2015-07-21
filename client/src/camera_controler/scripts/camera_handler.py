@@ -266,7 +266,7 @@ class CameraHandler:
                         self.load_raw_data(number_pictures_left)
                     if number_pictures > 0:
                         self.send_data()
-                rospy.sleep(5)
+                rospy.sleep(1)
         except:
             rospy.logerr(sys.exc_info()[1])
 
@@ -326,7 +326,7 @@ class CameraHandler:
 
             # 3 - Sending with rsync
             # TODO Sending with rsync: Find way to show progress / checkpoint with command
-            cmd = 'rsync -vrz --progress --remove-source-files --no-owner --no-group --chmod=ugo+rwx,Dugo+rwx'
+            cmd = 'rsync -vr --remove-source-files --no-owner --no-group --chmod=ugo+rwx,Dugo+rwx'
             time_out = '--timeout=10'
 
             while True:
