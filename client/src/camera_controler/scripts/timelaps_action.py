@@ -42,7 +42,13 @@ class TimelapsAction:
         self.picture_qty = goal.picture_qty
         self.picture_count = 0
         self.prog_downld = goal.download
-        self._progressive_downloading()
+
+        if self.prog_downld:
+            self.cam_handler.download_data(True)
+        else:
+            if self.cam_handler.cam_threads['LoadData'].is_alive():
+                self.cam_handler.cam_threads['LoadData'].stop()
+
         Locker.lock(LOCK_CAMNET_CAPTURE)
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
