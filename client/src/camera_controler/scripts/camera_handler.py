@@ -12,7 +12,7 @@ controler's services.
 import os, sys
 sys.path.append(os.path.expanduser('~/camera-network'))
 
-import threading
+import threading, time
 import rospy
 import std_srvs.srv
 from camera_network_msgs.srv import *

@@ -49,7 +49,6 @@ class TimelapsAction:
             if self.cam_handler.cam_threads['LoadData'].is_alive():
                 self.cam_handler.cam_threads['LoadData'].stop()
 
-        Locker.lock(LOCK_CAMNET_CAPTURE)
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
             self.picture_count += 1
@@ -57,7 +56,6 @@ class TimelapsAction:
             self._send_feedback(self.picture_count, picture_goal, hz)
             if self._sleep(timestamp):
                 break
-        Locker.unlock(LOCK_CAMNET_CAPTURE)
         success_msg = CameraControlActionResult
         success_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.action.set_succeeded(success_msg)
@@ -97,6 +95,7 @@ class TimelapsAction:
         :param mode: int - 0: single | 1: HDR | 2: shell
         :param pictureId:
         """
+        Locker.lock(LOCK_CAMNET_CAPTURE)
         if mode == 1:
             self.cam_handler.takeHDRPicture(pictureId, loadCamera=False)
         elif mode == 2:
@@ -104,6 +103,7 @@ class TimelapsAction:
                 Command.run(cmdLine)
         else:
             self.cam_handler.takeSinglePicture(pictureId, loadCamera=False)
+        Locker.unlock(LOCK_CAMNET_CAPTURE)
 
     def _progressive_downloading(self):
         if self.prog_downld:
