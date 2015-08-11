@@ -199,6 +199,7 @@ function device()
 				picture_qty : parseFloat(picture_qty),
 				inter_picture_delay_s : parseFloat(inter_picture_delay_s),
 				mode : parseInt($('input[name=capture_type]:checked', 'form[name=timelapse]').val()),
+				time : parseInt($('input[name=capture_time]:checked', 'form[name=timelapse]').val()),
 				download: document.getElementById('capture_download').checked
 			}
 		});
@@ -714,15 +715,15 @@ $(document).ready(function() {
 
 function addROSlogLine(msg) {
 // TODO ROSlog: find way to disable flood command (about websocket warnings)
-	var level = document;
+	var str_level = document;
 	if(msg.level == 2){
-		level = 'INFO:';
+		str_level = 'INFO:';
 	}else if(msg.level == 4){
-		level = 'WARN:';
+		str_level = 'WARN:';
 	}else if(msg.level == 6){
-		level = 'ERROR:';
+		str_level = 'ERROR:';
 	}else{
-		level = 'FATAL:';}
-	var str_info = level + '[' + msg.name + ']' + '[' + msg.function + ']';
+		str_level = 'FATAL:';}
+	var str_info = str_level + '[' + msg.name + ']' + '[' msg.file + '/' + msg.function + ':' + msg.line + ']';
 	$('#roslog').val(str_info + '\n >> ' + msg.msg + '\n\n' + $('#roslog').val());
 }
