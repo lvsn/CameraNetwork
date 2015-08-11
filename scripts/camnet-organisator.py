@@ -1,5 +1,6 @@
 import os, subprocess, sys
-sys.path.append(os.path.join(os.path.dirname(__file__)))
+sys.path.append('/'.join(os.path.dirname(__file__).split('/')[:-1]))
+
 import exifread
 from scripts.Util.convert import *
 from Util.convert import *

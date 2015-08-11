@@ -220,7 +220,8 @@ class GPhotoServer(cd.camera_driver):
         camera = ''
         r = rospy.Rate(0.25)  # retry connection every 4 seconds
         while camera == '':
-            cameralist = self._run_gphoto(" --auto-detect")
+            rospy.logdebug('<LFCamera: try getting camera info>')
+            cameralist = Command.run("gphoto2 --auto-detect")
             camera = self._parse_gphoto_camera_list(cameralist)
             if camera == '':
                 rospy.logwarn("No Camera Found")

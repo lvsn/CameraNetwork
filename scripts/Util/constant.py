@@ -27,13 +27,14 @@ except KeyError:
     rospy.logwarn('*** WARN: Bad camera output directory replaced by {}'.format(CAMNET_OUTPUT_DIR))
     try:
         os.mkdir(CAMNET_OUTPUT_DIR)
-    except:
-        rospy.logwarn('*** WARN: Directory Already exist')
+    except OSError as msg:
+        rospy.logwarn('*** WARN: %s' % msg)
 
 try:
     CAMNET_SERVER_DATA_DIR = os.environ['CAMNET_SERVER_DATA_DIR']
 except KeyError:
-    CAMNET_SERVER_DATA_DIR = 'JUBEC7@victoria.gel.ulaval.ca:/home-local/yahog.extra.nobkp/www/pictures/unprocessed/raw_data/'
+    CAMNET_SERVER_DATA_DIR = 'JUBEC7@victoria.gel.ulaval.ca:' + "" \
+                             '/home-local/yahog.extra.nobkp/www/pictures/unprocessed/raw_data/'
     rospy.logwarn('*** WARN: Bad server data directory replaced by {}'.format(CAMNET_SERVER_DATA_DIR))
 
 try:
@@ -52,4 +53,4 @@ LOCK_DEFAULT_PROCESS = 'gphoto2'
 LOCK_WHITE_LIST = {'gphoto2'}
 LOCK_CAMNET_CAPTURE = 'camnet_capture'
 DL_DATA_SERIE_SIZE = 10
-LATITUDE_DEG, LONGITUDE_DEG  = 46.779586, -71.275474
+LATITUDE_DEG, LONGITUDE_DEG = 46.779586, -71.275474
