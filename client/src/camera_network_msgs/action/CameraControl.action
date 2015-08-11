@@ -2,6 +2,7 @@
 float32 picture_qty
 float32 inter_picture_delay_s
 int8 mode
+int8 time
 bool download
 ---
 #result
