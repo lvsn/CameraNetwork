@@ -13,12 +13,14 @@ from camera_network_msgs.msg import *
 import actionlib
 import math
 
+from scripts.Util.miscellaneous import *
+
 class network_capture_action:
     
     def __init__(self):
         rospy.loginfo("Initialising Network timlaps action")
         self.publisher = rospy.Publisher("/network_capture_chatter", Capture, queue_size=1)
-        rospy.sleep(0.5) #let time for connections
+        rospy.sleep(0.5)    # let time for connections
         self.action = actionlib.SimpleActionServer('network_timelaps', CameraControlAction,
                                                    self.execute, False)
         self.action.start()
@@ -37,10 +39,19 @@ class network_capture_action:
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + period
             self.picture_count += 1
-            self.publisher.publish(self.msg)
+
+            if goal.time == 1:
+                if is_it_day():
+                    self.publisher.publish(self.msg)
+            elif goal.time == 2:
+                if not is_it_day():
+                    self.publisher.publish(self.msg)
+            else:
+                self.publisher.publish(self.msg)
+
             self._send_feedback(self.picture_count, picture_goal, hz)
             interupt = self._sleep(timestamp)
-            if(interupt):
+            if interupt:
                 break
         succes_msg = CameraControlActionResult
         succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
@@ -60,6 +71,7 @@ class network_capture_action:
                     return True
         return False
 
+    @staticmethod
     def _sec_to_hz(self, Tsec):
         try:
             hz = math.fabs(1/Tsec)
@@ -68,7 +80,8 @@ class network_capture_action:
             hz = -1
             rospy.logwarn("Can not set 0 as frequency... setting frequency to 1 hz")
         return hz
-            
+
+    @staticmethod
     def _get_frame_qty(self, Qty):
         if Qty < 0:
             frame_qty = float('inf')

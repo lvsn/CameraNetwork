@@ -69,6 +69,7 @@ function network_timelapse()
 				picture_qty : parseFloat(form.network_timelapse_qty.value),
 				inter_picture_delay_s : parseFloat(form.network_timelapse_frequency.value),
 				mode : parseInt($('input[name=capture_type_net]:checked', 'form[name=network]').val()),
+				time : parseInt($('input[name=capture_time_net]:checked', 'form[name=network]').val()),
 				download: document.getElementById('capture_download_net').checked
 			}
 		});

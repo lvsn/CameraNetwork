@@ -22,6 +22,7 @@ import camera_handler as ch
 from camera_network_msgs.msg import *
 from scripts.Util.command import *
 from scripts.Util.convert import *
+from scripts.Util.miscellaneous import *
 
 class TimelapsAction:
 
@@ -57,10 +58,10 @@ class TimelapsAction:
             if self.time_type == 0:
                 self._take_picture(goal.mode, self.picture_count)
             elif self.time_type == 1:
-                if self._is_day():
+                if is_it_day():
                     self._take_picture(goal.mode, self.picture_count)
             elif self.time_type == 2:
-                if not self._is_day():
+                if not is_it_day():
                     self._take_picture(goal.mode, self.picture_count)
 
             self._send_feedback(self.picture_count, picture_goal, hz)
@@ -69,18 +70,6 @@ class TimelapsAction:
         success_msg = CameraControlActionResult
         success_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.action.set_succeeded(success_msg)
-
-    @staticmethod
-    def _is_day():
-        """
-        _is_day() -> bool
-        """
-        date_time = datetime.datetime.now()
-        date_time = DatetimePysolar(date_time.year, date_time.month, date_time.day,
-                                    date_time.hour, date_time.minute, date_time.second)
-        solar_altitude = pysolar.solar.get_altitude(LATITUDE_DEG, LONGITUDE_DEG, date_time)
-        # rospy.loginfo('Solar Altitude: {}'.format(solar_altitude))
-        return solar_altitude >= 0.0
 
     def _sleep(self, timestamp):
         """

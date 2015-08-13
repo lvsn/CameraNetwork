@@ -26,8 +26,9 @@ from camera_network_msgs.srv import *
 from camera_network_msgs.msg import *
 import subprocess
 import envoy
-from scripts.Util.constant import *
 
+from scripts.Util.constant import *
+from scripts.Util.command import *
 
 class Server:
     def __init__(self):
@@ -40,11 +41,11 @@ class Server:
             Capture,
             self.capture_listen_cb,
             queue_size=1)
-        rospy.Subscriber(
-            '/network_capture_video_chatter',
-            std_msgs.msg.UInt32,
-            self.capture_video_listen_cb,
-            queue_size=1)
+        # rospy.Subscriber(
+        #     '/network_capture_video_chatter',
+        #     std_msgs.msg.UInt32,
+        #     self.capture_video_listen_cb,
+        #     queue_size=1)
 
         # setup server to set camera init parameters
         rospy.Service(
@@ -116,26 +117,18 @@ class Server:
         return ''
 
     def capture_listen_cb(self, req):
+
+        if req.download:
+            self.cam_handler.download_data(True)
+
         # Simply print out values in our custom message.
         if req.mode == 1:
             rospy.loginfo("Taking hdr picture")
             self.cam_handler.takeHDRPicture(0)
         elif req.mode == 2:
             rospy.loginfo("Getting shell command:\n{}".format(self.cam_handler.shell_config))
-            if 'gphoto2 --shell' in self.cam_handler.shell_config:
-                cmdHeader = self.cam_handler.shell_config.splitlines()[0]
-                cmdSequence = self.cam_handler.shell_config.replace('gphoto2 --shell', '')
-                r = envoy.run(cmdHeader, data=cmdSequence)
-                if r.status_code:
-                    rospy.logerr(r.std_out)
-                else:
-                    rospy.loginfo(r.std_out)
-            else:
-                for cmdLine in self.cam_handler.shell_config.splitlines():
-                    #rospy.loginfo('Cmd executing: ' + cmdLine)
-                    r = envoy.run(cmdLine)
-                    if r.status_code:
-                        rospy.logerr(r.std_out)
+            for cmdLine in self.cam_handler.shell_config.splitlines():
+                Command.run(cmdLine, 'Network launch command')
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)
@@ -172,6 +165,9 @@ class Server:
         except:
             rospy.logerr("Problem while renaming " + directory + filename)
 
+
+    def _progressive_download(self):
+        pass
 
 if __name__ == "__main__":
     serverInstance = Server()
