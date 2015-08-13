@@ -37,6 +37,7 @@ class TimelapsAction:
         self.action.start()
         self.cam_handler = cam_handler
         self.time_type = 0
+        rospy.loginfo("... Timelapse Action Done ...")
 
     def execute(self, goal):
         self.time_type = goal.time
@@ -78,6 +79,7 @@ class TimelapsAction:
         date_time = DatetimePysolar(date_time.year, date_time.month, date_time.day,
                                     date_time.hour, date_time.minute, date_time.second)
         solar_altitude = pysolar.solar.get_altitude(LATITUDE_DEG, LONGITUDE_DEG, date_time)
+        # rospy.loginfo('Solar Altitude: {}'.format(solar_altitude))
         return solar_altitude >= 0.0
 
     def _sleep(self, timestamp):
@@ -94,7 +96,8 @@ class TimelapsAction:
                     return True
         return False
 
-    def _sec_to_hz(self, Tsec):
+    @staticmethod
+    def _sec_to_hz(Tsec):
         try:
             hz = math.fabs(1 / Tsec)
         except ZeroDivisionError:
@@ -102,7 +105,8 @@ class TimelapsAction:
         rospy.loginfo("Frequency set to {:.4f} hz.".format(hz))
         return hz
 
-    def _get_frame_qty(self, Qty):
+    @staticmethod
+    def _get_frame_qty(Qty):
         if Qty < 0:
             frame_qty = float('inf')
         else:
@@ -127,7 +131,7 @@ class TimelapsAction:
         Locker.unlock(LOCK_CAMNET_CAPTURE)
 
     def _progressive_downloading(self):
-        if self.cam_dl:
+        if self.cam_handler.cam_dl:
             rospy.loginfo('downloading begin !')
 
             self.cam_handler.download_data(0)

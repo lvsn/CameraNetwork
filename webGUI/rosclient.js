@@ -724,6 +724,6 @@ function addROSlogLine(msg) {
 		str_level = 'ERROR:';
 	}else{
 		str_level = 'FATAL:';}
-	var str_info = str_level + '[' + msg.name + ']' + '[' msg.file + '/' + msg.function + ':' + msg.line + ']';
+	var str_info = str_level + '[' + msg.name + ']' + '[' + msg.file + '/' + msg.function + ':' + msg.line + ']';
 	$('#roslog').val(str_info + '\n >> ' + msg.msg + '\n\n' + $('#roslog').val());
 }

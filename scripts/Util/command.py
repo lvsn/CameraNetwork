@@ -30,6 +30,7 @@ class Locker(object):
         else:
             return False
 
+
 class Command(object):
     @staticmethod
     def run(cmd, msg='unspecified category'):

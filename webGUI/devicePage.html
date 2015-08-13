@@ -123,15 +123,18 @@
                     <input id="device_timelapse_qty" type="number" value="1" name="device_timelapse_qty" >
                     <span>(&lt;0 = infinite)</span>
                 </label>
+                <hr />
+                Capture mode :
                 <label for="capture_plain"><input type="radio" name="capture_type" id="capture_plain" value=0 checked="checked">Normal</label>
                 <label for="capture_hdr"><input type="radio" name="capture_type" id="capture_hdr" value=1>HDR</label>
                 <label for="capture_shell"><input type="radio" name="capture_type" id="capture_shell" value=2>Shell</label>
-                <br />
-                <label for="capture_24h"><input type="radio" name="capture_time" id="capture_24h" value=0 checked="checked">24h</label>
-                <label for="capture_day"><input type="radio" name="capture_time" id="capture_day" value=1>Jour</label>
-                <label for="capture_night"><input type="radio" name="capture_time" id="capture_night" value=2>Nuit</label>
-                <br />
-                <label for="capture_download"><input type="checkbox" name="capture_dl" id="capture_download" value=1>Progressive DL</label>
+                <hr />
+                Specific time :
+                <label for="capture_24h"><input type="radio" name="capture_time" id="capture_24h" value=0 checked="checked">No limit</label>
+                <label for="capture_day"><input type="radio" name="capture_time" id="capture_day" value=1>Day only</label>
+                <label for="capture_night"><input type="radio" name="capture_time" id="capture_night" value=2>Night only</label>
+                <hr />
+                <label for="capture_download"><input type="checkbox" name="capture_dl" id="capture_download" value=1>Progressive download</label>
                 <dl>
                     <dt>Status:</dt>
                         <dd id="device_timelapse_status"></dd>
