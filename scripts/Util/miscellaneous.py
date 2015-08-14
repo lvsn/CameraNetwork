@@ -26,3 +26,10 @@ def is_it_day():
     solar_altitude = pysolar.solar.get_altitude(LATITUDE_DEG, LONGITUDE_DEG, date_time)
     rospy.logdebug('Solar Altitude: {}'.format(solar_altitude))
     return solar_altitude >= 0.0
+
+
+def get_today_date():
+    """
+    get_today_date() -> str 'YYYY-MM-DD'
+    """
+    return str(datetime.date.today())

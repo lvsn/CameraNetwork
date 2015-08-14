@@ -15,8 +15,8 @@ import math
 
 from scripts.Util.miscellaneous import *
 
+
 class network_capture_action:
-    
     def __init__(self):
         rospy.loginfo("Initialising Network timlaps action")
         self.publisher = rospy.Publisher("/network_capture_chatter", Capture, queue_size=1)
@@ -31,6 +31,7 @@ class network_capture_action:
         
     def execute(self, goal):
         self.msg.mode = goal.mode
+        self.msg.download = goal.download
         period = goal.inter_picture_delay_s
         hz = self._sec_to_hz(period)
         picture_goal = self._get_frame_qty(goal.picture_qty)
@@ -72,7 +73,7 @@ class network_capture_action:
         return False
 
     @staticmethod
-    def _sec_to_hz(self, Tsec):
+    def _sec_to_hz(Tsec):
         try:
             hz = math.fabs(1/Tsec)
             rospy.loginfo("Frequency set to " + str(hz) + " hz.")
@@ -82,7 +83,7 @@ class network_capture_action:
         return hz
 
     @staticmethod
-    def _get_frame_qty(self, Qty):
+    def _get_frame_qty(Qty):
         if Qty < 0:
             frame_qty = float('inf')
         else:
