@@ -284,7 +284,7 @@ class CameraHandler:
         try:
             # 1 - Getting camera list files
             # TODO Check execution time with threading.lock something like that
-            camera_list = Command.run('gphoto2 --list-files').splitlines()
+            camera_list = Command.run('gphoto2 -L').splitlines()
             camera_list_files = [line.split()[1] for line in camera_list if '#' in line]
             i = 0
             if number < 1 or number > len(camera_list_files):
@@ -292,24 +292,27 @@ class CameraHandler:
 
             # 2 - Download number raw data
             while i < number:
-                if len(camera_list_files) == 0:
-                    rospy.loginfo('Camera empty')
-                    break
+                if not Locker.is_lock(LOCK_CAMNET_CAPTURE):
+                    if len(camera_list_files) == 0:
+                        rospy.loginfo('Camera empty')
+                        break
 
-                os.chdir(self.path_src)
-                folder_list_files = [file for file in os.listdir(self.path_src)]
+                    os.chdir(self.path_src)
+                    folder_list_files = [file for file in os.listdir(self.path_src)]
 
-                if not camera_list_files[0] in folder_list_files:
-                    Command.run('gphoto2 --get-file=1', 'get first file in camera')
-                    rospy.loginfo('#({}/{}) '.format(i + 1, number) + camera_list_files[0] + ' downloaded to folder')
+                    if not camera_list_files[0] in folder_list_files:
+                        Command.run('gphoto2 --get-file=1', 'get first file in camera')
+                        rospy.loginfo('#({}/{}) '.format(i + 1, number) + camera_list_files[0] + ' downloaded to folder')
 
-                folder_list_files = [file for file in os.listdir(self.path_src)]
+                    folder_list_files = [file for file in os.listdir(self.path_src)]
 
-                # 3 - Delete image
-                if camera_list_files[0] in folder_list_files:
-                    Command.run('gphoto2 --delete-file=1 --recurse')
-                    camera_list_files.pop(0)
-                    i += 1
+                    # 3 - Delete image
+                    if camera_list_files[0] in folder_list_files:
+                        Command.run('gphoto2 --delete-file=1 --recurse')
+                        camera_list_files.pop(0)
+                        i += 1
+                    else:
+                        rospy.sleep(1)
         except:
             err_type, err_tb, e = sys.exc_info()
             rospy.logerr(err_tb)
@@ -335,10 +338,11 @@ class CameraHandler:
 
             while True:
                 try:
-                    Command.run(' '.join([cmd, time_out, path_src, path_dst, get_today_date()]), 'SendRawData - rsync')
+                    Command.run(' '.join([cmd, time_out, path_src, os.path.join(path_dst, get_today_date())]), 'SendRawData - rsync')
                     break
                 except AssertionError as e:
                     rospy.logwarn('Rsync Error: %s' % e)
+                    rospy.sleep(10)
         except:
             err_type, err_tb, e = sys.exc_info()
             rospy.logerr(err_tb)

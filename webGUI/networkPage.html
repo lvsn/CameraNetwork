@@ -43,15 +43,18 @@
                 <input id="network_quantity" type="number" value="1" name="network_timelapse_qty" >
                 <span>(-1 = perpetual capture)</span>
             </label>
+            <hr />
+                Capture mode :
             <label for="capture_plain_net"><input type="radio" name="capture_type_net" id="capture_plain_net" value=0 checked="checked">Normal</label>
             <label for="capture_hdr_net"><input type="radio" name="capture_type_net" id="capture_hdr_net" value=1>HDR</label>
             <label for="capture_shell_net"><input type="radio" name="capture_type_net" id="capture_shell_net" value=2>Shell</label>
-            <br />
+            <hr />
+                Specific time :
             <label for="capture_24h_net"><input type="radio" name="capture_time_net" id="capture_24h_net" value=0 checked="checked">24h</label>
             <label for="capture_day_net"><input type="radio" name="capture_time_net" id="capture_day_net" value=1>Jour</label>
             <label for="capture_night_net"><input type="radio" name="capture_time_net" id="capture_night_net" value=2>Nuit</label>
-            <br />
-            <label for="capture_download_net"><input type="checkbox" name="capture_dl_net" id="capture_download_net" value=1>Progressive DL</label>
+            <hr />
+            <label for="capture_download_net"><input type="checkbox" name="capture_dl_net" id="capture_download_net" value=1>Progressive download</label>
             <dl>
                 <dt>Status:</dt>
                     <dd id="network_timelapse_status"></dd>

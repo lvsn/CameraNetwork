@@ -118,6 +118,7 @@ class Server:
 
     def capture_listen_cb(self, req):
 
+        rospy.loginfo('DEBUG: mode:{} | dl:{}'.format(req.mode, req.download))
         if req.download:
             self.cam_handler.download_data(True)
 

@@ -50,11 +50,12 @@ class TimelapsAction:
         self.cam_handler.cam_dl = goal.download
 
         if self.cam_handler.cam_dl:
-            self.cam_handler.download_data(True)
+                self.cam_handler.download_data(True)
 
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
             self.picture_count += 1
+
             if self.time_type == 0:
                 self._take_picture(goal.mode, self.picture_count)
             elif self.time_type == 1:
