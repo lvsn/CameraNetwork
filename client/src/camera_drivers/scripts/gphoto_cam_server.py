@@ -224,6 +224,7 @@ class GPhotoServer(cd.camera_driver):
             cameralist = Command.run("gphoto2 --auto-detect")
             camera = self._parse_gphoto_camera_list(cameralist)
             if camera == '':
+                Command.error_manager('No camera Found')
                 rospy.logwarn("No Camera Found")
             r.sleep()
 

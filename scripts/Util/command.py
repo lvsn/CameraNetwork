@@ -64,7 +64,7 @@ class Command(object):
                 rospy.logwarn(warn_msg)
 
                 # Manage specific errors
-                Command._error_manager(cmd_output.std_err)
+                Command.error_manager(cmd_output.std_err)
                 raise AssertionError(warn_msg)
 
             time.sleep(0.05)
@@ -74,7 +74,7 @@ class Command(object):
             rospy.logerr('*** ERROR: command [{}]: {}'.format(cmd, sys.exc_info()[1]))
 
     @staticmethod
-    def _error_manager(std_err):
+    def error_manager(std_err):
         """ Manage specific errors thanks to std_err log """
         if 'No camera found' in std_err:
             rospy.loginfo('Camera not detected. Camera is rebooting ...')
