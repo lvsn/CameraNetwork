@@ -54,17 +54,20 @@ class Command(object):
                     time.sleep(0.01)
                 Locker.lock(process_name)
             rospy.logdebug('Cmd exec:\n {}'.format(cmd))
+            time.sleep(0.05)
             cmd_output = envoy.run(cmd)
             if process_name in LOCK_WHITE_LIST:
                 Locker.unlock(process_name)
             if cmd_output.status_code:
                 warn_msg = '*** WARN: command error spotted from {}\n{}\n{}'.format(msg, cmd, cmd_output.std_err)
+                time.sleep(0.05)
                 rospy.logwarn(warn_msg)
 
                 # Manage specific errors
                 Command._error_manager(cmd_output.std_err)
                 raise AssertionError(warn_msg)
 
+            time.sleep(0.05)
             return cmd_output.std_out
 
         except:
