@@ -108,6 +108,7 @@ class CameraPowerController(object):
         CURRENT_DIR = os.path.dirname(__file__)
         file_path = os.path.join(CURRENT_DIR, 'cam_pw_manag.py')
         Command.run('sudo python {}'.format(file_path, 'Camera power reboot launch script'))
+        time.sleep(5)
 
 
     def camera_power_on(self):
