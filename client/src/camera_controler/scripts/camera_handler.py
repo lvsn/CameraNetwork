@@ -338,7 +338,7 @@ class CameraHandler:
 
             while True:
                 try:
-                    Command.run(' '.join([cmd, time_out, path_src, os.path.join(path_dst, get_today_date())]), 'SendRawData - rsync')
+                    Command.run(' '.join([cmd, time_out, path_src, os.path.join(path_dst, get_today_date()) + '/']), 'SendRawData - rsync')
                     break
                 except AssertionError as e:
                     rospy.logwarn('Rsync Error: %s' % e)

@@ -1,6 +1,10 @@
 import os, sys, envoy, time
 
 import rospy
+try:
+    import RPi.GPIO as GPIO
+except RuntimeError:
+    pass
 
 from scripts.Util.constant import *
 
@@ -34,6 +38,15 @@ class Locker(object):
 class Command(object):
     @staticmethod
     def run(cmd, msg='unspecified category'):
+        """
+        run(cmd, msg) -> str(command output)
+
+        Safety command runner :
+        1 - Check if command is locked
+        2 - Manage locker to execute command if it is necessary
+        3 - Manage specific error
+        4 - Output command std_out
+        """
         try:
             process_name = cmd.split()[0]
             if process_name in LOCK_WHITE_LIST:
@@ -41,15 +54,73 @@ class Command(object):
                     time.sleep(0.01)
                 Locker.lock(process_name)
             rospy.logdebug('Cmd exec:\n {}'.format(cmd))
+            time.sleep(0.05)
             cmd_output = envoy.run(cmd)
             if process_name in LOCK_WHITE_LIST:
                 Locker.unlock(process_name)
             if cmd_output.status_code:
                 warn_msg = '*** WARN: command error spotted from {}\n{}\n{}'.format(msg, cmd, cmd_output.std_err)
+                time.sleep(0.05)
                 rospy.logwarn(warn_msg)
+
+                # Manage specific errors
+                Command.error_manager(cmd_output.std_err)
                 raise AssertionError(warn_msg)
 
+            time.sleep(0.05)
             return cmd_output.std_out
 
         except:
             rospy.logerr('*** ERROR: command [{}]: {}'.format(cmd, sys.exc_info()[1]))
+
+    @staticmethod
+    def error_manager(std_err):
+        """ Manage specific errors thanks to std_err log """
+        if 'No camera found' in std_err:
+            rospy.loginfo('Camera not detected. Camera is rebooting ...')
+            power_control = CameraPowerController()
+            power_control.camera_power_off()
+            rospy.sleep(1)
+            power_control.camera_power_on()
+            rospy.sleep(5)
+            del power_control
+
+
+class CameraPowerController(object):
+    """ Control camera's power from pin GPIO_POWER_CONTROL """
+    def __init__(self):
+        if os.geteuid() != 0:
+            os.execvp("sudo", ["sudo"] + sys.argv)
+
+        self.gpio_id = GPIO_POWER_CONTROL
+        self.module_name = 'RPi.GPIO'
+
+        if self.module_name in sys.modules:
+            try:
+                GPIO.setmode(GPIO.Board)
+                GPIO.setup(self.gpio_id, GPIO.OUT)
+            except:
+                rospy.logdebug('GPIO are already in use.')
+
+    def camera_power_on(self):
+        """ Power on the camera """
+        if self.module_name in sys.modules:
+            try:
+                GPIO.output(self.gpio_id, True)
+            except:
+                rospy.logerr('*** ERROR: GPIO pin {} output configuration fail'.format(self.gpio_id))
+        else:
+            print('GPIO {} is ON'.format(self.gpio_id))
+        rospy.loginfo("Camera is power on")
+
+    def camera_power_off(self):
+        """ Power off the camera """
+        if self.module_name in sys.modules:
+            try:
+                GPIO.output(self.gpio_id, False)
+            except:
+                rospy.logerr('*** ERROR: GPIO pin {} output configuration fail'.format(self.gpio_id))
+        else:
+            print('GPIO {} is OFF'.format(self.gpio_id))
+        rospy.loginfo("Camera is power off")
+
