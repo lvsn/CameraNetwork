@@ -1,5 +1,6 @@
 import os, subprocess, sys
 sys.path.append('/'.join(os.path.dirname(__file__).split('/')[:-1]))
+from collections import defaultdict
 
 import exifread
 from scripts.Util.convert import *
@@ -24,7 +25,7 @@ def regroup_all_raw_data(path_src):
         exit(0)
 
     output_cmd = subprocess.Popen('find raw_data/ -name *.CR2 -type f', shell=True, stdout=subprocess.PIPE).communicate()
-    pictures_path = map(os.path.abspath, output_cmd[0].splitlines())
+    pictures_path = list(map(os.path.abspath, output_cmd[0].splitlines()))
 
     total_pics = len(pictures_path)
     pics = 1
@@ -46,7 +47,7 @@ def extract_exif(path_src):
     :param path_src: str - file source path
     :return: dict - exif information
     """
-    exif_raw_info = exifread.process_file(open(path_src))
+    exif_raw_info = exifread.process_file(open(path_src, 'rb'))
     if exif_raw_info is None:
         raise TypeError('File is not picture')
 
@@ -77,21 +78,21 @@ def create_dict_with_files(src_path):
     """
     sys.stdout.write('> Creating dictionary with file names\n')
     files = subprocess.check_output(['ls', src_path]).splitlines()
-    files = [file for file in files if '.CR2' in file]
+    files = [file for file in files if file.endswith('.CR2')]
     dict_date = {}
 
     sys.stdout.write('>> Register dates\n')
     for file in files:
         file_splited = file.split('_')
         date = '20' + file_splited[0]
-        if date in dict_date.keys():
+        if date in dict_date:
             dict_date[date].append(file)
         else:
             dict_date[date] = []
             dict_date[date].append(file)
 
     sys.stdout.write('>> Register times per dates\n')
-    for date in dict_date.keys():
+    for date in dict_date:
         file_list = dict_date[date]
         dict_date[date] = {}
         time_ref = '000000'
@@ -127,7 +128,7 @@ def create_folder_from_dictionary(path_dst, dict_tree):
     :param path_dst: string
     :param dict_tree: dictionary
     """
-    for key in dict_tree.keys():
+    for key in dict_tree:
         try:
             os.mkdir(os.path.join(path_dst, key))
             sys.stdout.write('> MKDIR {}\n'.format(os.path.join(path_dst, key)))
@@ -144,25 +145,29 @@ def move_with_dictionary(src_path, dst_path, tree_files):
     :param tree_files: dict with tree of directories and files
     """
     sys.stdout.write('> Pictures moving ...\n')
-    for date in tree_files.keys():
+    for date in tree_files:
         sys.stdout.write('>> Date: {}\n'.format(date))
-        for time in tree_files[date].keys():
+        for time in tree_files[date]:
             sys.stdout.write('>>> Time: {}\n'.format(time))
             for i, file in enumerate(tree_files[date][time]):
                 new_file = '_'.join(part if '.CR2' not in part else '{}.CR2'.format(i + 1) for part in file.split('_'))
                 sys.stdout.write(' >>>> file {} to {}\n'.format(file, os.path.join(dst_path, date, time, new_file)))
-                os.rename(os.path.join(src_path, file), os.path.join(dst_path, date, time, new_file))
+                if os.path.exists(os.path.join(dst_path, date, time, new_file)):
+                    sys.stderr.write('FILE ALREADY EXISTS: {}', os.path.join(dst_path, date, time, new_file))
+                else:
+                    os.rename(os.path.join(src_path, file), os.path.join(dst_path, date, time, new_file))
     sys.stdout.write('> Moving done\n')
+
 
 def organize_dictionary_day_night(dict_date_time):
     """ Manage day and night with standard datetime dictionary """
     print('> Converting datetime dictionary by day and night ...')
     dict_day_night = {}
-    for k_date in dict_date_time.keys():
-        for k_time in dict_date_time[k_date].keys():
+    for k_date in dict_date_time:
+        for k_time in dict_date_time[k_date]:
             print(k_date)
             print(k_time)
-            print(dict_date_time[k_date][k_time])
+            print((dict_date_time[k_date][k_time]))
             date_time = DatetimePysolar(int(k_date[0:4]),
                                         int(k_date[4:6]),
                                         int(k_date[6:8]),
@@ -178,16 +183,17 @@ def organize_dictionary_day_night(dict_date_time):
             else:
                 try:
                     if cvt_timestamp_to_second(k_time) > cvt_timestamp_to_second('120000'):
-                        dict_day_night[k_date + '_N'].update({k_time: dict_date_time[k_date][k_time]})
+                        dict_day_night[k_date + 'N'].update({k_time: dict_date_time[k_date][k_time]})
                     else:
-                        dict_day_night[get_yesterday(k_date) + '_N'].update({k_time: dict_date_time[k_date][k_time]})
+                        dict_day_night[get_yesterday(k_date) + 'N'].update({k_time: dict_date_time[k_date][k_time]})
                 except KeyError:
                     if cvt_timestamp_to_second(k_time) > cvt_timestamp_to_second('120000'):
-                        dict_day_night[k_date + '_N'] = {k_time: dict_date_time[k_date][k_time]}
+                        dict_day_night[k_date + 'N'] = {k_time: dict_date_time[k_date][k_time]}
                     else:
-                        dict_day_night[get_yesterday(k_date) + '_N'] = {k_time: dict_date_time[k_date][k_time]}
+                        dict_day_night[get_yesterday(k_date) + 'N'] = {k_time: dict_date_time[k_date][k_time]}
     print('>> Done')
     return dict_day_night
+
 
 if __name__ == '__main__':
     """

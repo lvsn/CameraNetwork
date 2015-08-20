@@ -1,6 +1,6 @@
 import os
 
-from convert import *
+from .convert import *
 
 __author__ = 'jbecirovski'
 

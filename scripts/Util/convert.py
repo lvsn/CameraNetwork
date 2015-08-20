@@ -4,8 +4,8 @@ import datetime
 import time
 import pysolar.solar
 
-from constant import *
-from extract import *
+from .constant import *
+from .extract import *
 
 
 __author__ = 'jbecirovski'
