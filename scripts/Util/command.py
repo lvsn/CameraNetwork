@@ -86,6 +86,9 @@ class Command(object):
 class CameraPowerController(object):
     """ Control camera's power from pin GPIO_POWER_CONTROL """
     def __init__(self):
+        if os.geteuid() != 0:
+            os.execvp("sudo", ["sudo"] + sys.argv)
+
         self.gpio_id = GPIO_POWER_CONTROL
         self.module_name = 'RPi.GPIO'
 
