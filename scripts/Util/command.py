@@ -1,12 +1,16 @@
 import os, sys, envoy, time
 
-import rospy
+try:
+    import rospy
+except ImportError:
+    pass
+
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
     pass
 
-from scripts.Util.constant import *
+from constant import *
 
 __author__ = 'jbecirovski'
 
@@ -78,19 +82,14 @@ class Command(object):
         """ Manage specific errors thanks to std_err log """
         if 'No camera found' in std_err:
             rospy.loginfo('Camera not detected. Camera is rebooting ...')
-            power_control = CameraPowerController()
-            power_control.camera_power_off()
-            rospy.sleep(1)
-            power_control.camera_power_on()
-            rospy.sleep(5)
-            del power_control
+            CameraPowerController.camera_reboot_script()
 
 
 class CameraPowerController(object):
     """ Control camera's power from pin GPIO_POWER_CONTROL """
     def __init__(self):
-        if os.geteuid() != 0:
-            os.execvp("sudo", ["sudo"] + sys.argv)
+        if 'rospy' in sys.modules.keys():
+            rospy.loginfo('*** CameraManagementBegin ***')
 
         self.gpio_id = GPIO_POWER_CONTROL
         self.module_name = 'RPi.GPIO'
@@ -100,7 +99,16 @@ class CameraPowerController(object):
                 GPIO.setmode(GPIO.Board)
                 GPIO.setup(self.gpio_id, GPIO.OUT)
             except:
-                rospy.logdebug('GPIO are already in use.')
+                if 'rospy' in sys.modules.keys():
+                    rospy.logdebug('GPIO are already in use.')
+    
+    @staticmethod
+    def camera_reboot_script():
+        """ Launch script with root permission for GPIO management """
+        CURRENT_DIR = os.path.dirname(__file__)
+        file_path = os.path.join(CURRENT_DIR, 'cam_pw_manag.py')
+        Command.run('sudo python {}'.format(file_path, 'Camera power reboot launch script'))
+
 
     def camera_power_on(self):
         """ Power on the camera """
@@ -108,10 +116,12 @@ class CameraPowerController(object):
             try:
                 GPIO.output(self.gpio_id, True)
             except:
-                rospy.logerr('*** ERROR: GPIO pin {} output configuration fail'.format(self.gpio_id))
+                if 'rospy' in sys.modules.keys():
+                    rospy.logerr('*** ERROR: GPIO pin {} output configuration fail'.format(self.gpio_id))
         else:
             print('GPIO {} is ON'.format(self.gpio_id))
-        rospy.loginfo("Camera is power on")
+        if 'rospy' in sys.modules.keys():
+            rospy.loginfo("Camera is power on")
 
     def camera_power_off(self):
         """ Power off the camera """
@@ -119,8 +129,10 @@ class CameraPowerController(object):
             try:
                 GPIO.output(self.gpio_id, False)
             except:
-                rospy.logerr('*** ERROR: GPIO pin {} output configuration fail'.format(self.gpio_id))
+                if 'rospy' in sys.modules.keys():
+                    rospy.logerr('*** ERROR: GPIO pin {} output configuration fail'.format(self.gpio_id))
         else:
             print('GPIO {} is OFF'.format(self.gpio_id))
-        rospy.loginfo("Camera is power off")
+        if 'rospy' in sys.modules.keys():
+            rospy.loginfo("Camera is power off")
 
