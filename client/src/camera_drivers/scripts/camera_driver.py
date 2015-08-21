@@ -26,6 +26,7 @@ class camera_driver(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):
+        rospy.loginfo("Initializing Generic Camera Driver")
         self.cameraModel = None
         try:
             self.homePath = CAMNET_OUTPUT_DIR

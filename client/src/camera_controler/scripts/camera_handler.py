@@ -301,6 +301,7 @@ class CameraHandler:
                     folder_list_files = [file for file in os.listdir(self.path_src)]
 
                     if not camera_list_files[0] in folder_list_files:
+                        rospy.loginfo("{} not found in {}.".format(camera_list_files[0], folder_list_files))
                         Command.run('gphoto2 --get-file=1', 'get first file in camera')
                         rospy.loginfo('#({}/{}) '.format(i + 1, number) + camera_list_files[0] + ' downloaded to folder')
 

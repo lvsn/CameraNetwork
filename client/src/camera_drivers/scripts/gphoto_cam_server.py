@@ -29,6 +29,7 @@ gphoto2Executable = 'gphoto2'
 
 class GPhotoServer(cd.camera_driver):
     def __init__(self):
+        rospy.loginfo("Initializing Gphoto camera driver")
         # Camera's configuration name
         self.isoConfig = "iso"
         self.apertureConfig = "aperture"
@@ -252,7 +253,7 @@ class GPhotoServer(cd.camera_driver):
         cmd_output = ''
         for subcmd in cmd.splitlines():
             subcmd = gphoto2Executable + ' ' + subcmd
-            cmd_output = Command.run(subcmd, 'GpohotoCamServer gphoto command')
+            cmd_output = Command.run(subcmd, 'GphotoCamServer gphoto command')
         return cmd_output
 
 
