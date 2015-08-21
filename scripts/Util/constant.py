@@ -1,13 +1,16 @@
-import os, sys
+__author__ = 'jbecirovski'
+import os
+import sys
+
 
 try:
     import rospy
 except ImportError:
+    print('Could not import rospy.')
     pass
 
-__author__ = 'jbecirovski'
 
-if 'rospy' in sys.modules.keys():
+if 'rospy' in sys.modules:
     try:
         LOCK_DIR = os.environ['LOCK_DIR']
         if not os.path.isdir(LOCK_DIR):
@@ -39,8 +42,27 @@ if 'rospy' in sys.modules.keys():
     try:
         CAMNET_SERVER_DATA_DIR = os.environ['CAMNET_SERVER_DATA_DIR']
     except KeyError:
-        CAMNET_SERVER_DATA_DIR = 'JUBEC7@victoria.gel.ulaval.ca:' + "" \
-                             '/home-local/yahog.extra.nobkp/www/pictures/unprocessed/raw_data/'
+        CAMNET_SERVER_DATA_DIR = ('JUBEC7@victoria.gel.ulaval.ca:'
+                                  '/home-local/yahog.extra.nobkp/www/pictures/unprocessed/raw_data/')
+        rospy.logwarn('*** WARN: Bad server data directory replaced by {}'.format(CAMNET_SERVER_DATA_DIR))
+
+    try:
+        CAMNET_OUTPUT_DIR = os.environ['CAMNET_OUTPUT_DIR']
+        if not os.path.isdir(CAMNET_OUTPUT_DIR):
+            raise KeyError
+    except KeyError:
+        CAMNET_OUTPUT_DIR = os.path.join(HOME_DIR, 'camera-output')
+        rospy.logwarn('*** WARN: Bad camera output directory replaced by {}'.format(CAMNET_OUTPUT_DIR))
+        try:
+            os.mkdir(CAMNET_OUTPUT_DIR)
+        except OSError as msg:
+            rospy.logwarn('*** WARN: %s' % msg)
+
+    try:
+        CAMNET_SERVER_DATA_DIR = os.environ['CAMNET_SERVER_DATA_DIR']
+    except KeyError:
+        CAMNET_SERVER_DATA_DIR = ('JUBEC7@victoria.gel.ulaval.ca:'
+                                  '/home-local/yahog.extra.nobkp/www/pictures/unprocessed/raw_data/')
         rospy.logwarn('*** WARN: Bad server data directory replaced by {}'.format(CAMNET_SERVER_DATA_DIR))
 
     try:
