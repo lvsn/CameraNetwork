@@ -1,6 +1,7 @@
 import os, subprocess, sys
 sys.path.append('/'.join(os.path.dirname(__file__).split('/')[:-1]))
 from collections import defaultdict
+import errno
 
 import exifread
 from scripts.Util.convert import *
@@ -78,13 +79,13 @@ def create_dict_with_files(src_path):
     """
     sys.stdout.write('> Creating dictionary with file names\n')
     files = subprocess.check_output(['ls', src_path]).splitlines()
-    files = [file for file in files if file.endswith('.CR2')]
+    files = [file for file in files if file.endswith(b'.CR2')]
     dict_date = {}
 
     sys.stdout.write('>> Register dates\n')
     for file in files:
-        file_splited = file.split('_')
-        date = '20' + file_splited[0]
+        file_splited = file.split(b'_')
+        date = b'20' + file_splited[0]
         if date in dict_date:
             dict_date[date].append(file)
         else:
@@ -98,7 +99,7 @@ def create_dict_with_files(src_path):
         time_ref = '000000'
 
         for file in file_list:
-            file_splited = file.split('_')
+            file_splited = file.split(b'_')
             file_time = cvt_timestamp_to_second(file_splited[1])
 
             if file_time >= cvt_timestamp_to_second(time_ref) + 60:
@@ -130,13 +131,14 @@ def create_folder_from_dictionary(path_dst, dict_tree):
     """
     for key in dict_tree:
         try:
-            os.mkdir(os.path.join(path_dst, key))
-            sys.stdout.write('> MKDIR {}\n'.format(os.path.join(path_dst, key)))
-        except:
-            pass
+            os.mkdir(os.path.join(path_dst, key.decode('utf-8') if type(key) is bytes else key))
+            sys.stdout.write('> MKDIR {}\n'.format(os.path.join(path_dst, key.decode('utf-8') if type(key) is bytes else key)))
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
 
         if isinstance(dict_tree[key], dict):
-            create_folder_from_dictionary(os.path.join(path_dst, key), dict_tree[key])
+            create_folder_from_dictionary(os.path.join(path_dst, key.decode('utf-8')), dict_tree[key])
 
 def move_with_dictionary(src_path, dst_path, tree_files):
     """
@@ -146,16 +148,19 @@ def move_with_dictionary(src_path, dst_path, tree_files):
     """
     sys.stdout.write('> Pictures moving ...\n')
     for date in tree_files:
+        date_s = date.decode('utf-8')
         sys.stdout.write('>> Date: {}\n'.format(date))
         for time in tree_files[date]:
+            time_s = time.decode('utf-8') if type(time) is bytes else time
             sys.stdout.write('>>> Time: {}\n'.format(time))
             for i, file in enumerate(tree_files[date][time]):
-                new_file = '_'.join(part if '.CR2' not in part else '{}.CR2'.format(i + 1) for part in file.split('_'))
-                sys.stdout.write(' >>>> file {} to {}\n'.format(file, os.path.join(dst_path, date, time, new_file)))
-                if os.path.exists(os.path.join(dst_path, date, time, new_file)):
-                    sys.stderr.write('FILE ALREADY EXISTS: {}', os.path.join(dst_path, date, time, new_file))
+                new_file = '_'.join(part if '.CR2' not in part else '{}.CR2'.format(i + 1) for part in file.decode('utf-8').split('_'))
+                sys.stdout.write(' >>>> file {} to {}\n'.format(file.decode('utf-8'), os.path.join(dst_path, date_s, time_s, new_file)))
+                if os.path.exists(os.path.join(dst_path, date_s, time_s, new_file)):
+                    sys.stderr.write('FILE ALREADY EXISTS: {}', os.path.join(dst_path, date_s, time_s, new_file))
                 else:
-                    os.rename(os.path.join(src_path, file), os.path.join(dst_path, date, time, new_file))
+                    #print("Renaming from ", os.path.join(src_path, file.decode('utf-8')), " to ", os.path.join(dst_path, date_s, time_s, new_file))
+                    os.rename(os.path.join(src_path, file.decode('utf-8')), os.path.join(dst_path, date_s, time_s, new_file))
     sys.stdout.write('> Moving done\n')
 
 
@@ -183,14 +188,14 @@ def organize_dictionary_day_night(dict_date_time):
             else:
                 try:
                     if cvt_timestamp_to_second(k_time) > cvt_timestamp_to_second('120000'):
-                        dict_day_night[k_date + 'N'].update({k_time: dict_date_time[k_date][k_time]})
+                        dict_day_night[k_date + b'N'].update({k_time: dict_date_time[k_date][k_time]})
                     else:
-                        dict_day_night[get_yesterday(k_date) + 'N'].update({k_time: dict_date_time[k_date][k_time]})
+                        dict_day_night[get_yesterday(k_date).encode('utf-8') + b'N'].update({k_time: dict_date_time[k_date][k_time]})
                 except KeyError:
                     if cvt_timestamp_to_second(k_time) > cvt_timestamp_to_second('120000'):
-                        dict_day_night[k_date + 'N'] = {k_time: dict_date_time[k_date][k_time]}
+                        dict_day_night[k_date + b'N'] = {k_time: dict_date_time[k_date][k_time]}
                     else:
-                        dict_day_night[get_yesterday(k_date) + 'N'] = {k_time: dict_date_time[k_date][k_time]}
+                        dict_day_night[get_yesterday(k_date).encode('utf-8') + b'N'] = {k_time: dict_date_time[k_date][k_time]}
     print('>> Done')
     return dict_day_night
 
