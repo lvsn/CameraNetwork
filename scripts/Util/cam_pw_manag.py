@@ -13,9 +13,10 @@ if __name__ == '__main__':
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(5, GPIO.OUT)
         GPIO.output(5, False)
-        time.sleep(1)
+        time.sleep(5)
         GPIO.output(5, True)
-        GPIO.sleep(5)
+        time.sleep(5)
+        GPIO.cleanup()
     else:
         sys.stdout.write('GPIO 5 False (simul)\n')
         time.sleep(1)
