@@ -1,14 +1,21 @@
-import os, sys, envoy, time
+import os
+import sys
+import time
+import errno
+
+import envoy
 
 try:
     import rospy
 except ImportError:
     pass
 
+
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
     pass
+
 
 from constant import *
 
@@ -17,6 +24,10 @@ __author__ = 'jbecirovski'
 
 class Locker(object):
     """ Control lock process by creating and deleting empty file inside tmpfs folder (LOCK_DIR) """
+    def __init__(self, process_name=LOCK_DEFAULT_PROCESS):
+        self.p = process_name
+        self.fn = os.path.join(LOCK_DIR, process_name)
+
     @staticmethod
     def lock(process_name=LOCK_DEFAULT_PROCESS):
         try:
@@ -33,10 +44,20 @@ class Locker(object):
 
     @staticmethod
     def is_lock(process_name=LOCK_DEFAULT_PROCESS):
-        if os.path.exists(os.path.join(LOCK_DIR, process_name)):
-            return True
-        else:
-            return False
+        return os.path.exists(os.path.join(LOCK_DIR, process_name))
+
+    def __enter__(self):
+        while True:
+            try:
+                os.open(self.fn, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            except Exception as e:
+                if e.errno == errno.ENOENT:
+                    time.sleep(1)
+                    continue
+            break
+
+    def __exit__(self):
+        os.remove(self.fn)
 
 
 class Command(object):

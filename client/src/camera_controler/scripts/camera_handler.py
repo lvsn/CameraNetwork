@@ -260,7 +260,7 @@ class CameraHandler:
         try:
             while True:
                 # 1 - check if camnet is capturing.
-                if not Locker.is_lock(LOCK_CAMNET_CAPTURE):
+                with Locker.is_lock(LOCK_CAMNET_CAPTURE):
                     # 2 - check if output folder is empty and load pictures left by DL_DATA_SERIE_SIZE
                     number_pictures = len([str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())])
                     number_pictures_left = DL_DATA_SERIE_SIZE - number_pictures
@@ -292,7 +292,7 @@ class CameraHandler:
 
             # 2 - Download number raw data
             while i < number:
-                if not Locker.is_lock(LOCK_CAMNET_CAPTURE):
+                with Locker.is_lock(LOCK_CAMNET_CAPTURE):
                     if len(camera_list_files) == 0:
                         rospy.loginfo('Camera empty')
                         break

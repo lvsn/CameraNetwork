@@ -109,16 +109,15 @@ class TimelapsAction:
         :param mode: int - 0: single | 1: HDR | 2: shell
         :param pictureId:
         """
-        Locker.lock(LOCK_CAMNET_CAPTURE)
-        if mode == 1:
-            self.cam_handler.takeHDRPicture(pictureId, loadCamera=False)
-        elif mode == 2:
-            for cmdLine in self.cam_handler.shell_config.splitlines():
-                rospy.loginfo('Cmd execute: {}'.format(cmdLine))
-                Command.run(cmdLine)
-        else:
-            self.cam_handler.takeSinglePicture(pictureId, loadCamera=False)
-        Locker.unlock(LOCK_CAMNET_CAPTURE)
+        with Locker(LOCK_CAMNET_CAPTURE):
+            if mode == 1:
+                self.cam_handler.takeHDRPicture(pictureId, loadCamera=False)
+            elif mode == 2:
+                for cmdLine in self.cam_handler.shell_config.splitlines():
+                    rospy.loginfo('Cmd execute: {}'.format(cmdLine))
+                    Command.run(cmdLine)
+            else:
+                self.cam_handler.takeSinglePicture(pictureId, loadCamera=False)
 
     def _progressive_downloading(self):
         if self.cam_handler.cam_dl:
