@@ -48,16 +48,20 @@ class Locker(object):
 
     def __enter__(self):
         while True:
+            rospy.logwarn('Looping!')
             try:
                 os.open(self.fn, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             except Exception as e:
-                if e.errno == errno.ENOENT:
+                if e.errno == 17:
                     time.sleep(1)
                     continue
+                rospy.logerr(str(e))
+                raise
             break
 
-    def __exit__(self):
+    def __exit__(self, type_, value, traceback):
         os.remove(self.fn)
+        assert not os.path.exists(self.fn)
 
 
 class Command(object):
