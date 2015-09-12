@@ -200,7 +200,7 @@ class CameraHandler:
         return {}
 
     def download_data_cb(self, req):
-        self.download_data(req.integer)
+        return self.download_data(req.integer)
 
     def download_data(self, req):
         """
@@ -337,7 +337,8 @@ class CameraHandler:
             cmd = 'rsync -vr --remove-source-files --no-owner --no-group --chmod=ugo+rwx,Dugo+rwx'
             time_out = '--timeout=10'
 
-            while True:
+            # Only try 5 times
+            for i in range(5):
                 try:
                     Command.run(' '.join([cmd, time_out, path_src, os.path.join(path_dst, get_today_date()) + '/']), 'SendRawData - rsync')
                     break
