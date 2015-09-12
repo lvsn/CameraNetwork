@@ -36,6 +36,7 @@ class CameraHandler:
         rospy.wait_for_service('calibrate_picture')
         rospy.wait_for_service('configure_parameter_queue')
         rospy.wait_for_service('preview_camera_driver')
+        rospy.loginfo("Driver Launched")
 
         self.get_camera_service = rospy.ServiceProxy(
             'get_camera',
@@ -218,38 +219,38 @@ class CameraHandler:
             rospy.logwarn('*** Loading process is currently activate ***')
         return {}
 
-    def download_all_raw_data(self, count):
-        """
-        Routine: == Download data sequence ==
-        1 - Adjust count with pictures list
-        2 - for each group of DL_DATA_SERIE_SIZE pictures
-        3 - Load pictures from camera
-        4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
-        :param count: int - number of pictures for downloading
-        """
-        try:
-            # 1 - Adjust count with pictures list
-            list_pictures = (Command.run('gphoto2 --list-files')).splitlines()
-            count_pictures = len([line.split()[1] for line in list_pictures if '#' in line])
-            if count > count_pictures or count == 0:
-                count = count_pictures
+    #def download_all_raw_data(self, count):
+    #    """
+    #    Routine: == Download data sequence ==
+    #    1 - Adjust count with pictures list
+    #    2 - for each group of DL_DATA_SERIE_SIZE pictures
+    #    3 - Load pictures from camera
+    #    4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
+    #    :param count: int - number of pictures for downloading
+    #    """
+    #    try:
+    #        # 1 - Adjust count with pictures list
+    #        list_pictures = (Command.run('gphoto2 --list-files')).splitlines()
+    #        count_pictures = len([line.split()[1] for line in list_pictures if '#' in line])
+    #        if count > count_pictures or count == 0:
+    #            count = count_pictures
 
-            # 2 - for each group of DL_DATA_SERIE_SIZE pictures
-            while count >= 0:
-                # 3 - Load pictures from camera
-                if not [str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())]:
-                    rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
-                    rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
-                    self.load_raw_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
+    #        # 2 - for each group of DL_DATA_SERIE_SIZE pictures
+    #        while count >= 0:
+    #            # 3 - Load pictures from camera
+    #            if not [str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())]:
+    #                rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
+    #                rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
+    #                self.load_raw_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
 
-                # 4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
-                rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
-                self.send_data()
-                rospy.loginfo('ServiceDownloadData: sequence done')
-                count -= DL_DATA_SERIE_SIZE
-        except:
-            err_type, err_tb, e = sys.exc_info()
-            rospy.logerr(err_tb)
+    #            # 4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
+    #            rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
+    #            self.send_data()
+    #            rospy.loginfo('ServiceDownloadData: sequence done')
+    #            count -= DL_DATA_SERIE_SIZE
+    #    except:
+    #        err_type, err_tb, e = sys.exc_info()
+    #        rospy.logerr(err_tb)
 
     def proc_dl_raw_data(self, req):
         # TODO proc_dl_raw_data: make documentation
@@ -259,15 +260,13 @@ class CameraHandler:
         """
         try:
             while True:
-                # 1 - check if camnet is capturing.
-                with Locker.is_lock(LOCK_CAMNET_CAPTURE):
-                    # 2 - check if output folder is empty and load pictures left by DL_DATA_SERIE_SIZE
-                    number_pictures = len([str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())])
-                    number_pictures_left = DL_DATA_SERIE_SIZE - number_pictures
-                    if number_pictures_left > 0:
-                        self.load_raw_data(number_pictures_left)
-                    if number_pictures > 0:
-                        self.send_data()
+                # check if output folder is empty and load pictures left by DL_DATA_SERIE_SIZE
+                number_pictures = len([str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())])
+                number_pictures_left = DL_DATA_SERIE_SIZE - number_pictures
+                if number_pictures_left > 0:
+                    self.load_raw_data(number_pictures_left)
+                if number_pictures > 0:
+                    self.send_data()
                 rospy.sleep(1)
                 if not self.cam_dl:
                     break
@@ -292,7 +291,7 @@ class CameraHandler:
 
             # 2 - Download number raw data
             while i < number:
-                with Locker.is_lock(LOCK_CAMNET_CAPTURE):
+                with Locker(LOCK_CAMNET_CAPTURE):
                     if len(camera_list_files) == 0:
                         rospy.loginfo('Camera empty')
                         break

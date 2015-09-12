@@ -19,7 +19,7 @@ from camera_network_msgs.srv import *
 from scripts.Util.constant import *
 import sensor_msgs.msg
 import envoy
-from cv_bridge import CvBridge, CvBridgeError
+#from cv_bridge import CvBridge, CvBridgeError
 
 
 class camera_driver(object):
@@ -41,7 +41,7 @@ class camera_driver(object):
         
         rospy.set_param("DownloadQty", 10)
         self.parameterQueue = []
-        self.bridge = CvBridge()
+        #self.bridge = CvBridge()
         self.image_publisher = rospy.Publisher("/preview", sensor_msgs.msg.Image, queue_size=1)
         rospy.Service('capture_camera', CaptureService, self.capture_image_cb)
         rospy.Service('preview_camera_driver', std_srvs.srv.Empty, self.preview_capture_cb)
@@ -186,10 +186,11 @@ class camera_driver(object):
         :param img:
         """
         try:
-            self.image_publisher.publish(
-                self.bridge.cv2_to_imgmsg(
-                    img,
-                    "bgr8"))
+            #self.image_publisher.publish(
+            #    self.bridge.cv2_to_imgmsg(
+            #        img,
+            #        "bgr8"))
+            pass
         except CvBridgeError as e:
             rospy.logwarn("imagePublish error : " + e)
         rospy.loginfo("Image Published to preview")

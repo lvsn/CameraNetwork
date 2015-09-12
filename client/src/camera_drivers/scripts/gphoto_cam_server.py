@@ -26,6 +26,7 @@ from scripts.Util.command import *
 join = os.path.join
 gphoto2Executable = 'gphoto2'
 
+print("ICI!")
 
 class GPhotoServer(cd.camera_driver):
     def __init__(self):
@@ -222,7 +223,8 @@ class GPhotoServer(cd.camera_driver):
         r = rospy.Rate(0.25)  # retry connection every 4 seconds
         while camera == '':
             rospy.logdebug('<LFCamera: try getting camera info>')
-            cameralist = Command.run("gphoto2 --auto-detect")
+            with Locker(LOCK_CAMNET_CAPTURE):
+                cameralist = Command.run("{} --auto-detect".format(gphoto2Executable))
             camera = self._parse_gphoto_camera_list(cameralist)
             if camera == '':
                 rospy.logwarn("No Camera Found")
@@ -253,7 +255,8 @@ class GPhotoServer(cd.camera_driver):
         cmd_output = ''
         for subcmd in cmd.splitlines():
             subcmd = gphoto2Executable + ' ' + subcmd
-            cmd_output = Command.run(subcmd, 'GphotoCamServer gphoto command')
+            with Locker(LOCK_CAMNET_CAPTURE):
+                cmd_output = Command.run(subcmd, 'GphotoCamServer gphoto command')
         return cmd_output
 
 
