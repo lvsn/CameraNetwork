@@ -50,17 +50,24 @@ class Locker(object):
         while True:
             rospy.logwarn('Looping!')
             try:
-                os.open(self.fn, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                f = os.open(self.fn, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             except Exception as e:
                 if e.errno == 17:
                     time.sleep(1)
                     continue
                 rospy.logerr(str(e))
                 raise
+            else:
+                os.close(f)
             break
 
     def __exit__(self, type_, value, traceback):
-        os.remove(self.fn)
+        try:
+            os.remove(self.fn)
+        except OSError as e:
+            if e.errno == 17:
+                pass
+            raise
         assert not os.path.exists(self.fn)
 
 

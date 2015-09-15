@@ -301,14 +301,14 @@ class CameraHandler:
 
                     if not camera_list_files[0] in folder_list_files:
                         rospy.loginfo("{} not found in {}.".format(camera_list_files[0], folder_list_files))
-                        Command.run('gphoto2 --get-file=1', 'get first file in camera')
+                        Command.run('gphoto2 --get-file=1 --wait-event-and-download=6s --skip-existing', 'get first file in camera')
                         rospy.loginfo('#({}/{}) '.format(i + 1, number) + camera_list_files[0] + ' downloaded to folder')
 
                     folder_list_files = [file for file in os.listdir(self.path_src)]
 
                     # 3 - Delete image
                     if camera_list_files[0] in folder_list_files:
-                        Command.run('gphoto2 --delete-file=1 --recurse')
+                        Command.run('gphoto2 --delete-file=1 --recurse --wait-event=1s')
                         camera_list_files.pop(0)
                         i += 1
                     else:
