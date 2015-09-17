@@ -253,9 +253,9 @@ class GPhotoServer(cd.camera_driver):
     def _run_gphoto(self, cmd):
         cmd = cmd.replace('--', '\n--').replace('\n', '', 1)
         cmd_output = ''
-        for subcmd in cmd.splitlines():
-            subcmd = gphoto2Executable + ' ' + subcmd
-            with Locker(LOCK_CAMNET_CAPTURE):
+        with Locker(LOCK_CAMNET_CAPTURE):
+            for subcmd in cmd.splitlines():
+                subcmd = gphoto2Executable + ' ' + subcmd
                 cmd_output = Command.run(subcmd, 'GphotoCamServer gphoto command')
         return cmd_output
 

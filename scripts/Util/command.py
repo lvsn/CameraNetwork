@@ -48,12 +48,12 @@ class Locker(object):
 
     def __enter__(self):
         while True:
-            rospy.logwarn('Looping!')
+            #rospy.logwarn('Looping!')
             try:
                 f = os.open(self.fn, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             except Exception as e:
                 if e.errno == 17:
-                    time.sleep(1)
+                    time.sleep(0.5)
                     continue
                 rospy.logerr(str(e))
                 raise
@@ -65,9 +65,8 @@ class Locker(object):
         try:
             os.remove(self.fn)
         except OSError as e:
-            if e.errno == 17:
-                pass
-            raise
+            if e.errno != errno.ENOENT:
+                raise
         assert not os.path.exists(self.fn)
 
 

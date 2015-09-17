@@ -267,7 +267,7 @@ class CameraHandler:
                     self.load_raw_data(number_pictures_left)
                 if number_pictures > 0:
                     self.send_data()
-                rospy.sleep(1)
+                rospy.sleep(5)
                 if not self.cam_dl:
                     break
         except:
@@ -283,7 +283,8 @@ class CameraHandler:
         try:
             # 1 - Getting camera list files
             # TODO Check execution time with threading.lock something like that
-            camera_list = Command.run('gphoto2 -L').splitlines()
+            with Locker(LOCK_CAMNET_CAPTURE):
+                camera_list = Command.run('gphoto2 -L').splitlines()
             camera_list_files = [line.split()[1] for line in camera_list if '#' in line]
             i = 0
             if number < 1 or number > len(camera_list_files):
@@ -311,8 +312,7 @@ class CameraHandler:
                         Command.run('gphoto2 --delete-file=1 --recurse --wait-event=1s')
                         camera_list_files.pop(0)
                         i += 1
-                    else:
-                        rospy.sleep(1)
+                rospy.sleep(2)
         except:
             err_type, err_tb, e = sys.exc_info()
             rospy.logerr(err_tb)
