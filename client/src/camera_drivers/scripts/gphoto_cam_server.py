@@ -218,21 +218,6 @@ class GPhotoServer(cd.camera_driver):
                 freeimages = n[len(freeimageskeyword):]
         return totalspace, freespace, freeimages
 
-    def _find_camera(self):
-        rospy.loginfo("...Looking for camera...")
-        r = rospy.Rate(0.25)  # retry connection every 4 seconds
-        while self.camera == '':
-            rospy.logdebug('<LFCamera: try getting camera info>')
-            with Locker(LOCK_CAMNET_CAPTURE):
-                cameralist = Command.run("{} --auto-detect".format(gphoto2Executable))
-            self.camera = self._parse_gphoto_camera_list(cameralist)
-            if self.camera == '':
-                rospy.logwarn("No Camera Found")
-                Command.error_manager('No camera found')
-            r.sleep()
-
-        self._set_camera_model(camera)
-
     def _find_camera_thread(self):
         while (not self.terminateThreads):
             if self.camera == '':
