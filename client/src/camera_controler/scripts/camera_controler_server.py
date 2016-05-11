@@ -80,7 +80,7 @@ class Server:
             try:
                 rospy.get_param('/IP/' + CAMERA_NAME)
             except KeyError:
-                command = 'ps aux | grep roslaunch | cut -c11-14'
+                command = "ps aux | grep roslaunch | awk 'NR == 1' | awk '{print $2}'"
                 pi = subprocess.check_output(command, shell = True)
                 os.system('kill ' + pi)
             rospy.sleep(4)
