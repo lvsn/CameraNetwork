@@ -92,7 +92,7 @@ class Command(object):
                 rospy.logwarn(warn_msg)
 
                 # Manage specific errors
-                Command.error_manager(cmd_output.std_err)
+                #Command.error_manager(cmd_output.std_err)
                 raise AssertionError(warn_msg)
 
             return cmd_output.std_out

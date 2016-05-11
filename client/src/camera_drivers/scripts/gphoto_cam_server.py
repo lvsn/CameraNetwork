@@ -20,7 +20,7 @@ sys.path.append(os.path.expanduser('~/camera-network/'))
 import camera_driver as cd
 import Image
 import numpy
-
+import thread
 from scripts.Util.command import *
 
 join = os.path.join
@@ -30,15 +30,16 @@ print("ICI!")
 
 class GPhotoServer(cd.camera_driver):
     def __init__(self):
+        self.terminateThreads = False
         rospy.loginfo("Initializing Gphoto camera driver")
         # Camera's configuration name
         self.isoConfig = "iso"
         self.apertureConfig = "aperture"
         self.shutterspeedConfig = "shutterspeed"
         self.imageformatConfig = "imageformat"
-
-        self._find_camera()
-        self._update_camera_parameters()
+        self.camera = ''
+        thread.start_new_thread(GPhotoServer._find_camera_thread, (self, ))
+        #self._update_camera_parameters()
 
         super(GPhotoServer, self).__init__()
 
@@ -219,19 +220,31 @@ class GPhotoServer(cd.camera_driver):
 
     def _find_camera(self):
         rospy.loginfo("...Looking for camera...")
-        camera = ''
         r = rospy.Rate(0.25)  # retry connection every 4 seconds
-        while camera == '':
+        while self.camera == '':
             rospy.logdebug('<LFCamera: try getting camera info>')
             with Locker(LOCK_CAMNET_CAPTURE):
                 cameralist = Command.run("{} --auto-detect".format(gphoto2Executable))
-            camera = self._parse_gphoto_camera_list(cameralist)
-            if camera == '':
+            self.camera = self._parse_gphoto_camera_list(cameralist)
+            if self.camera == '':
                 rospy.logwarn("No Camera Found")
                 Command.error_manager('No camera found')
             r.sleep()
 
         self._set_camera_model(camera)
+
+    def _find_camera_thread(self):
+        while (not self.terminateThreads):
+            if self.camera == '':
+                rospy.logdebug('<LFCamera : try getting camera info>')
+                with Locker(LOCK_CAMNET_CAPTURE):
+                    cameralist = Command.run("{} --auto-detect".format(gphoto2Executable))
+                self.camera = self._parse_gphoto_camera_list(cameralist)
+            if self.camera == '':
+                rospy.logwarn("no camera Found")
+                Command.error_manager('No camera found')
+            self._set_camera_model(camera)
+            rospy.sleep(4)
 
     def _update_camera_parameters(self):
         # Load specific parameter
@@ -251,6 +264,8 @@ class GPhotoServer(cd.camera_driver):
             return ''
 
     def _run_gphoto(self, cmd):
+        if self.camera == '':
+            return 'no camera'
         cmd = cmd.replace('--', '\n--').replace('\n', '', 1)
         cmd_output = ''
         with Locker(LOCK_CAMNET_CAPTURE):
