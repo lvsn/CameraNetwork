@@ -228,7 +228,7 @@ class GPhotoServer(cd.camera_driver):
             if self.camera == '':
                 rospy.logwarn("no camera Found")
                 Command.error_manager('No camera found')
-            self._set_camera_model(camera)
+            self._set_camera_model(self.camera)
             rospy.sleep(4)
 
     def _update_camera_parameters(self):
