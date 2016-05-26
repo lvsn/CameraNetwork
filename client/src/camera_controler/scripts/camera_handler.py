@@ -229,7 +229,7 @@ class CameraHandler:
         while True:
             number_pictures = self._number_pictures_to_download(DL_DATA_SERIE_SIZE)
             folder_list_files = [file for file in os.listdir(self.path_src) if '.CR2' in file]
-            if number_pictures > 0 and len(folder_list_files) + number_pictures < 40: #MAX_PHOTOS_ON_DISK: 
+            if number_pictures > 0 and len(folder_list_files) + number_pictures < MAX_PHOTOS_ON_DISK: 
                 self._load_and_delete_data(number_pictures)
                 self._send_data(folder_list_files)
             else:
@@ -239,7 +239,7 @@ class CameraHandler:
         self._start_send_data_thread(req)
         number_pictures = self._number_pictures_to_download(max_pictures)
         folder_list_files = [file for file in os.listdir(self.path_src)]
-        if number_pictures > 0 and len(folder_list_files) + number_pictures < 40: #MAX_PHOTOS_ON_DISK:
+        if number_pictures > 0 and len(folder_list_files) + number_pictures < MAX_PHOTOS_ON_DISK:
            self._load_and_delete_data(number_pictures)
 
     def _start_send_data_thread(self, req):

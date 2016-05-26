@@ -5,7 +5,7 @@ export ROS_MASTER_URI=http://victoria.gel.ulaval.ca:11311
 export CAMNET_CAM_NAME=ObjCam3
 export CAMNET_OUTPUT_DIR=/home/pi/camera-output/*
 export CAMNET_SERVER_DATA_DIR=dobil18@rachmaninoff.gel.ulaval.ca:/gel/rachmaninoff/data/pictures/unprocessed/raw_data/progressiveDL/
-export MAX_PHOTOS_ON_DISK=40
+export ENABLE_PROGRESSIVE_DL=false
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 
 /bin/ps aux | /bin/grep roslaunch | /bin/grep camera_controler_gphoto.launch &> /dev/null

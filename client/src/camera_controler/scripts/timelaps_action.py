@@ -22,6 +22,7 @@ import camera_handler as ch
 from camera_network_msgs.msg import *
 from scripts.Util.command import *
 from scripts.Util.convert import *
+from scripts.Util.constant import *
 from scripts.Util.miscellaneous import *
 
 class TimelapsAction:
@@ -64,7 +65,7 @@ class TimelapsAction:
 
             self._send_feedback(self.picture_count, picture_goal, hz)
                         
-            if self.cam_handler.cam_dl:
+            if self.cam_handler.cam_dl and ENABLE_PROGRESSIVE_DL:
                 self.cam_handler.progressive_dl_cb(True)
             
             if self._sleep(timestamp):
