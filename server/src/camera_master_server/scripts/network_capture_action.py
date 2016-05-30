@@ -32,6 +32,7 @@ class network_capture_action:
     def execute(self, goal):
         self.msg.mode = goal.mode
         self.msg.download = goal.download
+        self.msg.time = goal.time
         period = goal.inter_picture_delay_s
         hz = self._sec_to_hz(period)
         picture_goal = self._get_frame_qty(goal.picture_qty)

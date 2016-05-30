@@ -29,7 +29,7 @@ import thread
 
 from scripts.Util.constant import *
 from scripts.Util.command import *
-
+from scripts.Util.miscellaneous import *
 
 class Server:
     def __init__(self):
@@ -132,9 +132,21 @@ class Server:
     def capture_listen_cb(self, req):
 
         rospy.loginfo('DEBUG: mode:{} | dl:{}'.format(req.mode, req.download))
-        if req.download:
-            self.cam_handler.download_data(True)
+        #if req.download:
+        #    self.cam_handler.download_data(True)
+        if req.time == 1:
+            if is_it_day():
+                capture(req)
+        elif req.time == 2:
+            if not is_it_day():
+                capture(req)
+        else:
+            capture(req)
 
+        if req.download and ENABLE_PROGRESSIVE_DL:
+            self.cam_handler.progressive_dl_cb(True)
+
+    def capture(self, req):
         # Simply print out values in our custom message.
         if req.mode == 1:
             rospy.loginfo("Taking hdr picture")
@@ -146,6 +158,7 @@ class Server:
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)
+
 
     def capture_video_listen_cb(self, req):
         self.cam_handler.takeVideo(req.data)
