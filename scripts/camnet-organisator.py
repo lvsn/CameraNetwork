@@ -157,7 +157,7 @@ def move_with_dictionary(src_path, dst_path, tree_files):
                 new_file = '_'.join(part if '.CR2' not in part else '{}.CR2'.format(i + 1) for part in file.decode('utf-8').split('_'))
                 sys.stdout.write(' >>>> file {} to {}\n'.format(file.decode('utf-8'), os.path.join(dst_path, date_s, time_s, new_file)))
                 if os.path.exists(os.path.join(dst_path, date_s, time_s, new_file)):
-                    sys.stderr.write('FILE ALREADY EXISTS: {}', os.path.join(dst_path, date_s, time_s, new_file))
+                    sys.stderr.write('FILE ALREADY EXISTS: {}'.format(os.path.join(dst_path, date_s, time_s, new_file)))
                 else:
                     #print("Renaming from ", os.path.join(src_path, file.decode('utf-8')), " to ", os.path.join(dst_path, date_s, time_s, new_file))
                     os.rename(os.path.join(src_path, file.decode('utf-8')), os.path.join(dst_path, date_s, time_s, new_file))
