@@ -77,9 +77,20 @@ if 'rospy' in sys.modules:
         ROS_IP = '127.0.0.1'
         rospy.logwarn('*** WARN: Bad ROS ip replaced by {}'.format(ROS_IP))
 
+    try:
+        ENABLE_PROGRESSIVE_DL = os.environ['ENABLE_PROGRESSIVE_DL']
+        if ENABLE_PROGRESSIVE_DL.lower() == 'true':
+            ENABLE_PROGRESSIVE_DL = True
+        else:
+            ENABLE_PROGRESSIVE_DL = False
+    except KeyError:
+        ENABLE_PROGRESSIVE_DL = False
+        rospy.logwarn('*** WARN: Bad Progressive Download replaced by {}'.format(ENABLE_PROGRESSIVE_DL))
+
 LOCK_DEFAULT_PROCESS = 'gphoto2'
 LOCK_WHITE_LIST = {'gphoto2'}
 LOCK_CAMNET_CAPTURE = 'camnet_capture'
 DL_DATA_SERIE_SIZE = 10
 GPIO_POWER_CONTROL = 5
+MAX_PHOTOS_ON_DISK = 40
 LATITUDE_DEG, LONGITUDE_DEG = 46.779586, -71.275474

@@ -25,6 +25,7 @@ import std_srvs.srv
 from camera_network_msgs.srv import *
 from camera_network_msgs.msg import *
 import subprocess
+import thread
 
 from scripts.Util.constant import *
 from scripts.Util.command import *
@@ -33,7 +34,8 @@ from scripts.Util.command import *
 class Server:
     def __init__(self):
         rospy.init_node('timelaps_server')
-
+        self.terminateThreads= False
+        thread.start_new_thread(Server._heartbeat_thread, (self, ))
         self.cam_handler = ch.CameraHandler()
         self.TimelapsAction = ta.TimelapsAction(self.cam_handler)
         rospy.Subscriber(
@@ -71,6 +73,17 @@ class Server:
             self.update_camera_cb)
         rospy.on_shutdown(self.shutdown)
         rospy.spin()
+
+   
+    def _heartbeat_thread(self):
+        while (not self.terminateThreads):
+            try:
+                rospy.get_param('/IP/' + CAMERA_NAME)
+            except KeyError:
+                command = "ps aux | grep roslaunch | awk 'NR == 1' | awk '{print $2}'"
+                pi = subprocess.check_output(command, shell = True)
+                os.system('kill ' + pi)
+            rospy.sleep(4)
 
     def shutdown(self):
         del self.cam_handler

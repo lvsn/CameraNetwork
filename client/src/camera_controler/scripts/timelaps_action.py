@@ -22,6 +22,7 @@ import camera_handler as ch
 from camera_network_msgs.msg import *
 from scripts.Util.command import *
 from scripts.Util.convert import *
+from scripts.Util.constant import *
 from scripts.Util.miscellaneous import *
 
 class TimelapsAction:
@@ -49,9 +50,6 @@ class TimelapsAction:
         self.picture_count = 0
         self.cam_handler.cam_dl = goal.download
 
-        if self.cam_handler.cam_dl:
-                self.cam_handler.download_data(True)
-
         while self.picture_count < picture_goal:
             timestamp = rospy.get_time() + periode
             self.picture_count += 1
@@ -66,8 +64,13 @@ class TimelapsAction:
                     self._take_picture(goal.mode, self.picture_count)
 
             self._send_feedback(self.picture_count, picture_goal, hz)
+                        
+            if self.cam_handler.cam_dl and ENABLE_PROGRESSIVE_DL:
+                self.cam_handler.progressive_dl_cb(True)
+            
             if self._sleep(timestamp):
                 break
+
         success_msg = CameraControlActionResult
         success_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         self.action.set_succeeded(success_msg)

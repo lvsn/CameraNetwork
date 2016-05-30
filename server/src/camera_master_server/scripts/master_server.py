@@ -12,7 +12,7 @@ from __future__ import print_function
 
 
 import os, sys
-sys.path.append(os.path.expanduser('~/camera-network'))
+sys.path.append(os.path.expanduser('/home-local/yahog.extra.nobkp/CameraNetwork'))
 import errno
 
 import roslib
@@ -54,7 +54,8 @@ class Server:
             connectedDevices = rospy.get_param("/IP")
             for name in connectedDevices:
                 response = os.system("ping -c 1 " + connectedDevices[name] + " > /dev/null 2>&1")
-                if response == 1:
+                #rospy.logwarn("")
+                if response != 0:
                     rospy.logwarn("Lost connection with " + name)
                     rospy.delete_param("/IP/" + name)
             rospy.sleep(4)

@@ -78,7 +78,7 @@ class CameraHandler:
         self.current_status = 'Idle'
         self.shell_config = ''
         self.lock_gphoto = False
-        self.cam_threads = {'LoadData': threading.Thread(target=self.proc_dl_raw_data, name='LoadData')}
+        self.cam_threads = {'SendData': threading.Thread(target=self._send_data_thread, name='SendData')}
         self.cam_dl = False
 
         rospy.loginfo('Taking Environment Data')
@@ -201,149 +201,109 @@ class CameraHandler:
         return {}
 
     def download_data_cb(self, req):
-        return self.download_data(req.integer)
-
-    def download_data(self, req):
         """
         CallBack Ros Service: Launch thread for downloading pictures from camera to server.
         Check if current thread is starting or not.
         :param req: uInt32.integer = int
         :return: empty dict
         """
-        if not self.cam_threads['LoadData'].is_alive():
-            self.cam_threads['LoadData'] = threading.Thread(target=self.proc_dl_raw_data,
-                                                            name='LoadData',
+        self._start_dl_all_data_thread(req)
+        return {} 
+
+    def _start_dl_all_data_thread(self, req):
+
+        rospy.logwarn('CREATING THREAD')
+        if 'DLdata' not in self.cam_threads:
+            rospy.logwarn('CREATING THREAD')
+            self.cam_threads['DLdata'] = threading.Thread(target=self._dl_data_thread,
+                                                            name='DLdata',
                                                             args=(req,))
-            self.cam_threads['LoadData'].start()
+            self.cam_threads['DLdata'].start()
+        if not self.cam_threads['DLdata'].is_alive:
+            rospy.logwarn('STARTING THREAD')
+            self.cam_threads['DLdata'].start()
+
+    def _dl_data_thread(self, req):
+        #TODO : progression bar
+        rospy.logwarn('ENTERING THREAD')
+        while True:
+            number_pictures = self._number_pictures_to_download(DL_DATA_SERIE_SIZE)
+            folder_list_files = [file for file in os.listdir(self.path_src) if '.CR2' in file]
+            if number_pictures > 0 and len(folder_list_files) + number_pictures < MAX_PHOTOS_ON_DISK: 
+                self._load_and_delete_data(number_pictures)
+                self._send_data(folder_list_files)
+            else:
+                break
+
+    def progressive_dl_cb(self, req, max_pictures=DL_DATA_SERIE_SIZE):
+        self._start_send_data_thread(req)
+        number_pictures = self._number_pictures_to_download(max_pictures)
+        folder_list_files = [file for file in os.listdir(self.path_src)]
+        if number_pictures > 0 and len(folder_list_files) + number_pictures < MAX_PHOTOS_ON_DISK:
+           self._load_and_delete_data(number_pictures)
+
+    def _start_send_data_thread(self, req):
+        if not self.cam_threads['SendData'].is_alive():
+            self.cam_threads['SendData'] = threading.Thread(target=self._send_data_thread,
+                                                            name='sendData',
+                                                            args=(req,))
+            self.cam_threads['SendData'].start()
+
+    def _number_pictures_to_download(self, max_pictures=DL_DATA_SERIE_SIZE):
+        with Locker(LOCK_CAMNET_CAPTURE):
+            camera_raw_list_pictures = Command.run('gphoto2 --list-files').splitlines()
+        camera_list_pictures = [line.split()[1] for line in camera_raw_list_pictures if '#' in line]
+        rospy.logwarn(' '.join(camera_list_pictures))
+        if max_pictures < 0:
+            return len(camera_list_pictures)
         else:
-            rospy.logwarn('*** Loading process is currently activate ***')
-        return {}
+            return min(len(camera_list_pictures), max_pictures)
 
-    #def download_all_raw_data(self, count):
-    #    """
-    #    Routine: == Download data sequence ==
-    #    1 - Adjust count with pictures list
-    #    2 - for each group of DL_DATA_SERIE_SIZE pictures
-    #    3 - Load pictures from camera
-    #    4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
-    #    :param count: int - number of pictures for downloading
-    #    """
-    #    try:
-    #        # 1 - Adjust count with pictures list
-    #        list_pictures = (Command.run('gphoto2 --list-files')).splitlines()
-    #        count_pictures = len([line.split()[1] for line in list_pictures if '#' in line])
-    #        if count > count_pictures or count == 0:
-    #            count = count_pictures
 
-    #        # 2 - for each group of DL_DATA_SERIE_SIZE pictures
-    #        while count >= 0:
-    #            # 3 - Load pictures from camera
-    #            if not [str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())]:
-    #                rospy.loginfo('ServiceDownloadData: %i pictures left' % count)
-    #                rospy.loginfo('-> Loading data from camera: %s pictures' % (DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count))
-    #                self.load_raw_data(DL_DATA_SERIE_SIZE if count >= DL_DATA_SERIE_SIZE else count)
-
-    #            # 4 - Send with rsync to destination server for each group of DL_DATA_SERIE_SIZE pictures
-    #            rospy.loginfo('-> Sending data to destination: %s' % self.path_dst)
-    #            self.send_data()
-    #            rospy.loginfo('ServiceDownloadData: sequence done')
-    #            count -= DL_DATA_SERIE_SIZE
-    #    except:
-    #        err_type, err_tb, e = sys.exc_info()
-    #        rospy.logerr(err_tb)
-
-    def proc_dl_raw_data(self, req):
-        # TODO proc_dl_raw_data: make documentation
-        """
-        Process which download raw data anything.
-        :return:
-        """
+    def _load_and_delete_data(self, number):
         try:
-            while True:
-                # check if output folder is empty and load pictures left by DL_DATA_SERIE_SIZE
-                number_pictures = len([str_f for str_f in os.listdir(CAMNET_OUTPUT_DIR) if ('.cr2' in str_f.lower()) or ('.jpg' in str_f.lower())])
-                number_pictures_left = DL_DATA_SERIE_SIZE - number_pictures
-                if number_pictures_left > 0:
-                    self.load_raw_data(number_pictures_left)
-                if number_pictures > 0:
-                    self.send_data()
-                rospy.sleep(5)
-                if not self.cam_dl:
-                    break
-        except:
-            rospy.logerr(sys.exc_info()[1])
-
-    def load_raw_data(self, number=-1):
-        """
-        Routine: Loads raw data from camera to local pictures folder
-        1 - getting camera list files
-        2 - downloading number raw data
-        3 - delete it if downloaded
-        """
-        try:
-            # 1 - Getting camera list files
-            # TODO Check execution time with threading.lock something like that
-            with Locker(LOCK_CAMNET_CAPTURE):
-                camera_list = Command.run('gphoto2 -L').splitlines()
-            camera_list_files = [line.split()[1] for line in camera_list if '#' in line]
-            i = 0
-            if number < 1 or number > len(camera_list_files):
-                number = len(camera_list_files)
-
-            # 2 - Download number raw data
-            while i < number:
-                with Locker(LOCK_CAMNET_CAPTURE):
-                    if len(camera_list_files) == 0:
-                        rospy.loginfo('Camera empty')
-                        break
-
-                    os.chdir(self.path_src)
-                    folder_list_files = [file for file in os.listdir(self.path_src)]
-
-                    if not camera_list_files[0] in folder_list_files:
-                        rospy.loginfo("{} not found in {}.".format(camera_list_files[0], folder_list_files))
-                        Command.run('gphoto2 --get-file=1 --wait-event-and-download=6s --skip-existing', 'get first file in camera')
-                        rospy.loginfo('#({}/{}) '.format(i + 1, number) + camera_list_files[0] + ' downloaded to folder')
-
-                    folder_list_files = [file for file in os.listdir(self.path_src)]
-
-                    # 3 - Delete image
-                    if camera_list_files[0] in folder_list_files:
-                        Command.run('gphoto2 --delete-file=1 --recurse --wait-event=1s')
-                        camera_list_files.pop(0)
-                        i += 1
+             with Locker(LOCK_CAMNET_CAPTURE):
+                os.chdir(self.path_src)
+                self._download_camera_data(number)
                 rospy.sleep(2)
+                self._delete_camera_data(number)
         except:
             err_type, err_tb, e = sys.exc_info()
             rospy.logerr(err_tb)
+    
+    def _download_camera_data(self, number_pictures):
+        Command.run('gphoto2 --get-file 1-{} --wait-event-and-download=6s --skip-existing'.format(number_pictures), 'get files in camera')
 
-    def send_data(self):
-        """
-        Routine: Sends raw data from local pictures folder to another folder using rsync
-        1 - Getting path source
-        2 - Getting path destination
-        3 - Sending with rsync
-        """
-        try:
-            # 1 - Getting path pictures folder
-            path_src = self.path_src
+    def _delete_camera_data(self, number_pictures):
+        Command.run('gphoto2 --delete-file 1-{} --recurse --wait-event=1s'.format(number_pictures))
 
-            # 2 - Getting path destination
-            path_dst = self.path_dst
+    def _send_data_thread(self, req):
+        while True:
+            folder_list_files = [file for file in os.listdir(self.path_src) if '.CR2' in file]
+            if len(folder_list_files) > 0:
+                self._send_data(folder_list_files)
+                rospy.sleep(10)
+            else:
+                break
 
-            # 3 - Sending with rsync
-            # TODO Sending with rsync: Find way to show progress / checkpoint with command
-            cmd = 'rsync -vr --remove-source-files --no-owner --no-group --chmod=ugo+rwx,Dugo+rwx'
-            time_out = '--timeout=10'
 
-            # Only try 5 times
-            for i in range(5):
-                try:
-                    Command.run(' '.join([cmd, time_out, path_src, os.path.join(path_dst, get_today_date()) + '/']), 'SendRawData - rsync')
-                    break
-                except AssertionError as e:
-                    rospy.logwarn('Rsync Error: %s' % e)
-                    rospy.sleep(10)
-        except:
-            err_type, err_tb, e = sys.exc_info()
-            rospy.logerr(err_tb)
+    def _send_data(self, files_list):
+        if len(files_list) > 0:
+            try:
+                # TODO Sending with rsync: Find way to show progress / checkpoint with command
+                cmd = 'rsync -v --remove-source-files --no-owner --no-group --chmod=ugo+rwx,Dugo+rwx'
+                time_out = '--timeout=10'
+                files = ' '.join(self.path_src + '/' + file for file in files_list)
+                # try 5 times
+                for i in range(5):
+                    try:
+                        Command.run(' '.join([cmd, time_out, files, os.path.join(self.path_dst, get_today_date()) + '/']), 'SendRawData - rsync')
+                        break
+                    except AssertionError as e:
+                        rospy.logwarn('Rsync Error: %s' % e)
+                        rospy.sleep(10)
+            except:
+                err_type, err_tb, e = sys.exc_info()
+                rospy.logerr(err_tb)
+
+
