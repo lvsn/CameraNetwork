@@ -42,14 +42,7 @@ class network_capture_action:
             timestamp = rospy.get_time() + period
             self.picture_count += 1
 
-            if goal.time == 1:
-                if is_it_day():
-                    self.publisher.publish(self.msg)
-            elif goal.time == 2:
-                if not is_it_day():
-                    self.publisher.publish(self.msg)
-            else:
-                self.publisher.publish(self.msg)
+            self.publisher.publish(self.msg)
 
             self._send_feedback(self.picture_count, picture_goal, hz)
             interupt = self._sleep(timestamp)
