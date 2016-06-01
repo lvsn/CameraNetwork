@@ -136,12 +136,12 @@ class Server:
         #    self.cam_handler.download_data(True)
         if req.time == 1:
             if is_it_day():
-                capture(req)
+                self.capture(req)
         elif req.time == 2:
             if not is_it_day():
-                capture(req)
+                self.capture(req)
         else:
-            capture(req)
+            self.capture(req)
 
         if req.download and ENABLE_PROGRESSIVE_DL:
             self.cam_handler.progressive_dl_cb(True)
