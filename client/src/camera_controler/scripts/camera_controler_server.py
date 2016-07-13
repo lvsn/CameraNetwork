@@ -153,8 +153,9 @@ class Server:
             self.cam_handler.takeHDRPicture(0)
         elif req.mode == 2:
             rospy.loginfo("Getting shell command:\n{}".format(self.cam_handler.shell_config))
-            for cmdLine in self.cam_handler.shell_config.splitlines():
-                Command.run(cmdLine, 'Network launch command')
+            with Locker(LOCK_CAMNET_CAPTURE):
+                for cmdLine in self.cam_handler.shell_config.splitlines():
+                    Command.run(cmdLine, 'Network launch command')
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)
