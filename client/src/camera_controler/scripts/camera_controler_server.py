@@ -36,6 +36,7 @@ class Server:
         rospy.init_node('timelaps_server')
         self.terminateThreads= False
         thread.start_new_thread(Server._heartbeat_thread, (self, ))
+        thread.start_new_thread(Server._reset_camera_time_thread, (self, ))
         self.cam_handler = ch.CameraHandler()
         self.TimelapsAction = ta.TimelapsAction(self.cam_handler)
         rospy.Subscriber(
@@ -84,6 +85,14 @@ class Server:
                 pi = subprocess.check_output(command, shell = True)
                 os.system('kill ' + pi)
             rospy.sleep(4)
+
+    def _reset_camera_time_thread(self):
+        cmdLine = "gphoto2 --set-config /main/settings/datetime='now'"
+        while (not self.terminateThreads):
+            with Locker(LOCK_CAMNET_CAPTURE):
+                Command.run(cmdLine, 'Camera clock reset')
+            rospy.sleep(86400)
+
 
     def shutdown(self):
         del self.cam_handler
@@ -156,6 +165,7 @@ class Server:
             with Locker(LOCK_CAMNET_CAPTURE):
                 for cmdLine in self.cam_handler.shell_config.splitlines():
                     Command.run(cmdLine, 'Network launch command')
+                    
         else:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)
