@@ -44,6 +44,17 @@ class Server:
             Capture,
             self.capture_listen_cb,
             queue_size=1)
+        rospy.Subscriber(
+            '/theta_capture',
+            ThetaCapture,
+            self.theta_capture_cb,
+            queue_size=1)
+        rospy.Subscriber(
+            '/theta_options',
+            ThetaOptions,
+            self.theta_options_cb,
+            queue_size=1)
+        
         # rospy.Subscriber(
         #     '/network_capture_video_chatter',
         #     std_msgs.msg.UInt32,
@@ -209,3 +220,12 @@ class Server:
 
 if __name__ == "__main__":
     serverInstance = Server()
+
+
+#-----THETA------
+
+    def theta_capture_cb(self, req):
+        print("capture")
+
+    def theta_options_cb(self, req):
+        print("options")
