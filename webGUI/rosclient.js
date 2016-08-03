@@ -56,12 +56,12 @@ function theta_timelapse()
 	this.action = new ROSLIB.ActionClient({
       	ros : ros,
    	  	serverName : '/master/theta_timelapse',
-      	actionName : 'theta_network_msgs/ThetaControlAction'
+      	actionName : 'camera_network_msgs/ThetaControlAction'
     }); 
     
     this.setAction = function(form) {
 		var goal = new ROSLIB.Goal({
-			actionClient : _network_timelapse.action,
+			actionClient : _theta_timelapse.action,
 			goalMessage : {
 				ISO : form.theta_parameter_iso.value,
 				fileformat : form.theta_parameter_fileformat.value,
