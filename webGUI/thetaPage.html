@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="./js/jquery.timepicker.min.js"></script>
+    <script type="text/javascript" src="./js/jquery.blockUI.js"></script>
+    <script type="text/javascript" src="rosclient.js"></script>
+    <script type="text/javascript" src="dynamicPage.js"></script>
+
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen, projection" />
+
+    <title>Camera Network</title>
+</head>
+
+<body>
+    <nav>
+        <span id="device_list">Loading device list...</span>
+        <a href="./networkPage.html">Network</a>
+        <a href="./devicePage.html">Device</a>
+        <a href="./thetaPage.html">ThetaS</a>
+    </nav>
+
+    <div id="main-content">
+    <div id="sub-content">
+    <!-- Device interface -->
+        <div class="mainStyle">
+        
+        <div>
+         <!--   <select class="styleSelect" onchange="selectEvent(this);" id="deviceList" disabled="disabled">
+                    <option value="index0">Loading Devices...</option>
+            </select> --> 
+            <dl>
+                <dt>Device:</dt>
+                <!-- <dd id="theta_name"></dd> -->
+            </dl>
+        </div>
+        <div class="parameterStyle">
+            <span id="param_status"></span>
+            <form name="thetaTimelapse" action="javascript:void(0)" method="get">
+                <label>ISO
+                    <select id="theta_parameter_iso" value='' name="theta_parameter_iso" >
+                    </select>
+                </label>
+                <label>fileformat :
+                    <select id="theta_parameter_fileformat" value='' name="theta_parameter_fileformat" >
+                    </select>
+                </label>
+                <label>Shutter Speed :
+                    <select id="theta_parameter_shutterspeed" value='' name="theta_parameter_shutterspeed" >
+                    </select>
+                </label>
+                <label>Period :
+                    <select id="theta_parameter_period" value='' name="theta_parameter_frequency" >
+                    </select>
+                </label>
+                <input type="submit" class="styleButton" onclick="thetaStartCaptureEvent(this.form)" value="Start Capture">
+            </form>
+        </div>
+
+        </div>
+
+    </div>
+    </div>
+
+</body>
+</html>

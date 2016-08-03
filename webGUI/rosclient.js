@@ -36,6 +36,67 @@ log_listener.subscribe(function(message) {
 	// log_listener.unsubscribe();
 });
 
+function theta_timelapse()
+{
+	this.status = new ROSLIB.Topic({
+		ros : ros,
+		name : '/master/theta_timelapse/status',
+		messageType : 'actionlib_msgs/GoalStatusArray',
+	});
+	this.feedback = new ROSLIB.Topic({
+		ros : ros,
+		name : '/master/theta_timelapse/feedback',
+		messageType : 'camera_network_msgs/ThetaControlActionFeedback'
+	});
+	this.result = new ROSLIB.Topic({
+		ros : ros,
+		name : '/master/theta_timelapse/result',
+		messageType : 'camera_network_msgs/ThetaControlActionResult',
+	});	
+	this.action = new ROSLIB.ActionClient({
+      	ros : ros,
+   	  	serverName : '/master/theta_timelapse',
+      	actionName : 'theta_network_msgs/ThetaControlAction'
+    }); 
+    
+    this.setAction = function(form) {
+		var goal = new ROSLIB.Goal({
+			actionClient : _network_timelapse.action,
+			goalMessage : {
+				ISO : form.theta_parameter_iso.value,
+				fileformat : form.theta_parameter_fileformat.value,
+				shutterspeed : form.theta_parameter_shutterspeed.value,
+				period : form.theta_parameter_period.value,
+			}
+		});
+		goal.send();
+	}  	
+	
+	this.stopAction = function(){
+		this.action.cancel();
+	}
+	
+	this.feedback.subscribe(function(msg){
+		$("#theta_timelapse_feedback").text(msg.feedback.picture_taken);
+	});
+
+	this.status.subscribe(function(message) {
+		statusList = message.status_list;
+		if(statusList.length > 0){
+			//console.log(message.status_list[0].status);
+			$("#theta_timelapse_status").text("Busy");
+			$("#theta_timelapse_status").css("color", "orange");
+		}
+		else{
+			$("#theta_timelapse_status").text("Idle");
+			$("#theta_timelapse_status").css("color", "green");
+		}
+	}); 
+	this.result.subscribe(function(msg){
+		$("#theta_timelapse_result").text(msg.result.total_picture);
+	});
+}
+
 
 //   ---- Class ---- 
  
@@ -440,6 +501,7 @@ function device()
 //   ----  Instances   -----
 
 var _network_timelapse = new network_timelapse();
+var _theta_timelapse = new theta_timelapse();
 var _current_device;
 var _device_list;
 //var img = new Image;
@@ -572,6 +634,10 @@ function networkTimelapseEvent(form,isStart){
 	else{
 		_network_timelapse.stopAction();
 	}
+}
+
+function thetaStartCaptureEvent(form){
+        _theta_timelapse.setAction(form);
 }
 
 var cmdVideo = new ROSLIB.Topic({

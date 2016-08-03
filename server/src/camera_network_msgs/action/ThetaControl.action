@@ -1,0 +1,11 @@
+#goal
+string ISO
+string fileformat
+string shutterspeed
+string period
+---
+#result
+string total_picture
+---
+#feedback
+string picture_taken

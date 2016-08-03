@@ -21,6 +21,7 @@ roslib.load_manifest('camera_master_server')
 import rospy
 
 import network_capture_action as nca
+import theta_timelapse_action as tta
 import getpass
 import thread
 from scripts.Util.constant import *
@@ -32,6 +33,7 @@ class Server:
         rospy.init_node('master_server')
         self.setPictureDirectory()
         self.network_capture = nca.network_capture_action()
+        self.theta_timelapse = tta.theta_timelapse_action()
         self.setParam()
         thread.start_new_thread(Server._heart_beat, (self, ))
         rospy.on_shutdown(self.shutdown)
