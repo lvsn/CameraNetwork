@@ -18,6 +18,7 @@ import rospkg
 import rosparam
 import timelaps_action as ta
 import camera_handler as ch
+import thetaSdrivers.thetaS as thetaS
 import os, sys
 sys.path.append(os.path.expanduser('~/camera-network'))
 import std_msgs.msg
@@ -39,15 +40,11 @@ class Server:
         thread.start_new_thread(Server._reset_camera_time_thread, (self, ))
         self.cam_handler = ch.CameraHandler()
         self.TimelapsAction = ta.TimelapsAction(self.cam_handler)
+        self.thetaConnected = False
         rospy.Subscriber(
             '/network_capture_chatter',
             Capture,
             self.capture_listen_cb,
-            queue_size=1)
-        rospy.Subscriber(
-            '/theta_capture',
-            ThetaCapture,
-            self.theta_capture_cb,
             queue_size=1)
         rospy.Subscriber(
             '/theta_options',
@@ -167,15 +164,18 @@ class Server:
             self.cam_handler.progressive_dl_cb(True)
 
     def capture(self, req):
-        # Simply print out values in our custom message.
+        #start theta capture simulteanously
+        if self._is_theta_connected():
+            thread.start_new_thread(Server.theta_capture, (self, ))
         if req.mode == 1:
             rospy.loginfo("Taking hdr picture")
             self.cam_handler.takeHDRPicture(0)
         elif req.mode == 2:
             rospy.loginfo("Getting shell command:\n{}".format(self.cam_handler.shell_config))
-            with Locker(LOCK_CAMNET_CAPTURE):
-                for cmdLine in self.cam_handler.shell_config.splitlines():
-                    Command.run(cmdLine, 'Network launch command')
+            if self.cam_handler.shell_config:
+                with Locker(LOCK_CAMNET_CAPTURE):
+                    for cmdLine in self.cam_handler.shell_config.splitlines():
+                        Command.run(cmdLine, 'Network launch command')
                     
         else:
             rospy.loginfo("Taking single picture")
@@ -220,11 +220,31 @@ class Server:
 
 #-----THETA------
 
-    def theta_capture_cb(self, req):
-        rospy.logwarn("capture")
+    def theta_capture(self):
+        self.thetaCam.takePicture()
+        self.thetaCam.saveImage(self.thetaCam.latestFileUri(), '/home/pi/')
+        self.thetaCam.deleteFile(self.thetaCam.latestFileUri())
 
     def theta_options_cb(self, req):
-        rospy.logwarn("options")
+        if self._is_theta_connected():
+            self.thetaCam.setOption('iso', int(req.ISO))
+            self.thetaCam.setOption('shutterSpeed', int(req.shutterspeed))
+            self.thetaCam.setOption('fileFormat', req.fileformat)
+            rospy.logwarn("options")
+
+
+    def _is_theta_connected(self):
+        ip = Command.run("ip addr | grep 'state UP' -A2 | grep 'wlan0' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'")
+        if ip and not self.thetaConnected:
+            self.thetaConnected = True
+            self.thetaCam = thetaS.RicohThetaS()
+            self.thetasCam.setOption('_shutterVolume', 1)
+            self.thetasCam.setOption('captureMode', 'image')
+            self.thetasCam.setOption('exposureProgram', 1)
+            self.thetasCam.setOption('exposureCompensation', 0.0)
+        elif not ip:
+            self.thetaConnected = False
+        return ip != ''
 
 if __name__ == "__main__":
     serverInstance = Server()
