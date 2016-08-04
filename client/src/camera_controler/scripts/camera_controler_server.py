@@ -146,6 +146,8 @@ class Server:
         if req.time == 1:
             if is_it_day():
                 self.capture(req)
+            else:
+                self._poke_camera()
         elif req.time == 2:
             if not is_it_day():
                 self.capture(req)
@@ -170,6 +172,10 @@ class Server:
             rospy.loginfo("Taking single picture")
             self.cam_handler.takeSinglePicture(0, setCamera=False)
 
+    def _poke_camera(self):
+        with Locker(LOCK_CAMNET_CAPTURE):
+            Command.run('gphoto2 --reset')
+        rospy.sleep(2)
 
     def capture_video_listen_cb(self, req):
         self.cam_handler.takeVideo(req.data)
