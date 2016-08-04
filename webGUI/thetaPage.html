@@ -39,26 +39,30 @@
                 <!-- <dd id="theta_name"></dd> -->
             </dl>
         </div>
-        <div class="parameterStyle">
+        <div class="parameterStyle left">
             <span id="param_status"></span>
             <form name="thetaTimelapse" action="javascript:void(0)" method="get">
-                <label>ISO
-                    <input id="theta_parameter_iso" value='' name="theta_parameter_iso" >
+                <label>ISO :
+                    <input id="theta_parameter_iso" value='100' name="theta_parameter_iso" >
                     </input>
                 </label>
-                <label>fileformat :
-                    <input id="theta_parameter_fileformat" value='' name="theta_parameter_fileformat" >
+                <label>White Balance :
+                    <input id="theta_parameter_whitebalance" value='' name="theta_parameter_whitebalance" >
                     </input>
                 </label>
                 <label>Shutter Speed :
-                    <input id="theta_parameter_shutterspeed" value='' name="theta_parameter_shutterspeed" >
+                    <input id="theta_parameter_shutterspeed" value='0.05' name="theta_parameter_shutterspeed" >
                     </input>
                 </label>
-                <label>Period :
-                    <input id="theta_parameter_period" value='' name="theta_parameter_frequency" >
+                <label>Exposure Compensation :
+                    <input id="theta_parameter_exposurecompensation" value='0.0' name="thetha_parameter_exposurecompensation">
                     </input>
                 </label>
-                <input type="submit" class="styleButton" onclick="thetaStartCaptureEvent(this.form)" value="Start Capture">
+                <label>Exposure Program (1-manual 2-auto) :
+                    <input id="theta_parameter_exposureprogram" value='1' name="thetha_parameter_exposureprogram">
+                    </input>
+                </label>
+                <input type="submit" class="styleButton" onclick="thetaStartCaptureEvent(this.form)" value="Set options and start capture">
             </form>
         </div>
 

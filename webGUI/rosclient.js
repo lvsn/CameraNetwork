@@ -64,9 +64,10 @@ function theta_timelapse()
 			actionClient : _theta_timelapse.action,
 			goalMessage : {
 				ISO : form.theta_parameter_iso.value,
-				fileformat : form.theta_parameter_fileformat.value,
 				shutterspeed : form.theta_parameter_shutterspeed.value,
-				period : form.theta_parameter_period.value,
+				whitebalance : form.theta_parameter_whitebalance.value,
+                                exposurecompensation : form.theta_parameter_exposurecompensation.value,
+                                exposureprogram : form.theta_parameter_exposureprogram.value
 			}
 		});
 		goal.send();
