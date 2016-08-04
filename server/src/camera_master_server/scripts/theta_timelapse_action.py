@@ -20,7 +20,7 @@ class theta_timelapse_action:
     def __init__(self):
         rospy.loginfo("Initialising Theta timlapse action")
         self.capturePublisher = rospy.Publisher("/theta_capture", ThetaCapture, queue_size=1)
-        self.optionsPublisher = rospy.Publisher("/theta_options", ThetaOtions, queue_size=1)
+        self.optionsPublisher = rospy.Publisher("/theta_options", ThetaOptions, queue_size=1)
         rospy.sleep(0.5)    # let time for connections
         self.action = actionlib.SimpleActionServer('theta_timelapse', ThetaControlAction,
                                                    self.execute, False)
@@ -33,7 +33,7 @@ class theta_timelapse_action:
     def execute(self, goal):
         self.optionsMsg.ISO = goal.ISO
         self.optionsMsg.fileformat = goal.fileformat
-        self.optionsMsg.shutterSpeed = goal.shutterSpeed
+        self.optionsMsg.shutterspeed = goal.shutterspeed
         self.optionsPublisher.publish(self.optionsMsg)
         
         self.captureMsg.capture = True
@@ -54,9 +54,9 @@ class theta_timelapse_action:
             interupt = self._sleep(timestamp)
             if interupt:
                 break
-        succes_msg = CameraControlActionResult
-        succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
-        self.action.set_succeeded(succes_msg)
+        #succes_msg = CameraControlActionResult
+        #succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
+        #self.action.set_succeeded(succes_msg)
 
     def _sleep(self, timestamp):
         """
