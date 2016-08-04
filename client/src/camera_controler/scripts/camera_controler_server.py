@@ -232,7 +232,7 @@ class Server:
             self.thetaCam.setOption('exposureProgram', int(req.exposureprogram))
             self.thetaCam.setOption('iso', int(req.ISO))
             self.thetaCam.setOption('shutterSpeed', int(req.shutterspeed))
-            self.thetaCam.setOption('whiteBalance', int(req.whitebalance))
+            self.thetaCam.setOption('whiteBalance', req.whitebalance)
             self.thetaCam.setOption('exposureCompensation', int(req.exposurecompensation))
             rospy.logwarn("options")
 
