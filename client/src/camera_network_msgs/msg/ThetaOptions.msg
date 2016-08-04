@@ -1,3 +1,5 @@
 string ISO
-string fileformat
 string shutterspeed
+string whitebalance
+string exposurecompensation
+string exposureprogram

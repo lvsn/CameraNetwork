@@ -41,6 +41,7 @@ class Server:
         self.cam_handler = ch.CameraHandler()
         self.TimelapsAction = ta.TimelapsAction(self.cam_handler)
         self.thetaConnected = False
+        self.thetaCapture = False
         rospy.Subscriber(
             '/network_capture_chatter',
             Capture,
@@ -165,7 +166,7 @@ class Server:
 
     def capture(self, req):
         #start theta capture simulteanously
-        if self._is_theta_connected():
+        if self._is_theta_connected() and self.thetaCapture: 
             thread.start_new_thread(Server.theta_capture, (self, ))
         if req.mode == 1:
             rospy.loginfo("Taking hdr picture")
@@ -227,9 +228,12 @@ class Server:
 
     def theta_options_cb(self, req):
         if self._is_theta_connected():
+            self.thetaCapture = True
+            self.thetaCam.setOption('exposureProgram', int(req.exposureprogram))
             self.thetaCam.setOption('iso', int(req.ISO))
             self.thetaCam.setOption('shutterSpeed', int(req.shutterspeed))
-            self.thetaCam.setOption('fileFormat', req.fileformat)
+            self.thetaCam.setOption('whiteBalance', int(req.whitebalance))
+            self.thetaCam.setOption('exposureCompensation', int(req.exposurecompensation))
             rospy.logwarn("options")
 
 
@@ -238,11 +242,11 @@ class Server:
         if ip and not self.thetaConnected:
             self.thetaConnected = True
             self.thetaCam = thetaS.RicohThetaS()
-            self.thetasCam.setOption('_shutterVolume', 1)
-            self.thetasCam.setOption('captureMode', 'image')
-            self.thetasCam.setOption('exposureProgram', 1)
-            self.thetasCam.setOption('exposureCompensation', 0.0)
+            self.thetaCam.setOption('_shutterVolume', 1)
+            self.thetaCam.setOption('captureMode', 'image')
+            self.thetaCam.setOption('sleepDelay', 65535)
         elif not ip:
+            self.thetaCapture = False
             self.thetaConnected = False
         return ip != ''
 
