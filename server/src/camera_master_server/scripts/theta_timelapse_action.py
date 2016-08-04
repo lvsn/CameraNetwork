@@ -32,28 +32,28 @@ class theta_timelapse_action:
         
     def execute(self, goal):
         self.optionsMsg.ISO = goal.ISO
-        #self.optionsMsg.fileformat = goal.fileformat
-        #self.optionsMsg.shutterSpeed = goal.shutterSpeed
-        #self.optionsPublisher.publish(self.optionsMsg)
+        self.optionsMsg.fileformat = goal.fileformat
+        self.optionsMsg.shutterspeed = goal.shutterspeed
+        self.optionsPublisher.publish(self.optionsMsg)
         
-        #self.captureMsg.capture = True
+        self.captureMsg.capture = True
 
-        #period = goal.period
-        #hz = self._sec_to_hz(period)
-        ##picture_goal = self._get_frame_qty(goal.picture_qty)
-        #self.picture_count = 0
+        period = goal.period
+        hz = self._sec_to_hz(period)
+        #picture_goal = self._get_frame_qty(goal.picture_qty)
+        self.picture_count = 0
 
         #while self.picture_count < picture_goal:
-        #while 1:
-        #    timestamp = rospy.get_time() + period
-        #    self.picture_count += 1
+        while 1:
+            timestamp = rospy.get_time() + period
+            self.picture_count += 1
 
-        #    self.capturePublisher.publish(self.captureMsg)
+            self.capturePublisher.publish(self.captureMsg)
 
-        #    self._send_feedback(self.picture_count, 10000000, hz)
-        #    interupt = self._sleep(timestamp)
-        #    if interupt:
-        #        break
+            self._send_feedback(self.picture_count, 10000000, hz)
+            interupt = self._sleep(timestamp)
+            if interupt:
+                break
         #succes_msg = CameraControlActionResult
         #succes_msg.total_picture = 'Total Picture : ' + str(self.picture_count)
         #self.action.set_succeeded(succes_msg)

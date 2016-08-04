@@ -1,3 +1,3 @@
-int8 mode
-bool download
-int8 time
+string ISO
+string fileformat
+string shutterspeed
