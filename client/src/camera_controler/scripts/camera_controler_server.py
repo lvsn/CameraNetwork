@@ -218,14 +218,16 @@ class Server:
     def _progressive_download(self):
         pass
 
+#-----THETA------
+
+    def theta_capture_cb(self, req):
+        rospy.logwarn("capture")
+
+    def theta_options_cb(self, req):
+        rospy.logwarn("options")
+
 if __name__ == "__main__":
     serverInstance = Server()
 
 
-#-----THETA------
 
-    def theta_capture_cb(self, req):
-        print("capture")
-
-    def theta_options_cb(self, req):
-        print("options")
