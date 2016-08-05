@@ -5,6 +5,7 @@ export ROS_MASTER_URI=http://victoria.gel.ulaval.ca:11311
 export CAMNET_CAM_NAME=Skycam
 export CAMNET_OUTPUT_DIR=/home/pi/camera-output/*
 #export CAMNET_SERVER_DATA_DIR=dobil18@rachmaninoff.gel.ulaval.ca:/gel/rachmaninoff/data/pictures/unprocessed/raw_data/progressiveDL/
+export CAMNET_SERVER_DATA_DIR=dobil18@rachmaninoff.gel.ulaval.ca:/home/debussy/sibelius/skycam/raw_data/
 export THETA_SERVER_DATA_DIR=dobil18@rachmaninoff.gel.ulaval.ca:/home/debussy/sibelius/thetaS/
 export ENABLE_PROGRESSIVE_DL=True
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib

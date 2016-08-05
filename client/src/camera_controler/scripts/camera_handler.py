@@ -279,24 +279,26 @@ class CameraHandler:
 
     def _send_data_thread(self, req):
         while True:
+
             folder_list_files = [file for file in os.listdir(self.path_src) if '.CR2' in file]
             theta_list_files = [file for file in os.listdir(THETA_OUTPUT_DIR) if '.JPG' in file]
             if len(theta_list_files) > 0:
-                self._send_data(THETA_OUTPUT_DIR, THETA_SERVER_DATA_DIR)
+                self._send_data(THETA_OUTPUT_DIR, THETA_SERVER_DATA_DIR, theta_list_files)
             if len(folder_list_files) > 0:
                 self._send_data(self.path_src, self.path_dst, folder_list_files)
                 rospy.sleep(2)
             elif len(theta_list_files) == 0:
-                rospy.sleep(120)
+                rospy.sleep(10)
 
 
     def _send_data(self, srcfolder, dstfolder, files_list):
+
         if len(files_list) > 0:
             try:
                 # TODO Sending with rsync: Find way to show progress / checkpoint with command
                 cmd = 'rsync -v --remove-source-files --no-owner --no-group --chmod=ugo=rwX,Dugo=rwX'
                 time_out = '--timeout=10'
-                files = ' '.join(folder + '/' + file for file in files_list)
+                files = ' '.join(srcfolder + '/' + file for file in files_list)
                 # try 5 times
                 for i in range(5):
                     try:
