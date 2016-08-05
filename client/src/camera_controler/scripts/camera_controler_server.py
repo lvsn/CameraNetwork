@@ -223,7 +223,7 @@ class Server:
 
     def theta_capture(self):
         self.thetaCam.takePicture()
-        self.thetaCam.saveImage(self.thetaCam.latestFileUri(), '/home/pi/')
+        self.thetaCam.saveImage(self.thetaCam.latestFileUri(), THETA_OUTPUT_DIR)
         self.thetaCam.deleteFile(self.thetaCam.latestFileUri())
 
     def theta_options_cb(self, req):
@@ -231,9 +231,9 @@ class Server:
             self.thetaCapture = True
             self.thetaCam.setOption('exposureProgram', int(req.exposureprogram))
             self.thetaCam.setOption('iso', int(req.ISO))
-            self.thetaCam.setOption('shutterSpeed', int(req.shutterspeed))
+            self.thetaCam.setOption('shutterSpeed', float(req.shutterspeed))
             self.thetaCam.setOption('whiteBalance', req.whitebalance)
-            self.thetaCam.setOption('exposureCompensation', int(req.exposurecompensation))
+            self.thetaCam.setOption('exposureCompensation', float(req.exposurecompensation))
             rospy.logwarn("options")
 
 
@@ -242,7 +242,6 @@ class Server:
         if ip and not self.thetaConnected:
             self.thetaConnected = True
             self.thetaCam = thetaS.RicohThetaS()
-            self.thetaCam.setOption('_shutterVolume', 1)
             self.thetaCam.setOption('captureMode', 'image')
             self.thetaCam.setOption('sleepDelay', 65535)
         elif not ip:

@@ -87,6 +87,7 @@ if 'rospy' in sys.modules:
         ENABLE_PROGRESSIVE_DL = False
         rospy.logwarn('*** WARN: Bad Progressive Download replaced by {}'.format(ENABLE_PROGRESSIVE_DL))
 
+THETA_OUTPUT_DIR = os.path.join(HOME_DIR, 'theta-output')
 LOCK_DEFAULT_PROCESS = 'gphoto2'
 LOCK_WHITE_LIST = {'gphoto2'}
 LOCK_CAMNET_CAPTURE = 'camnet_capture'
