@@ -106,6 +106,9 @@ class Command(object):
         if 'No camera found' in std_err:
             rospy.loginfo('Camera not detected. Camera is rebooting ...')
             CameraPowerController.camera_reboot_script()
+        elif 'I/O Error' in std_err:
+            rospy.loginfo('Communication problem. Camera is rebooting ...')
+            CameraPowerController.camera_reboot_script()
 
 
 class CameraPowerController(object):
