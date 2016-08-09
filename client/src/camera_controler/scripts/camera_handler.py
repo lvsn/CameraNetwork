@@ -251,7 +251,10 @@ class CameraHandler:
 
     def _number_pictures_to_download(self, max_pictures=DL_DATA_SERIE_SIZE):
         with Locker(LOCK_CAMNET_CAPTURE):
-            camera_raw_list_pictures = Command.run('gphoto2 --list-files').splitlines()
+            output = Command.run('gphoto2 --list-files')
+        if not output:
+            return 0
+        camera_raw_list_pictures = output.splitlines()
         camera_list_pictures = [line.split()[1] for line in camera_raw_list_pictures if '#' in line]
         rospy.logwarn(' '.join(camera_list_pictures))
         if max_pictures < 0:
@@ -296,7 +299,7 @@ class CameraHandler:
         if len(files_list) > 0:
             try:
                 # TODO Sending with rsync: Find way to show progress / checkpoint with command
-                cmd = 'rsync -v --remove-source-files --no-owner --no-group --chmod=ugo=rwX,Dugo=rwX'
+                cmd = 'rsync -v --remove-source-files --no-owner --no-group -p --chmod=ugo=rwX,Dugo=rwX'
                 time_out = '--timeout=10'
                 files = ' '.join(srcfolder + '/' + file for file in files_list)
                 # try 5 times
