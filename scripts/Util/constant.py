@@ -47,7 +47,7 @@ if 'rospy' in sys.modules:
         rospy.logwarn('*** WARN: Bad server data directory replaced by {}'.format(CAMNET_SERVER_DATA_DIR))
 
     try:
-        THETA_SERVER_DATA_DIR = os.environ['CAMNET_SERVER_DATA_DIR']
+        THETA_SERVER_DATA_DIR = os.environ['THETA_SERVER_DATA_DIR']
     except KeyError:
         THETA_SERVER_DATA_DIR = ('dobil18@rachmaninoff.gel.ulaval.ca:'
                                   '/gel/rachmaninoff/data/pictures/ThetaS/')
