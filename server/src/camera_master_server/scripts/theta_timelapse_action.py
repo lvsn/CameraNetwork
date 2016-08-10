@@ -30,8 +30,10 @@ class theta_timelapse_action:
         
     def execute(self, goal):
         self.optionsMsg.ISO = goal.ISO
-        self.optionsMsg.fileformat = goal.fileformat
         self.optionsMsg.shutterspeed = goal.shutterspeed
+        self.optionsMsg.whitebalance = goal.whitebalance
+        self.optionsMsg.exposurecompensation = goal.exposurecompensation
+        self.optionsMsg.exposureprogram = goal.exposureprogram
         self.optionsPublisher.publish(self.optionsMsg)
 
 

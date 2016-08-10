@@ -1,8 +1,9 @@
 #goal
 string ISO
-string fileformat
 string shutterspeed
-string period
+string whitebalance
+string exposurecompensation
+string exposureprogram
 ---
 #result
 string total_picture
