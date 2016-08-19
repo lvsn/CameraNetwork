@@ -222,8 +222,12 @@ class Server:
 #-----THETA------
 
     def theta_capture(self):
+        theta_list_files = [file for file in os.listdir('/home/pi/theta-temp') if '.JPG' in file]
+        for file in theta_list_files:
+            os.rename('/home/pi/theta-temp/' + file, THETA_OUTPUT_DIR + '/' + file)
+
         self.thetaCam.takePicture()
-        self.thetaCam.saveImage(self.thetaCam.latestFileUri(), THETA_OUTPUT_DIR)
+        self.thetaCam.saveImage(self.thetaCam.latestFileUri(), '/home/pi/theta-temp/')
         self.thetaCam.deleteFile(self.thetaCam.latestFileUri())
 
     def theta_options_cb(self, req):

@@ -231,7 +231,7 @@ class CameraHandler:
             folder_list_files = [file for file in os.listdir(self.path_src) if '.CR2' in file]
             if number_pictures > 0 and len(folder_list_files) + number_pictures < MAX_PHOTOS_ON_DISK: 
                 self._load_and_delete_data(number_pictures)
-                self._send_data(folder_list_files)
+                self.send_data(self.path_src, self.path_dst, folder_list_files)
             else:
                 break
 
@@ -286,15 +286,15 @@ class CameraHandler:
             folder_list_files = [file for file in os.listdir(self.path_src) if '.CR2' in file]
             theta_list_files = [file for file in os.listdir(THETA_OUTPUT_DIR) if '.JPG' in file]
             if len(theta_list_files) > 0:
-                self._send_data(THETA_OUTPUT_DIR, THETA_SERVER_DATA_DIR, theta_list_files)
+                self.send_data(THETA_OUTPUT_DIR, THETA_SERVER_DATA_DIR, theta_list_files)
             if len(folder_list_files) > 0:
-                self._send_data(self.path_src, self.path_dst, folder_list_files)
+                self.send_data(self.path_src, self.path_dst, folder_list_files)
                 rospy.sleep(2)
             elif len(theta_list_files) == 0:
                 rospy.sleep(10)
 
 
-    def _send_data(self, srcfolder, dstfolder, files_list):
+    def send_data(self, srcfolder, dstfolder, files_list):
 
         if len(files_list) > 0:
             try:
